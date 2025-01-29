@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.Xs.Extensions", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.XS.Extensions.Tests", "test\Hyperbee.XS.Extensions.Tests\Hyperbee.XS.Extensions.Tests.csproj", "{4ECD9E30-D79F-4333-88BE-495F515EC873}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.Xs.Tools", "src\Hyperbee.XS.Tools\Hyperbee.Xs.Tools.csproj", "{4E314DC6-C864-469B-866B-988EE73F981B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{4ECD9E30-D79F-4333-88BE-495F515EC873}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4ECD9E30-D79F-4333-88BE-495F515EC873}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ECD9E30-D79F-4333-88BE-495F515EC873}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E314DC6-C864-469B-866B-988EE73F981B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E314DC6-C864-469B-866B-988EE73F981B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E314DC6-C864-469B-866B-988EE73F981B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E314DC6-C864-469B-866B-988EE73F981B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
