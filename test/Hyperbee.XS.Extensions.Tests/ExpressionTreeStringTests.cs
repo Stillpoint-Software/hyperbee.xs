@@ -2,7 +2,6 @@
 using System.Reflection;
 using Hyperbee.Xs.Extensions;
 using Hyperbee.XS.System.Writer;
-using Hyperbee.XS.Tests;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 namespace Hyperbee.XS.Extensions.Tests;

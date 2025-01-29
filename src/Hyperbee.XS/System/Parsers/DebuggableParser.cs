@@ -60,6 +60,7 @@ public static class XsParsersHelper
                     Constant( kvp.Key ),
                     Convert( kvp.Value, typeof( object ) )
                 )
-            ) );
+            )
+        );
     }
 }

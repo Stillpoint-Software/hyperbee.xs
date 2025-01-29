@@ -81,4 +81,4 @@ jobs:
       run: dotnet test --no-build --verbosity normal --configuration ${{ env.BUILD_CONFIGURATION }} ${{ env.SOLUTION_NAME }}
 
     - name: Pack and Push
-      run: dotnet pack --no-build --configuration ${{ env.BUILD_CONFIGURATION }} -p:PackageId=${{ env.PROJECT_NAME }} -p:PackageOutputPath=../../output --version-suffix "${{ env.VERSION_SUFFIX }}" -p:PackageSource='${{ env.NUGET_SOURCE }}' -p:PushAfterPack=true -p:PackageApiKey='${{ secrets.NUGET_API_KEY }}'
+      run: dotnet pack --no-build --configuration ${{ env.BUILD_CONFIGURATION }} -p:PackageOutputPath=../../output --version-suffix "${{ env.VERSION_SUFFIX }}" -p:PackageSource='${{ env.NUGET_SOURCE }}' -p:PushAfterPack=true -p:PackageApiKey='${{ secrets.NUGET_API_KEY }}'

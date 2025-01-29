@@ -1,6 +1,6 @@
-﻿using System.Numerics;
+using System.Numerics;
 
-namespace Hyperbee.XS.Tests;
+namespace Hyperbee.XS.Extensions.Tests;
 
 public class TestClass
 {

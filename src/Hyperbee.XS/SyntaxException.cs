@@ -1,6 +1,4 @@
-﻿using System.Data.Common;
-using System.Text.RegularExpressions;
-using Parlot;
+﻿using Parlot;
 
 namespace Hyperbee.XS;
 
@@ -11,8 +9,6 @@ public class SyntaxException : Exception
     public int Offset { get; }
 
     public string Buffer { get; }
-
-    public ReadOnlySpan<char> Span => Buffer != null ? Buffer.AsSpan( Offset ) : ReadOnlySpan<char>.Empty;
 
     public SyntaxException( string message, Cursor cursor = null )
         : base( message )
@@ -27,5 +23,4 @@ public class SyntaxException : Exception
     }
 
     public override string Message => $"{base.Message} {Buffer.GetLine( Line, Column, true )}";
-
 }

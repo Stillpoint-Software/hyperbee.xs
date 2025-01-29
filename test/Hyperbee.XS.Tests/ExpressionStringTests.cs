@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Scripting;
 namespace Hyperbee.XS.Tests;
 
 [TestClass]
-public class ExpressionTreeStringTests
+public class ExpressionStringTests
 {
     public XsParser Xs { get; set; } = new
     (
@@ -15,7 +15,7 @@ public class ExpressionTreeStringTests
     );
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_NestedLambdas()
+    public async Task ToExpressionString_ShouldCreate_NestedLambdas()
     {
         var script = """
             var x = 2;
@@ -39,7 +39,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_Loops()
+    public async Task ToExpressionString_ShouldCreate_Loops()
     {
         var script = """
             var l = 0;
@@ -67,7 +67,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_Switch()
+    public async Task ToExpressionString_ShouldCreate_Switch()
     {
         var script = """
             var x = 2;
@@ -100,7 +100,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_TryCatch()
+    public async Task ToExpressionString_ShouldCreate_TryCatch()
     {
         var script = """
             var result = 0;
@@ -128,7 +128,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_Conditional()
+    public async Task ToExpressionString_ShouldCreate_Conditional()
     {
         var script = """
             var x = 5;
@@ -156,7 +156,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_Goto()
+    public async Task ToExpressionString_ShouldCreate_Goto()
     {
         var script = """
             var result = 0;
@@ -180,7 +180,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_Return()
+    public async Task ToExpressionString_ShouldCreate_Return()
     {
         var script = """
             var result = 0;
@@ -201,7 +201,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_InstanceAndSetProperty()
+    public async Task ToExpressionString_ShouldCreate_InstanceAndSetProperty()
     {
         var script = """
             var instance = new TestClass(0);
@@ -223,7 +223,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_ArrayInitialization()
+    public async Task ToExpressionString_ShouldCreate_ArrayInitialization()
     {
         var script = """
             var a = new int[] { 1, 2, 3, 4, 5 };
@@ -243,7 +243,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_ListInitialization()
+    public async Task ToExpressionString_ShouldCreate_ListInitialization()
     {
         var script = """
             var l = new List<int>() { 1, 2, 3, 4, 5 };
@@ -263,7 +263,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_CallMethod()
+    public async Task ToExpressionString_ShouldCreate_CallMethod()
     {
         var script = """
             var instance = new TestClass(5);
@@ -283,7 +283,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_GetIndexer()
+    public async Task ToExpressionString_ShouldCreate_GetIndexer()
     {
         var script = """
             var instance = new TestClass(0);
@@ -303,7 +303,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_SetIndexer()
+    public async Task ToExpressionString_ShouldCreate_SetIndexer()
     {
         var script = """
             var instance = new TestClass(0);
@@ -324,7 +324,7 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
-    public async Task ToExpressionTreeString_ShouldCreate_CallStaticMethod()
+    public async Task ToExpressionString_ShouldCreate_CallStaticMethod()
     {
         var script = """
             TestClass.StaticAddNumbers(3, 4);

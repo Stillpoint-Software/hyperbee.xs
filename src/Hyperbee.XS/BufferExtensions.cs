@@ -2,7 +2,7 @@
 
 public static class BufferExtensions
 {
-    public static string GetLine( this string buffer, int line, int column, bool showCaret = false ) //BF refactored to eliminate split string[] allocations
+    public static string GetLine( this string buffer, int line, int column, bool showCaret = false )
     {
         if ( string.IsNullOrEmpty( buffer ) || line <= 0 )
             return string.Empty;
@@ -18,7 +18,7 @@ public static class BufferExtensions
 
             // Handle line endings (normalize for \r\n, \n, or \r)
             if ( span[i] == '\r' && i + 1 < span.Length && span[i + 1] == '\n' )
-                i++; // Skip the '\n' in "\r\n"
+                i++;
 
             currentLine++;
 

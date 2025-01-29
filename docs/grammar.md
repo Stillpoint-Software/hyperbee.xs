@@ -1,4 +1,4 @@
-﻿---
+---
 layout: default
 title: Grammar
 nav_order: 5
@@ -6,6 +6,8 @@ nav_order: 5
 # Grammar
 
 ## ABNF Grammar Specification
+
+Wroking draft of the ABNF grammar specification for the language.
 
 ```abnf
 ; Root Rule: A script is a sequence of statements

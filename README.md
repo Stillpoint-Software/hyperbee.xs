@@ -112,27 +112,21 @@ performance improvements and enabling dynamic updates without application restar
 
 ---
 
-### **How Does XS Compare to Alternatives?**
+### **How Does XS Compare to Roslyn?**  
 
-#### **Dynamic LINQ**:
+**Different tools for different needs:** Roslyn is a full compiler designed for analyzing, transforming, and compiling 
+complete C# programs. XS is a **lightweight scripting engine optimized for runtime execution** and **expression tree generation**.  
 
-- **Limitations**: Dynamic LINQ lacks support for `async/await`, modern constructs, and advanced control flow. It is also not free.
-- **XS Advantage**: XS offers a full scripting language with variables, loops, exception handling, and extensibility, making it far more versatile for runtime logic.
+#### **Why Use XS Instead of Roslyn for Runtime Execution?** 
+- **Enhances Expressions** – XS simplifies expression tree creation and management, enabling developers to focus on code, not AST syntax. 
+- **Lower Overhead** – XS generates and executes **expression trees directly**, avoiding Roslyn’s full compilation pipeline and reducing startup costs.  
+- **Optimized for Dynamic Execution** – Ideal for **rule engines, embedded scripting, and DSLs**, where Roslyn’s full compilation step is unnecessary.  
+- **Expression Tree Native** – Unlike Roslyn, XS treats **code as data**, enabling **runtime introspection, transformation, and optimization** before execution.  
+- **Extensible by Design** – XS allows **custom language constructs, control flow features, and operators**, making it a better fit for domain-specific scripting.  
 
-#### **Roslyn**:
-
-- **Limitations**: Roslyn is powerful but heavy, with significant performance and memory overhead. Its compilation pipeline is resource-intensive and slow to warm up, making it less suitable for runtime scenarios.
-- **XS Advantage**: XS is lightweight and optimized for runtime use. It avoids Roslyn’s overhead while still supporting advanced capabilities like `async/await` through its extensibility.
-
-#### **IronPython**:
-
-- **Limitations**: IronPython introduces high memory usage and is slower to evolve compared to modern .NET languages. It also lacks tight integration with expression trees.
-- **XS Advantage**: XS integrates natively with .NET’s expression trees, offering better performance and a more deterministic execution model.
-
-#### **FLEE (Fast Lightweight Expression Evaluator)**:
-
-- **Limitations**: FLEE is a basic expression evaluator that lacks control flow, variable scoping, and extensibility.
-- **XS Advantage**: XS is a complete scripting language, supporting advanced constructs like `try-catch`, `looping`, and `async/await` while maintaining lightweight performance.
+XS is **not a Roslyn replacement**—it serves a different purpose: **fast, lightweight, and embeddable runtime execution 
+without full compiler overhead**. If you need to **compile and analyze full C# programs**, Roslyn is the right tool. If 
+you need a **small, efficient, and customizable scripting language for runtime execution**, **XS is a solid choice.**
 
 ---
 
@@ -208,25 +202,6 @@ classes, and methods. This design prevents accidental exposure of sensitive APIs
 
 ---
 
-## **Who Should Use XS?**
-
-XS is ideal for:
-
-- **Foundational Library Creators**:
-
-  - Developers working on IoC containers, ESBs, reporting tools, or code as data and configuration scripting, that rely 
-  heavily on expression trees.
-
-- **DSL Builders**:
-
-  - Teams creating domain-specific languages
-
-- **Performance-Critical Applications**:
-
-  - Developers needing lightweight, high-performance scripting without the overhead of tools like Roslyn.
-
----
-
 ## **Getting Started with XS**
 
 To get started with XS, you need to set up a .NET project. Ensure you have .NET 8 or .NET 9 installed.
@@ -285,7 +260,6 @@ long-term relevance and adaptability.
 Special thanks to:
 
 - [Parlot](https://github.com/sebastienros/parlot) for the fast .NET parser combinator. :heart:
-- [Fast Expression Compiler](https://github.com/dadhi/FastExpressionCompiler) for improved performance. :rocket:
 - [Just The Docs](https://github.com/just-the-docs/just-the-docs) for the documentation theme.
 
 ## Contributing
