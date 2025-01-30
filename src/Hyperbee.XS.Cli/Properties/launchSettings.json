@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Hyperbee.Xs.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "run  -r System.Linq;System.Collections script \"var x = new List<int>() { 1,2,3}; x[1];\""
+    }
+  }
+}

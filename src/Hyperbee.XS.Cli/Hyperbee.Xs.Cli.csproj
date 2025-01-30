@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <IsPackable>true</IsPackable>
+    <OutputType>Exe</OutputType>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>xs</ToolCommandName>
+    <!--<PackageOutputPath>./nupkg</PackageOutputPath> -->
+
+    <Authors>Stillpoint Software, Inc.</Authors>
+    <PackageId>Hyperbee.XS.Cli</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>expressions;script;cli;tool;xs</PackageTags>
+
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageProjectUrl>https://stillpoint-software.github.io/hyperbee.xs/</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>Stillpoint Software, Inc.</Copyright>
+    <Title>Hyperbee Expression Script [XS] Cli</Title>
+    <Description>Expression Script [XS] Cli.</Description>
+    <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.XS</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>https://github.com/Stillpoint-Software/Hyperbee.XS/releases/latest</PackageReleaseNotes>
+    <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.72" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.49.2-preview.0.72" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
+    <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="/" />
+    <None Include="..\..\NOTICES" Pack="true" Visible="false" PackagePath="/" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <ProjectReference Include="..\Hyperbee.XS.Extensions\Hyperbee.Xs.Extensions.csproj" />
+    <ProjectReference Include="..\Hyperbee.XS\Hyperbee.XS.csproj" />
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+  </ItemGroup>
+
+</Project>

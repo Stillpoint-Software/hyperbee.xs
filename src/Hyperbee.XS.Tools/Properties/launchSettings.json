@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Hyperbee.Xs.Tools": {
-      "commandName": "Project",
-      "commandLineArgs": "run -s (1+1);"
-    }
-  }
-}
