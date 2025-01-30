@@ -1,17 +1,26 @@
-﻿using Hyperbee.Xs.Cli.Commands;
-using Hyperbee.Xs.Cli.Converters;
+﻿#if NET9_0_OR_GREATER
+using Hyperbee.Xs.Cli.Commands;
 using Spectre.Console.Cli;
 using Spectre.Console;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Hyperbee.Xs.Cli;
 
 internal class CompileCommand : Command<CompileCommand.Settings>
 {
     internal sealed class Settings : RunSettings
     {
-        [Description( "Compile" )]
+        [Description( "File to compile" )]
         [CommandArgument( 0, "[file]" )]
         public string ScriptFile { get; init; }
+
+        [Description( "File path for the saved dll" )]
+        [CommandOption( "-o|--output" )]
+        public string Output { get; init; }
+
+        [Description( "AssemblyName" )]
+        [CommandOption( "-a|--assemblyName" )]
+        public string AssemblyName { get; init; }
     }
 
     public override int Execute( [NotNull] CommandContext context, [NotNull] Settings settings )
@@ -26,7 +35,7 @@ internal class CompileCommand : Command<CompileCommand.Settings>
         {
             var references = AssemblyHelper.GetAssembly( settings.References );
             var script = File.ReadAllText( settings.ScriptFile );
-            var result = Script.Execute( script, references );
+            var result = Script.Compile( script, settings.AssemblyName, settings.Output, references );
 
             AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
         }
@@ -39,3 +48,4 @@ internal class CompileCommand : Command<CompileCommand.Settings>
         return 0;
     }
 }
+#endif

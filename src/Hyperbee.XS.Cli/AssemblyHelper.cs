@@ -1,15 +1,15 @@
 ﻿using System.Reflection;
 using Spectre.Console;
 
-namespace Hyperbee.Xs.Cli.Converters;
+namespace Hyperbee.Xs.Cli;
 
-public static class AssemblyHelper
+internal static class AssemblyHelper
 {
     public static List<Assembly> GetAssembly( string value )
     {
         var assemblies = new List<Assembly>();
 
-        if( string.IsNullOrWhiteSpace( value ) )
+        if ( string.IsNullOrWhiteSpace( value ) )
             return assemblies;
 
 #if NET9_0_OR_GREATER

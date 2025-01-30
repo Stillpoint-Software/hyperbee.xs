@@ -44,7 +44,7 @@ public class AsyncParseExtension : IParseExtension, IExtensionWriter
 
     public bool CanWrite( Expression node )
     {
-        return node is AsyncBlockExpression asyncBlock;
+        return node is AsyncBlockExpression;
     }
 
     public void WriteExpression( Expression node, ExpressionWriterContext context )

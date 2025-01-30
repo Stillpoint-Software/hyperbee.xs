@@ -15,7 +15,13 @@ partial class Program
             {
                 run.AddCommand<RunFileCommand>( "file" );
                 run.AddCommand<RunScriptCommand>( "script" );
-            });
+
+                run.AddCommand<ReplCommand>( "repl" );
+
+#if NET9_0_OR_GREATER
+                run.AddCommand<CompileCommand>( "compile" );
+#endif
+            } );
         } );
 
         return app.Run( args );
