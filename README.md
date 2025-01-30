@@ -25,11 +25,10 @@ larger or nested constructs like `if-else`, `switch`, `loops`, or `exception han
 
 Developers typically avoid using expression trees for anything beyond trivial cases due to this complexity.
 
-#### **XS’s Contribution**:
+#### **XS's Contribution**:
 
-XS abstracts this complexity, allowing developers to write intuitive scripts that directly translate into efficient and
-optimized expression trees. By automating the creation and management of these trees, XS reduces errors and development
-time.
+XS abstracts this complexity, allowing developers to write scripts that directly translate into efficient expression trees. 
+By automating the creation and management of these trees, XS reduces errors and development time.
 
 ---
 
@@ -41,11 +40,11 @@ XS enables developers to extend the language by adding new expressions, keywords
 of extensibility is unparalleled in the ecosystem and directly addresses common gaps in native expression trees.
 
 For example, adding `async/await` support in C# expression trees is labor-intensive and involves creating custom state
-machines and `Task` objects manually. XS simplifies this by allowing developers to seamlessly integrate `async` behaviors
+machines and `Task` objects manually. XS simplifies this by allowing developers to integrate `async` behaviors
 through a custom parser extension, as demonstrated by its built-in `async` block feature.
 
-Additional constructs like `using blocks`, `string interpolation`, `while`, `for`, and `foreach` illustrate how XS empowers 
-developers to expand the language with minimal effort while maintaining high performance.
+Additional constructs like `using blocks`, `string interpolation`, `while`, `for`, and `foreach` illustrate how XS lets 
+developers to easily expand the language.
 
 Consider this example of a `foreach` loop in XS:
 
@@ -75,10 +74,10 @@ XS allows developers to create and execute high-level logic like this without re
 
 - **Challenge**: "How hard is it to extend the language?"
 
-  - **Response**: XS’s `IParseExtension` interface makes extension straightforward and modular. Developers can focus on 
+  - **Response**: XS's `IParseExtension` interface makes extension straightforward and modular. Developers can focus on 
   the high-level behavior of their custom expressions without needing to handle low-level parsing or tree construction 
-  manually. The design promotes rapid iteration and avoids the rigidity seen in alternatives like Dynamic LINQ or FLEE.
-
+  manually. The design promotes rapid iteration and avoids the rigidity seen in alternative implementations.
+  
 ---
 
 ### **Unified Syntax and Model**:
@@ -94,17 +93,17 @@ intuitive scripting model.
 
 ### **Performance and Flexibility**:
 
-- **Generates Expression Trees**: XS generates standard expression trees, ensuring runtime performance is as good as—or 
-better than—handwritten expression trees.
+- Generates Expression Trees: XS generates standard expression trees, ensuring runtime performance is as good as-or 
+better than-handwritten expression trees.
 
-- **Compiler Agnosticism**: XS supports both `Expression.Compile()` and FastExpressionCompiler (FEC), giving developers 
+- Compiler Agnosticism: XS supports both `Expression.Compile()` and FastExpressionCompiler (FEC), giving developers 
 full control over how to execute scripts.
 
-- **Lightweight Parsing**: XS is built on Parlot, a high-performance parser combinator that outperforms alternatives 
+- Lightweight Parsing: XS is built on Parlot, a high-performance parser combinator that outperforms alternatives 
 like Sprache and Superpower in both speed and memory usage. XS avoids the bloat of Roslyn while still offering advanced
 language features, ensuring a lightweight and efficient runtime.
 
-- **No Overhead After Compilation**: While parsing adds some overhead initially, once XS compiles a script into an 
+- No Overhead After Compilation: While parsing adds some overhead initially, once XS compiles a script into an 
 expression tree, the compiled tree can be reused repeatedly without additional parsing or runtime costs.
 
 - By integrating FEC, XS can compile expression trees directly into reloadable assemblies, providing significant 
@@ -118,11 +117,11 @@ performance improvements and enabling dynamic updates without application restar
 complete C# programs. XS is a **lightweight scripting engine optimized for runtime execution** and **expression tree generation**.  
 
 #### **Why Use XS Instead of Roslyn for Runtime Execution?** 
-- **Enhances Expressions** – XS simplifies expression tree creation and management, enabling developers to focus on code, not AST syntax. 
-- **Lower Overhead** – XS generates and executes **expression trees directly**, avoiding Roslyn’s full compilation pipeline and reducing startup costs.  
-- **Optimized for Dynamic Execution** – Ideal for **rule engines, embedded scripting, and DSLs**, where Roslyn’s full compilation step is unnecessary.  
-- **Expression Tree Native** – Unlike Roslyn, XS treats **code as data**, enabling **runtime introspection, transformation, and optimization** before execution.  
-- **Extensible by Design** – XS allows **custom language constructs, control flow features, and operators**, making it a better fit for domain-specific scripting.  
+- Enhances Expressions – XS simplifies expression tree creation and management, enabling developers to focus on code, not AST syntax. 
+- Lower Overhead – XS generates and executes **expression trees directly**, avoiding Roslyn's full compilation pipeline and reducing startup costs.  
+- Optimized for Dynamic Execution – Ideal for **rule engines, embedded scripting, and DSLs**, where Roslyn's full compilation step is unnecessary.  
+- Expression Tree Native – Unlike Roslyn, XS treats **code as data**, enabling **runtime introspection, transformation, and optimization** before execution.  
+- Extensible by Design – XS allows **custom language constructs, control flow features, and operators**, making it a better fit for domain-specific scripting.  
 
 XS is **not a Roslyn replacement**—it serves a different purpose: **fast, lightweight, and embeddable runtime execution 
 without full compiler overhead**. If you need to **compile and analyze full C# programs**, Roslyn is the right tool. If 
@@ -138,21 +137,21 @@ XS provides one-to-one support for all expression tree types, ensuring full alig
 
 It supports:
 
-- **Control Flow**: Try-catch, conditionals (`if`, `switch`), and looping constructs (`for`, `while`, `foreach`, `loop`).
-- **Async/Await**: `async` and `await` constructs.
-- **Exception Handling**: `try-catch` blocks and exception handling.
-- **Variables and Scoping**: Local variables, block scoping, and variable assignment.
-- **Expressions and Methods**: Lambdas, inline functions, and method calls.
-- **Generics**: Fully supports generic types and methods.
-- **LINQ**: Seamless integration with LINQ expressions for dynamic query building.
-- **Tuples and Deconstruction**: Built-in support for tuples and destructuring patterns.
-- **Debugging**: Debug statements and detailed syntax error reporting.
+- Control Flow: Try-catch, conditionals (`if`, `switch`), and looping constructs (`for`, `while`, `foreach`, `loop`).
+- Async/Await: `async` and `await` constructs.
+- Exception Handling: `try-catch` blocks and exception handling.
+- Variables and Scoping: Local variables, block scoping, and variable assignment.
+- Expressions and Methods: Lambdas, inline functions, and method calls.
+- Generics: Fully supports generic types and methods.
+- LINQ: Seamless integration with LINQ expressions for dynamic query building.
+- Tuples and Deconstruction: Built-in support for tuples and destructuring patterns.
+- Debugging: Debug statements and detailed syntax error reporting.
 
 #### **Extensibility**:
 
 XS allows developers to add custom expressions, keywords, operators, and statements through its `IParseExtension` interface.
 
-XS’s extensibility makes it future-proof. By allowing developers to easily add constructs tailored to their domain, XS 
+XS's extensibility makes it future-proof. By allowing developers to easily add constructs tailored to their domain, XS 
 ensures that the language can evolve with changing requirements. Unlike other tools that lock developers into fixed 
 capabilities, XS encourages customization and innovation.
 

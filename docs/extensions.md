@@ -5,7 +5,7 @@ nav_order: 4
 ---
 # Extensions
 
-XS supports extensibility by allowing developers to define **custom expressions** and seamlessly integrate them into the parser. 
+XS supports extensibility by allowing developers to define **custom expressions** and integrate them directly into the parser. 
 This provides a clean and flexible way to extend the language syntax for specific use cases or additional functionality.
 
 ## **Steps to Add a Custom Expression**
@@ -123,6 +123,6 @@ By using extensions, developers can:
 1. Introduce new syntax into XS.
 2. Implement custom expressions like `RepeatExpression`.
 3. Keep the parser modular and extensible.
-4. Seamlessly integrate the custom expressions into the generated expression tree pipeline.
+4. Integrate the custom expressions into the generated expression tree pipeline.
 
 This approach ensures that XS remains flexible, extensible, and adaptable to domain-specific needs with minimal effort.
