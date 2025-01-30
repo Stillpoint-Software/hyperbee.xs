@@ -1,9 +1,9 @@
-﻿using Hyperbee.Xs.Cli.Commands;
-using Hyperbee.Xs.Cli.Converters;
-using Spectre.Console.Cli;
-using Spectre.Console;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Hyperbee.Xs.Cli.Commands;
+using Hyperbee.Xs.Cli.Converters;
+using Spectre.Console;
+using Spectre.Console.Cli;
 
 internal class CompileCommand : Command<CompileCommand.Settings>
 {

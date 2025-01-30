@@ -13,7 +13,7 @@ internal static class Script
             new XsConfig
             {
                 References = references
-            } 
+            }
         );
 
         var expression = parser.Parse( script );

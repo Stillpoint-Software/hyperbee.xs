@@ -9,7 +9,7 @@ public static class AssemblyHelper
     {
         var assemblies = new List<Assembly>();
 
-        if( string.IsNullOrWhiteSpace( value ) )
+        if ( string.IsNullOrWhiteSpace( value ) )
             return assemblies;
 
 #if NET9_0_OR_GREATER

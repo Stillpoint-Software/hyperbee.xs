@@ -11,11 +11,11 @@ partial class Program
 
         app.Configure( config =>
         {
-            config.AddBranch<RunSettings>( "run", run => 
+            config.AddBranch<RunSettings>( "run", run =>
             {
                 run.AddCommand<RunFileCommand>( "file" );
                 run.AddCommand<RunScriptCommand>( "script" );
-            });
+            } );
         } );
 
         return app.Run( args );
