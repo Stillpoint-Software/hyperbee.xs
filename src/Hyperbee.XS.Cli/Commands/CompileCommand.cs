@@ -1,4 +1,4 @@
-#if NET9_0_OR_GREATER
+﻿#if NET9_0_OR_GREATER
 using Hyperbee.Xs.Cli.Commands;
 using Spectre.Console.Cli;
 using Spectre.Console;

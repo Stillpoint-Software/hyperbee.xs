@@ -1,4 +1,4 @@
-using Hyperbee.Xs.Cli.Commands;
+﻿using Hyperbee.Xs.Cli.Commands;
 using Spectre.Console.Cli;
 
 namespace Hyperbee.Xs.Cli;
