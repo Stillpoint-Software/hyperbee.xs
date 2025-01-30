@@ -1,4 +1,4 @@
-﻿using Hyperbee.Xs.Cli.Commands;
+using Hyperbee.Xs.Cli.Commands;
 using Spectre.Console.Cli;
 
 namespace Hyperbee.Xs.Cli;
@@ -11,7 +11,7 @@ partial class Program
 
         app.Configure( config =>
         {
-            config.AddBranch<RunSettings>( "run", run => 
+            config.AddBranch<RunSettings>( "run", run =>
             {
                 run.AddCommand<RunFileCommand>( "file" );
                 run.AddCommand<RunScriptCommand>( "script" );
