@@ -9,9 +9,14 @@ internal class RunFileCommand : Command<RunFileCommand.Settings>
 {
     internal sealed class Settings : RunSettings
     {
-        [Description( "File" )]
-        [CommandArgument( 0, "[file]" )]
+        [Description( "File to run" )]
+        [CommandArgument( 0, "<file>" )]
         public string ScriptFile { get; init; }
+
+        [Description( "Show the expression tree instead of running" )]
+        [CommandOption( "-s|--show" )]
+        [DefaultValue( false )]
+        public bool? Show { get; init; }
     }
 
     public override int Execute( [NotNull] CommandContext context, [NotNull] Settings settings )
@@ -26,16 +31,29 @@ internal class RunFileCommand : Command<RunFileCommand.Settings>
         {
             var references = AssemblyHelper.GetAssembly( settings.References );
             var script = File.ReadAllText( settings.ScriptFile );
-            var result = Script.Execute( script, references );
 
-            AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
+            if ( settings.Show.Value )
+            {
+                var result = Script.Show( script, references );
+
+                AnsiConsole.MarkupInterpolated( $"[green]Result:[/]\n" );
+                AnsiConsole.Write( new Panel( new Text( result ) )
+                {
+                    Border = BoxBorder.Rounded,
+                    Expand = true
+                } );
+            }
+            else 
+            {
+                var result = Script.Execute( script, references );
+                AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
+            }
+            return 0;
         }
         catch ( Exception ex )
         {
             AnsiConsole.MarkupInterpolated( $"[red]Error executing script: {ex.Message}[/]\n" );
             return 1;
         }
-
-        return 0;
     }
 }

@@ -14,6 +14,10 @@ XS.Cli added dotnet commands like:
 
 ## Examples
 
+![XS Run Script](../../assets/cli-run-script.gif)
+
+![XS Run Script Show](../../assets/cli-run-script-show.gif)
+
 ### Run
 ```
 xs run -s "1 + 1"

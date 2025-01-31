@@ -14,13 +14,25 @@ internal class CompileCommand : Command<CompileCommand.Settings>
         [CommandArgument( 0, "[file]" )]
         public string ScriptFile { get; init; }
 
-        [Description( "File path for the saved dll" )]
+        [Description( "File path for the saved assembly" )]
         [CommandOption( "-o|--output" )]
         public string Output { get; init; }
 
-        [Description( "AssemblyName" )]
+        [Description( "Assembly Name (can include Version, Culture and PublicKeyToken)" )]
         [CommandOption( "-a|--assemblyName" )]
         public string AssemblyName { get; init; }
+
+        [Description( "Module Name" )]
+        [CommandOption( "-m|--module" )]
+        public string ModuleName { get; init; }
+
+        [Description( "Class Name" )]
+        [CommandOption( "-c|--class" )]
+        public string ClassName { get; init; }
+
+        [Description( "Function Name" )]
+        [CommandOption( "-f|--function" )]
+        public string FunctionName { get; init; }
     }
 
     public override int Execute( [NotNull] CommandContext context, [NotNull] Settings settings )
@@ -35,7 +47,15 @@ internal class CompileCommand : Command<CompileCommand.Settings>
         {
             var references = AssemblyHelper.GetAssembly( settings.References );
             var script = File.ReadAllText( settings.ScriptFile );
-            var result = Script.Compile( script, settings.AssemblyName, settings.Output, references );
+
+            var result = Script.Compile( 
+                script, 
+                settings.AssemblyName, 
+                settings.Output,
+                settings.ModuleName,
+                settings.ClassName,
+                settings.FunctionName,
+                references );
 
             AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
         }

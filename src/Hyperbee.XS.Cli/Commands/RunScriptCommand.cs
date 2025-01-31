@@ -37,15 +37,28 @@ internal class RunScriptCommand : Command<RunScriptCommand.Settings>
                         show = true;
                         break;
                     }
+
                     script += line + "\n";
                 }
             }
 
-            var result = show
-                ? Script.Show( script, references )
-                : Script.Execute( script, references );
+            if( show )
+            {
+                var result = Script.Show( script, references );
 
-            AnsiConsole.MarkupInterpolated( $"[green]Result:[/]\n\n{result}\n" );
+                AnsiConsole.MarkupInterpolated( $"[green]Result:[/]\n" );
+                AnsiConsole.Write( new Panel( new Text( result ) )
+                {
+                    Border = BoxBorder.Rounded,
+                    Expand = true
+                } );
+            }
+            else 
+            { 
+                var result =  Script.Execute( script, references );
+
+                AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
+            }
         }
         catch ( Exception ex )
         {
