@@ -23,7 +23,7 @@ public class AwaitParseExtension : IParseExtension, IExtensionWriter
 
     public bool CanWrite( Expression node )
     {
-        return node is AwaitExpression awaitExpression;
+        return node is AwaitExpression;
     }
 
     public void WriteExpression( Expression node, ExpressionWriterContext context )

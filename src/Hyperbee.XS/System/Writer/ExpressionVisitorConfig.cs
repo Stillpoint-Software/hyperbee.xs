@@ -2,6 +2,6 @@
 
 public record ExpressionVisitorConfig(
     string Prefix = "Expression.",
-    char Indentation = '\t',
+    string Indentation = "  ",
     string Variable = "expression",
     params IExtensionWriter[] Writers );

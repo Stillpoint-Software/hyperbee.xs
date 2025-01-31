@@ -18,7 +18,7 @@ public class ExpressionWriterContext
 
     internal int IndentDepth = 0;
 
-    internal char Indention => Config.Indentation;
+    internal string Indention => Config.Indentation;
     internal string Prefix => Config.Prefix;
     internal string Variable => Config.Variable;
 
@@ -42,11 +42,18 @@ public class ExpressionWriterContext
             .WriteExpression( expression );
 
         var usings = string.Join( '\n', context.Usings.Select( u => $"using {u};" ) );
+        var parameterOutput = context.ParameterOutput.ToString();
+        var labelOutput = context.LabelOutput.ToString();
 
         output.WriteLine( usings );
         output.WriteLine();
-        output.WriteLine( context.ParameterOutput );
-        output.WriteLine( context.LabelOutput );
+
+        if ( !string.IsNullOrEmpty( parameterOutput ) )
+            output.WriteLine( parameterOutput );
+
+        if ( !string.IsNullOrEmpty( labelOutput ) )
+            output.WriteLine( labelOutput );
+
         output.Write( $"var {context.Variable} = {context.ExpressionOutput};" );
     }
 

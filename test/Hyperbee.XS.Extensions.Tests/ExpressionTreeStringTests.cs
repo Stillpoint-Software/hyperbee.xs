@@ -18,7 +18,7 @@ public class ExpressionTreeStringTests
         }
     );
 
-    public ExpressionVisitorConfig Config = new( "Expression.", '\t', "expression",
+    public ExpressionVisitorConfig Config = new( "Expression.", "\t", "expression",
             XsExtensions.Extensions().OfType<IExtensionWriter>().ToArray() );
 
     [TestMethod]
