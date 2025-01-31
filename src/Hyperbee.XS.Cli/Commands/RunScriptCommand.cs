@@ -42,7 +42,7 @@ internal class RunScriptCommand : Command<RunScriptCommand.Settings>
                 }
             }
 
-            if( show )
+            if ( show )
             {
                 var result = Script.Show( script, references );
 
@@ -53,9 +53,9 @@ internal class RunScriptCommand : Command<RunScriptCommand.Settings>
                     Expand = true
                 } );
             }
-            else 
-            { 
-                var result =  Script.Execute( script, references );
+            else
+            {
+                var result = Script.Execute( script, references );
 
                 AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
             }

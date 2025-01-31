@@ -43,7 +43,7 @@ internal class RunFileCommand : Command<RunFileCommand.Settings>
                     Expand = true
                 } );
             }
-            else 
+            else
             {
                 var result = Script.Execute( script, references );
                 AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
