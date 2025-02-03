@@ -28,13 +28,13 @@ public partial class XsParser
 
     // Parse
 
-    public Expression Parse( string script, XsDebugInfo debugInfo = null )
+    public Expression Parse( string script, XsDebugInfo debugInfo = null, ParseScope scope = null )
     {
         if ( debugInfo != null )
             debugInfo.Source = script;
 
         var scanner = new Scanner( script );
-        var context = new XsContext( _config, debugInfo, scanner ) { WhiteSpaceParser = WhitespaceOrNewLineOrComment() };
+        var context = new XsContext( _config, debugInfo, scanner, scope ) { WhiteSpaceParser = WhitespaceOrNewLineOrComment() };
 
         try
         {
@@ -306,12 +306,15 @@ public partial class XsParser
         return Bounded(
             static ctx =>
             {
-                ctx.EnterScope( FrameType.Method );
+                if ( ctx is not XsContext xsContext || xsContext.InitalScope )
+                    ctx.EnterScope( FrameType.Method );
             },
             parser.Then( ConvertToSingleExpression ),
             static ctx =>
             {
-                ctx.ExitScope();
+                if ( ctx is not XsContext xsContext || xsContext.InitalScope )
+                    ctx.ExitScope();
+
                 ThrowIfNotEof( ctx );
             }
         );

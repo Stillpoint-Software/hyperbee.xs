@@ -9,7 +9,8 @@ namespace Hyperbee.XS;
 public class XsContext : ParseContext
 {
     public TypeResolver Resolver { get; }
-    public ParseScope Scope { get; } = new();
+    public ParseScope Scope { get; }
+    internal bool InitalScope { get; }
 
     public List<string> Namespaces { get; } = [];
 
@@ -21,11 +22,13 @@ public class XsContext : ParseContext
     public Stack<object> ParserStack { get; } = new();
 #endif
 
-    public XsContext( XsConfig config, XsDebugInfo debugInfo, Scanner scanner, bool useNewLines = false )
+    public XsContext( XsConfig config, XsDebugInfo debugInfo, Scanner scanner, ParseScope scope = null, bool useNewLines = false )
         : base( scanner, useNewLines )
     {
         Resolver = config.Resolver.Value;
         DebugInfo = debugInfo;
+        Scope = scope ?? new ParseScope();
+        InitalScope = scope == null;
 
 #if DEBUG
         OnEnterParser += ( obj, ctx ) =>

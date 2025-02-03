@@ -1,4 +1,4 @@
-﻿# XS.Extensions: Extensions for Hyperbee.XS
+﻿# XS.Cli: Cli tooling for Hyperbee.XS
 
 ### **What is XS?**
 
@@ -18,13 +18,21 @@ XS.Cli added dotnet commands like:
 
 ![XS Run Script Show](../../assets/cli-run-script-show.gif)
 
+### Install Xs.Cli using 
+
+you can install Xs.Cli using the following command:
+```
+dotnet tool install -g hyperbee.xs.cli
+```
+or following Microsoft's [documentation](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install)
+
 ### Run
 ```
-xs run -s "1 + 1"
+dotnet xs run script
 ```
 or:
 ```
-xs run -f ./script.xs
+dotnet xs run file ./script.xs
 ```
 
 ### Compile
@@ -36,14 +44,6 @@ xs compile -s "1 + 1" -o "output.dll"
 ```
 xs repl
 ```
-
-### Install Xs.Cli using 
-
-you can install Xs.Cli using the following command:
-```
-dotnet tool install -g hyperbee.xs.cli
-```
-or following Microsoft's [documentation](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install)
 
 ## Contributing
 
