@@ -4,6 +4,8 @@ using System.Reflection;
 #if NET9_0_OR_GREATER
 using System.Reflection.Emit;  // For PersistedAssemblyBuilder
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+
 #endif
 using Hyperbee.XS;
 using Hyperbee.XS.System.Writer;

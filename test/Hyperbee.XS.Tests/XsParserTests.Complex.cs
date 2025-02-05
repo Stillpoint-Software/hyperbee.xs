@@ -15,6 +15,24 @@ public class XsParserComplexTests
         }
     );
 
+
+    [TestMethod]
+    public void Compile_ShouldAllowDoubleAssignment()
+    {
+        var script = "var x = var y = 42; x;";
+
+        var expression = Xs.Parse( script );
+
+        var code = expression.ToExpressionString();
+
+        var lambda = Expression.Lambda<Func<int>>( expression );
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        Assert.AreEqual( 42, result );
+    }
+
+
     [TestMethod]
     public void Compile_ShouldDemonstrateAllLanguageFeatures()
     {
@@ -36,10 +54,11 @@ public class XsParserComplexTests
         var s = 3;
         switch (s)
         {
-            case 1: s = 1; break;
-            case 2: s = 2; break;
-            default: s = 42; break;
+            case 1: s = 1; goto there;
+            case 2: s = 2; goto there;
+            default: s = 42; goto there;
         }
+        there:
         results.Add(s);
         
         var t = 1;

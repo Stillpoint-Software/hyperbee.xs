@@ -458,6 +458,15 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
         return node;
     }
 
+    protected override Expression VisitTypeBinary( TypeBinaryExpression node )
+    {
+        using var writer = _context.EnterExpression( $"{node.NodeType}" );
+        writer.WriteExpression( node.Expression );
+        writer.Write( ",\n" );
+        writer.WriteType( node.TypeOperand );
+        return node;
+    }
+
     protected override CatchBlock VisitCatchBlock( CatchBlock node )
     {
         using var writer = _context.EnterExpression( "MakeCatchBlock" );
@@ -496,7 +505,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
         writer.WriteExpression( node.Operand );
 
-        if ( node.NodeType == ExpressionType.Convert || node.NodeType == ExpressionType.ConvertChecked )
+        if ( node.NodeType == ExpressionType.Convert || node.NodeType == ExpressionType.ConvertChecked || node.NodeType == ExpressionType.TypeAs )
         {
             writer.Write( ",\n" );
             writer.WriteType( node.Type );

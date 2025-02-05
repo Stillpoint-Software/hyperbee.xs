@@ -57,7 +57,6 @@ public class ExpressionWriterContext
         output.Write( $"var {context.Variable} = {context.ExpressionOutput};" );
     }
 
-
     public ExpressionWriter EnterExpression( string name, bool newLine = true, bool prefix = true )
     {
         var writer = new ExpressionWriter( this, ( w ) => ExitExpression( w, newLine ) );

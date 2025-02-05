@@ -237,46 +237,29 @@ public partial class XsParser
     private static KeywordParserPair<Expression> SwitchParser( Parser<Expression> expression, Deferred<Expression> statement )
     {
         return new( "switch",
-            Always().Then( static ( ctx, _ ) =>
-            {
-                var breakLabel = Label( typeof( void ), "Break" );
-                ctx.EnterScope( FrameType.Statement, breakLabel );
-
-                return breakLabel;
-            } )
-            .And(
+            Bounded(
+                ctx => ctx.EnterScope( FrameType.Statement ),
                 Between(
                     OpenParen,
                     expression,
                     CloseParen
                 )
-            )
-            .And(
-                Between(
-                    OpenBrace,
-                    ZeroOrMany( Case( expression, statement ) )
-                        .And( ZeroOrOne( Default( statement ) ) ),
-                    CloseBrace
+                .And(
+                    Between(
+                        OpenBrace,
+                        ZeroOrMany( Case( expression, statement ) )
+                            .And( ZeroOrOne( Default( statement ) ) ),
+                        CloseBrace
+                    )
                 )
+                .Then<Expression>( static ( ctx, parts ) =>
+                {
+                    var (switchValue, (cases, defaultBody)) = parts;
+
+                    return Switch( switchValue, defaultBody, [.. cases] );
+                } ),
+                ctx => ctx.ExitScope()
             )
-            .Then<Expression>( static ( ctx, parts ) =>
-            {
-                var (breakLabel, switchValue, bodyParts) = parts;
-
-                try
-                {
-                    var (cases, defaultBody) = bodyParts;
-
-                    return Block(
-                        Switch( switchValue, defaultBody, cases.ToArray() ),
-                        Label( breakLabel )
-                    );
-                }
-                finally
-                {
-                    ctx.ExitScope();
-                }
-            } )
             .Named( "switch" )
         );
 

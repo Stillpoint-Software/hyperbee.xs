@@ -19,12 +19,12 @@ public class XsParserSwitchTests
             {
                 case 1:
                     result = 1;
-                    break;
+                    goto there;
                 case 3:
                     result = 42;
-                    break;
+                    goto there;
             }
-
+            there:
             result;
             """ );
 
@@ -47,9 +47,9 @@ public class XsParserSwitchTests
             {
                 default:
                     result = 42;
-                    break;
+                    goto there;
             }
-
+            there:
             result;
             """ );
 
@@ -72,15 +72,15 @@ public class XsParserSwitchTests
             {
                 case 1:
                     result = 10;
-                    break;
+                    goto there;
                 case 2:
                     result = 20;
-                    break;
+                    goto there;
                 default:
                     result = 30;
-                    break;
+                    goto there;
             }
-
+            there:
             result;
             """ );
 
@@ -103,18 +103,18 @@ public class XsParserSwitchTests
             {
                 case 1:
                     result = 10;
-                    break;
+                    goto there;
                 case 2:
                     result = 20;
-                    break;
+                    goto there;
                 case 3:
                     result = 30;
-                    break;
+                    goto there;
                 default:
                     result = 50;
-                    break;
+                    goto there;
             }
-
+            there:
             result;
             """ );
 
@@ -138,12 +138,12 @@ public class XsParserSwitchTests
                 case 1:
                 case 2:
                     result = 100;
-                    break;
+                    goto there;
                 default:
                     result = 0;
-                    break;
+                    goto there;
             }
-
+            there:
             result;
             """ );
 
@@ -170,17 +170,18 @@ public class XsParserSwitchTests
                     {
                         case 2:
                             result = 50;
-                            break;
+                            goto here;
                         default:
                             result = 0;
-                            break;
+                            goto here;
                     }
-                    break;
+                    here:
+                    goto there;
                 default:
                     result = 0;
-                    break;
+                    goto there;
             }
-
+            there:
             result;
             """ );
 
