@@ -21,6 +21,9 @@ public class ExpressionTreeStringTests
     public ExpressionVisitorConfig Config = new( "Expression.", "\t", "expression",
             XsExtensions.Extensions().OfType<IExtensionWriter>().ToArray() );
 
+    public XsVisitorConfig XsConfig = new( "\t",
+            XsExtensions.Extensions().OfType<IXsWriter>().ToArray() );
+
     [TestMethod]
     public async Task ToExpressionTreeString_ShouldCreate_ForLoop()
     {
@@ -172,6 +175,36 @@ public class ExpressionTreeStringTests
 
         await AssertScriptValueAsync( code, result );
     }
+
+    [TestMethod]
+    public async Task ToXsString_ShouldCreate_AsyncAwait()
+    {
+        var t = await Task<int>.FromResult( 42 );
+
+        var script = """
+            async {
+                var asyncBlock = async {
+                    await Task.FromResult( 42 );
+                };
+
+                await asyncBlock;
+            }
+            """;
+
+        var expression = XsParser.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
+
+        WriteResult( script, newScript );
+
+        var newExpression = XsParser.Parse( newScript );
+        var lambda = Expression.Lambda<Func<Task<int>>>( newExpression );
+        var compiled = lambda.Compile();
+        var result = await compiled();
+
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValueAsync( code, result );
+    }
+
 
     public async Task AssertScriptValue<T>( string code, T result )
     {

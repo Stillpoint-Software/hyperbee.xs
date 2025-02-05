@@ -12,7 +12,7 @@ public static class XsWriterExtensions
         return output.ToString();
     }
 
-    public static void ToXs( this Expression expression, StringWriter output, XsVisitorConfig config = null )
+    public static void ToXS( this Expression expression, StringWriter output, XsVisitorConfig config = null )
     {
         XsWriterContext.WriteTo( expression, output, config );
     }

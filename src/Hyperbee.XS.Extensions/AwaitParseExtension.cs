@@ -6,7 +6,7 @@ using Parlot.Fluent;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class AwaitParseExtension : IParseExtension, IExtensionWriter
+public class AwaitParseExtension : IParseExtension, IExtensionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "await";
@@ -39,5 +39,16 @@ public class AwaitParseExtension : IParseExtension, IExtensionWriter
             writer.Write( ",\n" );
             writer.Write( "true", indent: true );
         }
+    }
+
+    public void WriteExpression( Expression node, XsWriterContext context )
+    {
+        if ( node is not AwaitExpression awaitExpression )
+            return;
+
+        using var writer = context.GetWriter();
+
+        writer.Write( "await " );
+        writer.WriteExpression( awaitExpression.Target );
     }
 }

@@ -9,8 +9,8 @@ public class XsWriterContext
     internal readonly StringWriter ExpressionOutput;
 
     internal int IndentDepth = 0;
-    internal bool SkipTerminated = false;
-    internal bool ForceBlock = false;
+    public bool SkipTerminated = false;
+    public bool ForceBlock = false;
 
     internal string Indention => Config.Indentation;
 
