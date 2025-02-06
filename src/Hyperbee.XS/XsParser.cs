@@ -214,7 +214,7 @@ public partial class XsParser
             (Terms.Text( "~" ), OnesComplement)
         ).Named( "unary" );
 
-        
+
         // Binary Expressions
 
         return expression.Parser = unaryExpression
