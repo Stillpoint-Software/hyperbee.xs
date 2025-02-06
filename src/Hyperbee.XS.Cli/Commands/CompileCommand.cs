@@ -1,10 +1,11 @@
 ﻿#if NET9_0_OR_GREATER
-using Hyperbee.Xs.Cli.Commands;
-using Spectre.Console.Cli;
-using Spectre.Console;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using Hyperbee.Xs.Cli;
+using Hyperbee.XS;
+using Spectre.Console;
+using Spectre.Console.Cli;
+
+namespace Hyperbee.Xs.Cli.Commands;
 
 internal class CompileCommand : Command<CompileCommand.Settings>
 {
@@ -39,23 +40,24 @@ internal class CompileCommand : Command<CompileCommand.Settings>
     {
         if ( !File.Exists( settings.ScriptFile ) )
         {
-            AnsiConsole.Markup( $"[red]Invalid file[/]" );
+            AnsiConsole.Markup( "[red]Invalid file[/]" );
             return 1;
         }
 
         try
         {
-            var references = AssemblyHelper.GetAssembly( settings.References );
+            var xsConfig = new XsConfig( references => references.AddReference( AssemblyHelper.GetAssembly( settings.References ) ) );
+
             var script = File.ReadAllText( settings.ScriptFile );
 
-            var result = Script.Compile( 
-                script, 
-                settings.AssemblyName, 
+            var result = Script.Compile(
+                script,
+                settings.AssemblyName,
                 settings.Output,
                 settings.ModuleName,
                 settings.ClassName,
                 settings.FunctionName,
-                references );
+                xsConfig );
 
             AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
         }
@@ -68,4 +70,5 @@ internal class CompileCommand : Command<CompileCommand.Settings>
         return 0;
     }
 }
+
 #endif

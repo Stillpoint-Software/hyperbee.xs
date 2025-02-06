@@ -7,10 +7,7 @@ namespace Hyperbee.XS.System;
 
 public sealed class TypeResolver
 {
-    private readonly List<Assembly> _references = [
-        typeof( string ).Assembly,
-        typeof( Enumerable ).Assembly
-    ];
+    private readonly ReferenceManager _referenceManager;
 
     private const int ConcurrencyLevel = -1;
     private const int Capacity = 32;
@@ -35,10 +32,13 @@ public sealed class TypeResolver
         { typeof(float), [typeof(double)] }
     };
 
-    public TypeResolver( IReadOnlyCollection<Assembly> references )
+
+    public TypeResolver( ReferenceManager referenceManager )
     {
-        if ( references != null && references.Count > 0 )
-            _references.AddRange( references );
+        if ( referenceManager == null )
+            throw new ArgumentNullException( nameof( referenceManager ) );
+
+        _referenceManager = referenceManager;
 
         CacheExtensionMethods();
     }
@@ -52,7 +52,7 @@ public sealed class TypeResolver
             if ( type != null )
                 return type;
 
-            return _references
+            return _referenceManager.Assemblies
                 .SelectMany( assembly => assembly.GetTypes() )
                 .FirstOrDefault( compare => compare.Name == typeName || compare.FullName == typeName );
         } );
@@ -145,7 +145,7 @@ public sealed class TypeResolver
 
     private void CacheExtensionMethods()
     {
-        Parallel.ForEach( _references, assembly =>
+        Parallel.ForEach( _referenceManager.Assemblies, assembly =>
         {
             foreach ( var type in assembly.GetTypes() )
             {

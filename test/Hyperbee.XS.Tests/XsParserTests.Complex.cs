@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using Hyperbee.XS.System;
 using Hyperbee.XS.System.Writer;
 
 namespace Hyperbee.XS.Tests;
@@ -11,7 +12,7 @@ public class XsParserComplexTests
     (
         new XsConfig
         {
-            References = [Assembly.GetExecutingAssembly()]
+            ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ),
         }
     );
 
@@ -120,7 +121,8 @@ public class XsParserComplexTests
         Console.WriteLine( code );
 
         var lambda = Expression.Lambda<Func<List<int>>>( expression );
-        var compiled = lambda.Compile();
+     
+        var compiled = lambda.Compile( preferInterpretation: true );
         var result = compiled();
 
         // Assertions for each feature
@@ -131,5 +133,34 @@ public class XsParserComplexTests
         Assert.AreEqual( 42, result[2] ); // Try-Catch-Finally
         Assert.AreEqual( 42, result[3] ); // Loop 
         Assert.AreEqual( 42, result[4] ); // Lambda calculation (6 * 7)
+    }
+
+    [TestMethod]
+    public async Task  Compile_ShouldDemonstrateReference()
+    {
+        const string script =
+            """
+            import Humanizer;
+            
+            var number = 123;
+            number.ToWords( default(System.Globalization.CultureInfo) );
+            """;
+
+        var rm = new ReferenceManager().AddReference( Assembly.GetExecutingAssembly() );
+        await rm.LoadPackage( "Humanizer.Core" );
+
+        var xsConfig = new XsConfig 
+        { 
+            ReferenceManager = rm
+        };
+
+        var xs = new XsParser( xsConfig );
+
+        var expression = xs.Parse( script );
+
+        var lambda = Expression.Lambda<Func<string>>( expression );
+     
+        var compiled = lambda.Compile();
+        var result = compiled();
     }
 }

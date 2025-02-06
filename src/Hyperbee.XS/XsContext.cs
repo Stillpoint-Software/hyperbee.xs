@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Hyperbee.XS.System;
 using Parlot;
@@ -9,8 +9,10 @@ namespace Hyperbee.XS;
 public class XsContext : ParseContext
 {
     public TypeResolver Resolver { get; }
-    public ParseScope Scope { get; }
+    public ReferenceManager References { get; }
+
     internal bool InitalScope { get; }
+    public ParseScope Scope { get; }
 
     public List<string> Namespaces { get; } = [];
 
@@ -26,6 +28,7 @@ public class XsContext : ParseContext
         : base( scanner, useNewLines )
     {
         Resolver = config.Resolver.Value;
+        References = config.ReferenceManager;
         DebugInfo = debugInfo;
         Scope = scope ?? new ParseScope();
         InitalScope = scope == null;

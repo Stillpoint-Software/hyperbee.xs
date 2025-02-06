@@ -19,7 +19,7 @@ internal class ReplCommand : Command<ReplCommand.Settings>
     {
         AnsiConsole.Markup( "[yellow]Starting REPL session. Type [green]\"run\"[/] to run the current block, [green]\"exit\"[/] to quit, [green]\"print\"[/] to see variables.[/]\n" );
 
-        var references = AssemblyHelper.GetAssembly( settings.References );
+        var xsConfig = new XsConfig( references => references.AddReference( AssemblyHelper.GetAssembly( settings.References ) ) );
 
         var prompt = new TextPrompt<string>( "[cyan]>[/]" );
 
@@ -42,12 +42,14 @@ internal class ReplCommand : Command<ReplCommand.Settings>
                     {
                         return 0;
                     }
-                    else if ( line == "run" )
+
+                    if ( line == "run" )
                     {
                         run = true;
                         break;
                     }
-                    else if ( line == "print" )
+
+                    if ( line == "print" )
                     {
                         var table = new Table()
                             .AddColumn( "Name" )
@@ -55,7 +57,7 @@ internal class ReplCommand : Command<ReplCommand.Settings>
 
                         foreach ( var (name, value) in values )
                         {
-                            table.AddRow( name, value.ToString() );
+                            table.AddRow( name, value?.ToString() ?? string.Empty );
                         }
 
                         AnsiConsole.Write( table );
@@ -68,12 +70,7 @@ internal class ReplCommand : Command<ReplCommand.Settings>
 
                 if ( run )
                 {
-                    var parser = new XsParser(
-                        new XsConfig
-                        {
-                            References = references
-                        }
-                    );
+                    var parser = new XsParser( xsConfig );
 
                     var expression = parser.Parse( script, scope: scope );
 

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Hyperbee.XS.System;
 using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
@@ -8,7 +9,7 @@ public class XsParserIndexTests
 {
     public XsParser Xs { get; set; } = new
     (
-        new XsConfig { References = [Assembly.GetExecutingAssembly()] }
+        new XsConfig { ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ) }
     );
 
     [TestMethod]

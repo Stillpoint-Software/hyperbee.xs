@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using Hyperbee.Xs.Extensions;
+using Hyperbee.XS.System;
 using Hyperbee.XS.System.Writer;
 
 namespace Hyperbee.XS.Extensions.Tests;
@@ -12,7 +13,7 @@ public class DebugParseExtensionTests
     (
         new XsConfig
         {
-            References = [Assembly.GetExecutingAssembly()],
+            ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ),
             Extensions = XsExtensions.Extensions()
         }
     );

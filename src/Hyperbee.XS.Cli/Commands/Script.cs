@@ -8,6 +8,7 @@ using System.Runtime.Loader;
 
 #endif
 using Hyperbee.XS;
+using Hyperbee.XS.System;
 using Hyperbee.XS.System.Writer;
 using Spectre.Console;
 
@@ -24,18 +25,13 @@ internal static class Script
         string outputModuleName = null,
         string outputClassName = null,
         string outputMethodName = null,
-        IReadOnlyCollection<Assembly> references = null )
+        XsConfig config = null )
     {
         outputModuleName ??= "DynamicModule";
         outputClassName ??= "DynamicClass";
         outputMethodName ??= "DynamicMethod";
 
-        var parser = new XsParser(
-            new XsConfig
-            {
-                References = references
-            } 
-        );
+        var parser = new XsParser( config );
 
         AnsiConsole.Status()
             .Spinner( Spinner.Known.Default )
@@ -127,7 +123,7 @@ internal static class Script
         var parser = new XsParser(
             new XsConfig
             {
-                References = references
+                ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() )
             }
         );
 
@@ -146,7 +142,7 @@ internal static class Script
         var parser = new XsParser(
             new XsConfig
             {
-                References = references
+                ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() )
             }
         );
 

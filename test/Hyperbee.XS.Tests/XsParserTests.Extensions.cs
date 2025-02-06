@@ -14,7 +14,7 @@ public class XsParserExtensionsTests
     (
         new XsConfig
         {
-            References = [Assembly.GetExecutingAssembly()],
+            ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ),
             Extensions = [new AnswerToEverythingParseExtension()]
         }
     );
