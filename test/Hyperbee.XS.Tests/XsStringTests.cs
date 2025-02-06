@@ -246,8 +246,6 @@ public class XsStringTests
         AssertXsScript( expression, xs );
     }
 
-
-
     [TestMethod]
     public void ToXS_ShouldCreate_CallStaticMethod()
     {
