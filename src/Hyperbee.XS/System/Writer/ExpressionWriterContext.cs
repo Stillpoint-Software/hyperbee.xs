@@ -22,7 +22,7 @@ public class ExpressionWriterContext
     internal string Prefix => Config.Prefix;
     internal string Variable => Config.Variable;
 
-    internal IExtensionWriter[] ExtensionWriters => Config.Writers;
+    internal IExpressionWriter[] ExtensionWriters => Config.Writers;
 
     internal ExpressionVisitor Visitor { get; init; }
     internal ExpressionVisitorConfig Config { get; init; }

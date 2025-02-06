@@ -13,7 +13,7 @@ using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class StringFormatParseExtension : IParseExtension, IExtensionWriter, IXsWriter
+public class StringFormatParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Literal;
 

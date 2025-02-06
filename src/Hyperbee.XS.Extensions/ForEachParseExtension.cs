@@ -10,7 +10,7 @@ using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class ForEachParseExtension : IParseExtension, IExtensionWriter, IXsWriter
+public class ForEachParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "foreach";

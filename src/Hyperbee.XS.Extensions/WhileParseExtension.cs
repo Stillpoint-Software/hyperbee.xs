@@ -7,7 +7,7 @@ using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class WhileParseExtension : IParseExtension, IExtensionWriter, IXsWriter
+public class WhileParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "while";

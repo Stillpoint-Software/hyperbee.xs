@@ -9,7 +9,7 @@ using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class AsyncParseExtension : IParseExtension, IExtensionWriter, IXsWriter
+public class AsyncParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "async";

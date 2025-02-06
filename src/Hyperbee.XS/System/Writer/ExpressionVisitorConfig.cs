@@ -4,4 +4,4 @@ public record ExpressionVisitorConfig(
     string Prefix = "Expression.",
     string Indentation = "  ",
     string Variable = "expression",
-    params IExtensionWriter[] Writers );
+    params IExpressionWriter[] Writers );

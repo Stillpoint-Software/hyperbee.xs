@@ -6,7 +6,7 @@ using Parlot.Fluent;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class AwaitParseExtension : IParseExtension, IExtensionWriter, IXsWriter
+public class AwaitParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "await";

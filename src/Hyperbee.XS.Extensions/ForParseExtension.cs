@@ -11,7 +11,7 @@ using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class ForParseExtension : IParseExtension, IExtensionWriter, IXsWriter
+public class ForParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "for";

@@ -2,7 +2,7 @@
 
 namespace Hyperbee.XS.System.Writer;
 
-public interface IExtensionWriter
+public interface IExpressionWriter
 {
     bool CanWrite( Expression node );
     void WriteExpression( Expression node, ExpressionWriterContext context );
