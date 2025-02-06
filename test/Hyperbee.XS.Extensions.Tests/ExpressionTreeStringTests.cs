@@ -217,18 +217,18 @@ public class ExpressionTreeStringTests
             x;
             """;
 
-        var expression = XsParser.Parse(script);
-        var newScript = expression.ToXS(XsConfig);
+        var expression = XsParser.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
 
-        WriteResult(script, newScript);
+        WriteResult( script, newScript );
 
-        var newExpression = XsParser.Parse(newScript);
-        var lambda = Expression.Lambda<Func<int>>(newExpression);
+        var newExpression = XsParser.Parse( newScript );
+        var lambda = Expression.Lambda<Func<int>>( newExpression );
         var compiled = lambda.Compile();
         var result = compiled();
 
-        var code = expression.ToExpressionString(Config);
-        await AssertScriptValue(code, result);
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValue( code, result );
     }
 
     [TestMethod]
@@ -244,18 +244,18 @@ public class ExpressionTreeStringTests
             x;
             """;
 
-        var expression = XsParser.Parse(script);
-        var newScript = expression.ToXS(XsConfig);
+        var expression = XsParser.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
 
-        WriteResult(script, newScript);
+        WriteResult( script, newScript );
 
-        var newExpression = XsParser.Parse(newScript);
-        var lambda = Expression.Lambda<Func<int>>(newExpression);
+        var newExpression = XsParser.Parse( newScript );
+        var lambda = Expression.Lambda<Func<int>>( newExpression );
         var compiled = lambda.Compile();
         var result = compiled();
 
-        var code = expression.ToExpressionString(Config);
-        await AssertScriptValue(code, result);
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValue( code, result );
     }
 
     [TestMethod]
@@ -275,18 +275,18 @@ public class ExpressionTreeStringTests
             x;
             """;
 
-        var expression = XsParser.Parse(script);
-        var newScript = expression.ToXS(XsConfig);
+        var expression = XsParser.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
 
-        WriteResult(script, newScript);
+        WriteResult( script, newScript );
 
-        var newExpression = XsParser.Parse(newScript);
-        var lambda = Expression.Lambda<Func<int>>(newExpression);
+        var newExpression = XsParser.Parse( newScript );
+        var lambda = Expression.Lambda<Func<int>>( newExpression );
         var compiled = lambda.Compile();
         var result = compiled();
 
-        var code = expression.ToExpressionString(Config);
-        await AssertScriptValue(code, result);
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValue( code, result );
     }
 
     [TestMethod]
@@ -302,18 +302,18 @@ public class ExpressionTreeStringTests
             x;
             """;
 
-        var expression = XsParser.Parse(script);
-        var newScript = expression.ToXS(XsConfig);
+        var expression = XsParser.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
 
-        WriteResult(script, newScript);
+        WriteResult( script, newScript );
 
-        var newExpression = XsParser.Parse(newScript);
-        var lambda = Expression.Lambda<Func<int>>(newExpression);
+        var newExpression = XsParser.Parse( newScript );
+        var lambda = Expression.Lambda<Func<int>>( newExpression );
         var compiled = lambda.Compile();
         var result = compiled();
 
-        var code = expression.ToExpressionString(Config);
-        await AssertScriptValue(code, result);
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValue( code, result );
     }
 
     [TestMethod]
@@ -326,18 +326,18 @@ public class ExpressionTreeStringTests
             result;
             """;
 
-        var expression = XsParser.Parse(script);
-        var newScript = expression.ToXS(XsConfig);
+        var expression = XsParser.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
 
-        WriteResult(script, newScript);
+        WriteResult( script, newScript );
 
-        var newExpression = XsParser.Parse(newScript);
-        var lambda = Expression.Lambda<Func<string>>(newExpression);
+        var newExpression = XsParser.Parse( newScript );
+        var lambda = Expression.Lambda<Func<string>>( newExpression );
         var compiled = lambda.Compile();
         var result = compiled();
 
-        var code = expression.ToExpressionString(Config);
-        await AssertScriptValue(code, result);
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValue( code, result );
     }
 
     public async Task AssertScriptValue<T>( string code, T result )
