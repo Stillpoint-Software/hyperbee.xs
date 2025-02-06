@@ -121,7 +121,7 @@ public class XsParserComplexTests
         Console.WriteLine( code );
 
         var lambda = Expression.Lambda<Func<List<int>>>( expression );
-     
+
         var compiled = lambda.Compile( preferInterpretation: true );
         var result = compiled();
 
@@ -136,7 +136,7 @@ public class XsParserComplexTests
     }
 
     [TestMethod]
-    public async Task  Compile_ShouldDemonstrateReference()
+    public async Task Compile_ShouldDemonstrateReference()
     {
         const string script =
             """
@@ -149,8 +149,8 @@ public class XsParserComplexTests
         var rm = new ReferenceManager().AddReference( Assembly.GetExecutingAssembly() );
         await rm.LoadPackage( "Humanizer.Core" );
 
-        var xsConfig = new XsConfig 
-        { 
+        var xsConfig = new XsConfig
+        {
             ReferenceManager = rm
         };
 
@@ -159,7 +159,7 @@ public class XsParserComplexTests
         var expression = xs.Parse( script );
 
         var lambda = Expression.Lambda<Func<string>>( expression );
-     
+
         var compiled = lambda.Compile();
         var result = compiled();
     }
