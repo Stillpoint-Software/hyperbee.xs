@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using Hyperbee.Xs.Extensions;
 using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
-using Hyperbee.Xs.Extensions;
 
 namespace Hyperbee.XS.Extensions.Tests;
 

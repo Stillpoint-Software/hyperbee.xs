@@ -119,8 +119,8 @@ internal class ReplCommand : Command<ReplCommand.Settings>
             var keyExpr = Constant( name );
 
             initExpressions.Add(
-                values.ContainsKey( name ) 
-                    ? Assign( local, Convert( Property( valuesConst, indexerProperty, keyExpr ), parameter.Type ) ) 
+                values.ContainsKey( name )
+                    ? Assign( local, Convert( Property( valuesConst, indexerProperty, keyExpr ), parameter.Type ) )
                     : Assign( local, Default( parameter.Type ) )
             );
 
