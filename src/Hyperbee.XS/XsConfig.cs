@@ -1,8 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-using Hyperbee.XS.System;
-using Hyperbee.XS.System.Parsers;
+using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Parsers;
 using Parlot.Fluent;
+using ReferenceManager = Hyperbee.XS.Core.ReferenceManager;
 
 namespace Hyperbee.XS;
 

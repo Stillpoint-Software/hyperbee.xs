@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
+using Hyperbee.XS.Core;
 using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.System;
 using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Extensions.Tests;

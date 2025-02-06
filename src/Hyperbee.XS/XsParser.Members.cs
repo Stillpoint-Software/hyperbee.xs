@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Hyperbee.XS.System.Parsers;
+using Hyperbee.XS.Core.Parsers;
 using Parlot.Fluent;
 using static Parlot.Fluent.Parsers;
 

@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
-using Hyperbee.XS.System;
-using Hyperbee.XS.System.Parsers;
+using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Parsers;
 using Parlot.Fluent;
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.XS.System.Parsers.XsParsers;
+using static Hyperbee.XS.Core.Parsers.XsParsers;
 using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.XS;

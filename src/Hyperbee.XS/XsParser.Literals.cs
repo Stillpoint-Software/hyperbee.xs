@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Hyperbee.XS.System.Parsers;
+using Hyperbee.XS.Core.Parsers;
 using Parlot.Fluent;
 using static System.Linq.Expressions.Expression;
 using static Parlot.Fluent.Parsers;

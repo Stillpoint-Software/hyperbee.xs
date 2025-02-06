@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Hyperbee.XS;
-using Hyperbee.XS.System;
+using Hyperbee.XS.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -118,18 +118,11 @@ internal class ReplCommand : Command<ReplCommand.Settings>
 
             var keyExpr = Constant( name );
 
-            if ( values.ContainsKey( name ) )
-            {
-                initExpressions.Add(
-                    Assign( local, Convert( Property( valuesConst, indexerProperty, keyExpr ), parameter.Type ) )
-                );
-            }
-            else
-            {
-                initExpressions.Add(
-                    Assign( local, Default( parameter.Type ) )
-                );
-            }
+            initExpressions.Add(
+                values.ContainsKey( name ) 
+                    ? Assign( local, Convert( Property( valuesConst, indexerProperty, keyExpr ), parameter.Type ) ) 
+                    : Assign( local, Default( parameter.Type ) )
+            );
 
             var localAsObject = parameter.Type.IsValueType
                 ? Convert( local, typeof( object ) )

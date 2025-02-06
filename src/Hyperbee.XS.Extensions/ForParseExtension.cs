@@ -3,9 +3,9 @@ using System.Linq.Expressions;
 using Hyperbee.Collections;
 using Hyperbee.Expressions;
 using Hyperbee.XS;
-using Hyperbee.XS.System;
-using Hyperbee.XS.System.Parsers;
-using Hyperbee.XS.System.Writer;
+using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Parsers;
+using Hyperbee.XS.Core.Writer;
 using Parlot.Fluent;
 using static Parlot.Fluent.Parsers;
 
