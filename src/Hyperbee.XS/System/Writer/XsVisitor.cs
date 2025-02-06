@@ -48,6 +48,18 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
             case ExpressionType.Power:
                 writer.Write( " ** " );
                 break;
+            case ExpressionType.LessThan:
+                writer.Write( " < " );
+                break;
+            case ExpressionType.LessThanOrEqual:
+                writer.Write( " <= " );
+                break;
+            case ExpressionType.GreaterThan:
+                writer.Write( " > " );
+                break;
+            case ExpressionType.GreaterThanOrEqual:
+                writer.Write( " >= " );
+                break;
             case ExpressionType.Coalesce:
                 writer.Write( " ?? " );
                 break;
