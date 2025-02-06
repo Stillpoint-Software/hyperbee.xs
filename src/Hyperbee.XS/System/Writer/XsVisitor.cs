@@ -3,18 +3,11 @@ using System.Linq.Expressions;
 
 namespace Hyperbee.XS.System.Writer;
 
-internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
+internal class XsVisitor( XsWriterContext context ) : global::System.Linq.Expressions.ExpressionVisitor
 {
-    private readonly XsWriterContext _context;
-
-    public XsVisitor( XsWriterContext context )
-    {
-        _context = context;
-    }
-
     protected override Expression VisitBinary( BinaryExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
         var group = GroupBinary( node.NodeType );
 
         if ( group )
@@ -136,16 +129,16 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitBlock( BlockExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         var count = node.Expressions.Count;
-        if ( count == 1 && !_context.ForceBlock )
+        if ( count == 1 && !context.ForceBlock )
         {
             writer.WriteExpression( node.Expressions[0] );
             return node;
         }
 
-        _context.ForceBlock = false;
+        context.ForceBlock = false;
 
         writer.Write( "{\n", indent: true );
         writer.Indent();
@@ -158,14 +151,14 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
         writer.Outdent();
         writer.Write( "}\n", indent: true );
-        _context.SkipTerminated = true;
+        context.SkipTerminated = true;
 
         return node;
     }
 
     protected override Expression VisitConditional( ConditionalExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "if(" );//, indent: true );
         writer.WriteExpression( node.Test );
@@ -190,7 +183,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitConstant( ConstantExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         var value = node.Value;
 
@@ -222,7 +215,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitDefault( DefaultExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         if ( node.Type != typeof( void ) )
         {
@@ -240,7 +233,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override ElementInit VisitElementInit( ElementInit node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         var count = node.Arguments.Count;
 
@@ -260,14 +253,14 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitExtension( Expression node )
     {
-        if ( _context.ExtensionWriters is not null )
+        if ( context.ExtensionWriters is not null )
         {
-            foreach ( var writer in _context.ExtensionWriters )
+            foreach ( var writer in context.ExtensionWriters )
             {
                 if ( !writer.CanWrite( node ) )
                     continue;
 
-                writer.WriteExpression( node, _context );
+                writer.WriteExpression( node, context );
                 return node;
             }
         }
@@ -279,23 +272,23 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitGoto( GotoExpression node )
     {
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
 
         switch ( node.Kind )
         {
             case GotoExpressionKind.Break:
                 writer.Write( "break;", indent: true );
-                _context.SkipTerminated = true;
+                context.SkipTerminated = true;
                 break;
 
             case GotoExpressionKind.Continue:
                 writer.Write( "continue;", indent: true );
-                _context.SkipTerminated = true;
+                context.SkipTerminated = true;
                 break;
 
             case GotoExpressionKind.Goto:
                 writer.Write( $"goto {node.Target.Name};", indent: true );
-                _context.SkipTerminated = true;
+                context.SkipTerminated = true;
                 break;
 
             case GotoExpressionKind.Return:
@@ -306,7 +299,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
                     writer.WriteExpression( node.Value );
                 }
                 writer.Write( ";" );
-                _context.SkipTerminated = true;
+                context.SkipTerminated = true;
                 break;
 
             default:
@@ -319,7 +312,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitIndex( IndexExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.WriteExpression( node.Object );
         writer.Write( "[" );
@@ -343,7 +336,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitInvocation( InvocationExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.WriteExpression( node.Expression );
 
@@ -368,7 +361,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitLambda<T>( Expression<T> node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "(" );
         var count = node.Parameters.Count;
@@ -376,7 +369,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
         for ( var i = 0; i < count; i++ )
         {
             var parameter = node.Parameters[i];
-            _context.Parameters.Add( parameter, parameter.Name );
+            context.Parameters.Add( parameter, parameter.Name );
 
             writer.WriteType( parameter.Type );
             writer.Write( $" {parameter.Name}" );
@@ -395,7 +388,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitListInit( ListInitExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.WriteExpression( node.NewExpression );
 
@@ -406,14 +399,14 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
         writer.Outdent();
         writer.Write( "}\n", indent: true );
-        _context.SkipTerminated = true;
+        context.SkipTerminated = true;
 
         return node;
     }
 
     protected override Expression VisitMember( MemberExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.WriteExpression( node.Expression );
         writer.Write( "." );
@@ -425,7 +418,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitMethodCall( MethodCallExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         if ( node.Object != null )
         {
@@ -460,7 +453,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitNew( NewExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "new " );
 
@@ -486,7 +479,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitNewArray( NewArrayExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "new " );
 
@@ -509,42 +502,42 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
         writer.Outdent();
         writer.Write( "}\n", indent: true );
-        _context.SkipTerminated = true;
+        context.SkipTerminated = true;
 
         return node;
     }
 
     protected override Expression VisitParameter( ParameterExpression node )
     {
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
         writer.WriteParameter( node );
         return node;
     }
 
     protected override Expression VisitLabel( LabelExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         if ( node.Target.Name != "ReturnLabel" )
             writer.Write( $"{node.Target.Name}:\n" );
 
-        _context.SkipTerminated = true;
+        context.SkipTerminated = true;
         return node;
     }
 
     protected override LabelTarget VisitLabelTarget( LabelTarget node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( $"{node.Name}:\n" );
-        _context.SkipTerminated = true;
+        context.SkipTerminated = true;
 
         return node;
     }
 
     protected override Expression VisitLoop( LoopExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "loop", indent: true );
 
@@ -555,7 +548,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitSwitch( SwitchExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "switch (" );
 
@@ -575,40 +568,40 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
         }
 
         writer.Write( "}\n" );
-        _context.SkipTerminated = true;
+        context.SkipTerminated = true;
 
         return node;
     }
 
     protected override SwitchCase VisitSwitchCase( SwitchCase node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
         writer.Write( "case " );
 
         writer.WriteExpressions( node.TestValues );
         writer.Write( ":\n" );
 
         writer.WriteExpression( node.Body );
-        _context.SkipTerminated = false;
+        context.SkipTerminated = false;
 
         return node;
     }
 
     protected override Expression VisitTry( TryExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "try\n", indent: true );
 
-        _context.ForceBlock = true;
+        context.ForceBlock = true;
         writer.WriteExpression( node.Body );
 
         VisitCatchBlocks( node.Handlers );
 
         if ( node.Finally != null )
         {
-            _context.SkipTerminated = false;
-            _context.ForceBlock = true;
+            context.SkipTerminated = false;
+            context.ForceBlock = true;
             writer.Write( "finally\n", indent: true );
             writer.WriteExpression( node.Finally );
         }
@@ -618,7 +611,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitTypeBinary( TypeBinaryExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
         writer.WriteExpression( node.Expression );
         writer.Write( " is " );
         writer.WriteType( node.TypeOperand );
@@ -626,7 +619,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
     }
     protected override CatchBlock VisitCatchBlock( CatchBlock node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         writer.Write( "catch (", indent: true );
 
@@ -642,7 +635,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
         writer.Write( ")\n" );
 
-        _context.ForceBlock = true;
+        context.ForceBlock = true;
         writer.WriteExpression( node.Body );
         writer.Write( "\n" );
 
@@ -653,7 +646,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     protected override Expression VisitUnary( UnaryExpression node )
     {
-        using var writer = _context.GetWriter();
+        using var writer = context.GetWriter();
 
         switch ( node.NodeType )
         {
@@ -721,7 +714,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
     private void VisitInitializers( ReadOnlyCollection<ElementInit> initializers )
     {
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
         writer.Indent();
 
         var count = initializers.Count;
@@ -745,7 +738,7 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
             return;
         }
 
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
         writer.Indent();
 
         var count = cases.Count;
@@ -766,14 +759,14 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
             return;
         }
 
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
         writer.Indent();
 
         var count = handlers.Count;
 
         for ( var i = 0; i < count; i++ )
         {
-            _context.SkipTerminated = false;
+            context.SkipTerminated = false;
 
             VisitCatchBlock( handlers[i] );
             writer.Write( "\n" );

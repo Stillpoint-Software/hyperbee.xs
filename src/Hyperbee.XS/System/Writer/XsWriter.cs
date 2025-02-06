@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Hyperbee.XS.System.Writer;
 
-public class XsWriter( XsWriterContext context, Action<XsWriter> dispose ) : IDisposable
+public sealed class XsWriter( XsWriterContext context, Action<XsWriter> dispose ) : IDisposable
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public Expression WriteExpression( Expression node )
@@ -40,7 +40,7 @@ public class XsWriter( XsWriterContext context, Action<XsWriter> dispose ) : IDi
 
     public string GetTypeString( Type type )
     {
-        if ( CSharpTypes.TryGetValue( type, out var typeName ) )
+        if ( TryGetCSharpType( type, out var typeName ) )
         {
             return typeName;
         }
@@ -71,9 +71,8 @@ public class XsWriter( XsWriterContext context, Action<XsWriter> dispose ) : IDi
         Write( GetTypeString( type ) );
     }
 
-    public void WriteExpressions<T>( ReadOnlyCollection<T> collection, bool firstArgument = false ) where T : Expression
+    public void WriteExpressions<T>( ReadOnlyCollection<T> collection ) where T : Expression
     {
-
         if ( collection.Count > 0 )
         {
             var count = collection.Count;
@@ -87,7 +86,6 @@ public class XsWriter( XsWriterContext context, Action<XsWriter> dispose ) : IDi
 
     public void WriteParameter( ParameterExpression node )
     {
-
         if ( context.Parameters.TryGetValue( node, out var name ) )
         {
             Write( $"{name}" );
@@ -127,29 +125,34 @@ public class XsWriter( XsWriterContext context, Action<XsWriter> dispose ) : IDi
         context.IndentDepth--;
     }
 
-    private static readonly Dictionary<Type, string> CSharpTypes = new()
+    private static bool TryGetCSharpType( Type type, out string typeName )
     {
-        { typeof(int), "int" },
-        { typeof(short), "short" },
-        { typeof(string), "string" },
-        { typeof(bool), "bool" },
-        { typeof(byte), "byte" },
-        { typeof(char), "char" },
-        { typeof(decimal), "decimal" },
-        { typeof(double), "double" },
-        { typeof(float), "float" },
-        { typeof(long), "long" },
-        { typeof(sbyte), "sbyte" },
-        { typeof(ushort), "ushort" },
-        { typeof(uint), "uint" },
-        { typeof(ulong), "ulong" },
-        { typeof(object), "object" },
-        { typeof(void), "null" }
-    };
-
-    public void Dispose()
-    {
-        dispose?.Invoke( this );
+        if ( type == typeof( int ) ) typeName = "int";
+        else if ( type == typeof( string ) ) typeName = "string";
+        else if ( type == typeof( bool ) ) typeName = "bool";
+        else if ( type == typeof( object ) ) typeName = "object";
+        else if ( type == typeof( void ) ) typeName = "null";
+        else if ( type == typeof( double ) ) typeName = "double";
+        else if ( type == typeof( float ) ) typeName = "float";
+        else if ( type == typeof( long ) ) typeName = "long";
+        else if ( type == typeof( short ) ) typeName = "short";
+        else if ( type == typeof( byte ) ) typeName = "byte";
+        else if ( type == typeof( char ) ) typeName = "char";
+        else if ( type == typeof( decimal ) ) typeName = "decimal";
+        else if ( type == typeof( sbyte ) ) typeName = "sbyte";
+        else if ( type == typeof( ushort ) ) typeName = "ushort";
+        else if ( type == typeof( uint ) ) typeName = "uint";
+        else if ( type == typeof( ulong ) ) typeName = "ulong";
+        else if ( type == typeof( object ) ) typeName = "object";
+        else if ( type == typeof( void ) ) typeName = "null";
+        else
+        {
+            typeName = null;
+            return false;
+        }
+        return true;
     }
+
+    public void Dispose() => dispose?.Invoke( this );
 
 }

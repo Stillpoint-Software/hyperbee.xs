@@ -253,7 +253,7 @@ public sealed class TypeResolver
 
         try
         {
-            resolvedMethod = method.MakeGenericMethod( typeArgs.ToArray() );
+            resolvedMethod = method.MakeGenericMethod( [.. typeArgs] );
         }
         catch
         {

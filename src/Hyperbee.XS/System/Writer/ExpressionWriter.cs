@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Hyperbee.XS.System.Writer;
 
-public class ExpressionWriter( ExpressionWriterContext context, Action<ExpressionWriter> dispose ) : IDisposable
+public sealed class ExpressionWriter( ExpressionWriterContext context, Action<ExpressionWriter> dispose ) : IDisposable
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public Expression WriteExpression( Expression node )
@@ -210,9 +210,6 @@ public class ExpressionWriter( ExpressionWriterContext context, Action<Expressio
         context.IndentDepth--;
     }
 
-    public void Dispose()
-    {
-        dispose?.Invoke( this );
-    }
+    public void Dispose() => dispose?.Invoke( this );
 
 }

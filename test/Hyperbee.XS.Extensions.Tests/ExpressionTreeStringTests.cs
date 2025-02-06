@@ -152,7 +152,7 @@ public class ExpressionTreeStringTests
     [TestMethod]
     public async Task ToExpressionTreeString_ShouldCreate_AsyncAwait()
     {
-        var t = await Task<int>.FromResult( 42 );
+        var t = await Task.FromResult( 42 );
 
         var script = """
             async {
@@ -179,7 +179,7 @@ public class ExpressionTreeStringTests
     [TestMethod]
     public async Task ToXsString_ShouldCreate_AsyncAwait()
     {
-        var t = await Task<int>.FromResult( 42 );
+        var t = await Task.FromResult( 42 );
 
         var script = """
             async {
@@ -340,7 +340,7 @@ public class ExpressionTreeStringTests
         await AssertScriptValue( code, result );
     }
 
-    public async Task AssertScriptValue<T>( string code, T result )
+    public static async Task AssertScriptValue<T>( string code, T result )
     {
         var scriptOptions = ScriptOptions.Default.WithReferences(
             [
@@ -363,7 +363,7 @@ public class ExpressionTreeStringTests
         Assert.AreEqual( result, scriptResult );
     }
 
-    public async Task AssertScriptValueAsync<T>( string code, T result )
+    public static async Task AssertScriptValueAsync<T>( string code, T result )
     {
         var scriptOptions = ScriptOptions.Default.WithReferences(
             [
@@ -387,7 +387,7 @@ public class ExpressionTreeStringTests
         Assert.AreEqual( result, scriptResult );
     }
 
-    private void WriteResult( string script, string code )
+    private static void WriteResult( string script, string code )
     {
 #if DEBUG
         Console.WriteLine( "Script:" );

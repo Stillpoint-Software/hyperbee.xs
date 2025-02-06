@@ -3,18 +3,11 @@ using System.Linq.Expressions;
 
 namespace Hyperbee.XS.System.Writer;
 
-internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVisitor
+internal class ExpressionVisitor( ExpressionWriterContext context ) : global::System.Linq.Expressions.ExpressionVisitor
 {
-    private readonly ExpressionWriterContext _context;
-
-    public ExpressionVisitor( ExpressionWriterContext context )
-    {
-        _context = context;
-    }
-
     protected override Expression VisitBinary( BinaryExpression node )
     {
-        using var writer = _context.EnterExpression( $"{node.NodeType}" );
+        using var writer = context.EnterExpression( $"{node.NodeType}" );
 
         writer.WriteExpression( node.Left );
         writer.Write( ",\n" );
@@ -38,7 +31,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitBlock( BlockExpression node )
     {
-        using var writer = _context.EnterExpression( "Block" );
+        using var writer = context.EnterExpression( "Block" );
 
         writer.WriteParamExpressions( node.Variables, true );
 
@@ -61,7 +54,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitConditional( ConditionalExpression node )
     {
-        using var writer = _context.EnterExpression( "Condition" );
+        using var writer = context.EnterExpression( "Condition" );
 
         writer.WriteExpression( node.Test );
         writer.Write( ",\n" );
@@ -79,7 +72,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitConstant( ConstantExpression node )
     {
-        using var writer = _context.EnterExpression( "Constant", newLine: false );
+        using var writer = context.EnterExpression( "Constant", newLine: false );
         var value = node.Value;
 
         switch ( value )
@@ -108,12 +101,12 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
     {
         if ( node.Type != typeof( void ) )
         {
-            using var writer = _context.EnterExpression( "Default" );
+            using var writer = context.EnterExpression( "Default" );
             writer.WriteType( node.Type );
         }
         else
         {
-            using var writer = _context.EnterExpression( "Empty", newLine: false );
+            using var writer = context.EnterExpression( "Empty", newLine: false );
         }
 
         return node;
@@ -121,7 +114,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override ElementInit VisitElementInit( ElementInit node )
     {
-        using var writer = _context.EnterExpression( "ElementInit" );
+        using var writer = context.EnterExpression( "ElementInit" );
 
         writer.WriteMethodInfo( node.AddMethod );
         writer.WriteExpressions( node.Arguments );
@@ -131,14 +124,14 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitExtension( Expression node )
     {
-        if ( _context.ExtensionWriters is not null )
+        if ( context.ExtensionWriters is not null )
         {
-            foreach ( var writer in _context.ExtensionWriters )
+            foreach ( var writer in context.ExtensionWriters )
             {
                 if ( !writer.CanWrite( node ) )
                     continue;
 
-                writer.WriteExpression( node, _context );
+                writer.WriteExpression( node, context );
                 return node;
             }
         }
@@ -150,16 +143,16 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitGoto( GotoExpression node )
     {
-        using var writer = _context.EnterExpression( $"{node.Kind}" );
+        using var writer = context.EnterExpression( $"{node.Kind}" );
 
-        if ( _context.Labels.TryGetValue( node.Target, out var lableTarget ) )
+        if ( context.Labels.TryGetValue( node.Target, out var lableTarget ) )
         {
             writer.Write( lableTarget, indent: true );
         }
         else
         {
             VisitLabelTarget( node.Target );
-            _context.Labels.TryGetValue( node.Target, out lableTarget );
+            context.Labels.TryGetValue( node.Target, out lableTarget );
             writer.Write( lableTarget, indent: true );
         }
 
@@ -182,7 +175,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
     {
         if ( node.Indexer != null )
         {
-            using var writer = _context.EnterExpression( "MakeIndex" );
+            using var writer = context.EnterExpression( "MakeIndex" );
 
             writer.WriteExpression( node.Object );
             writer.Write( ",\n" );
@@ -216,7 +209,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
         }
         else
         {
-            using var writer = _context.EnterExpression( "ArrayAccess" );
+            using var writer = context.EnterExpression( "ArrayAccess" );
 
             writer.WriteExpression( node.Object );
 
@@ -228,7 +221,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitInvocation( InvocationExpression node )
     {
-        using var writer = _context.EnterExpression( "Invoke" );
+        using var writer = context.EnterExpression( "Invoke" );
 
         writer.WriteExpression( node.Expression );
 
@@ -239,7 +232,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitLambda<T>( Expression<T> node )
     {
-        using var writer = _context.EnterExpression( "Lambda" );
+        using var writer = context.EnterExpression( "Lambda" );
 
         writer.WriteExpression( node.Body );
 
@@ -273,7 +266,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitListInit( ListInitExpression node )
     {
-        using var writer = _context.EnterExpression( "ListInit" );
+        using var writer = context.EnterExpression( "ListInit" );
 
         writer.WriteExpression( node.NewExpression );
         writer.Write( ",\n" );
@@ -285,7 +278,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitMember( MemberExpression node )
     {
-        using var writer = _context.EnterExpression( "MakeMemberAccess" );
+        using var writer = context.EnterExpression( "MakeMemberAccess" );
 
         writer.WriteExpression( node.Expression );
         writer.Write( ",\n" );
@@ -297,7 +290,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitMethodCall( MethodCallExpression node )
     {
-        using var writer = _context.EnterExpression( "Call" );
+        using var writer = context.EnterExpression( "Call" );
 
         if ( node.Object != null )
         {
@@ -318,7 +311,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitNew( NewExpression node )
     {
-        using var writer = _context.EnterExpression( "New" );
+        using var writer = context.EnterExpression( "New" );
 
         writer.WriteConstructorInfo( node.Constructor );
         writer.WriteExpressions( node.Arguments );
@@ -328,7 +321,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitNewArray( NewArrayExpression node )
     {
-        using var writer = _context.EnterExpression( $"{node.NodeType}" );
+        using var writer = context.EnterExpression( $"{node.NodeType}" );
 
         writer.WriteType( node.NodeType == ExpressionType.NewArrayBounds
             ? node.Type
@@ -342,23 +335,23 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitParameter( ParameterExpression node )
     {
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
         writer.WriteParameter( node );
         return node;
     }
 
     protected override Expression VisitLabel( LabelExpression node )
     {
-        using var writer = _context.EnterExpression( "Label" );
+        using var writer = context.EnterExpression( "Label" );
 
-        if ( _context.Labels.TryGetValue( node.Target, out var lableTarget ) )
+        if ( context.Labels.TryGetValue( node.Target, out var lableTarget ) )
         {
             writer.Write( lableTarget, indent: true );
         }
         else
         {
             VisitLabelTarget( node.Target );
-            _context.Labels.TryGetValue( node.Target, out lableTarget );
+            context.Labels.TryGetValue( node.Target, out lableTarget );
             writer.Write( lableTarget, indent: true );
         }
 
@@ -373,7 +366,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override LabelTarget VisitLabelTarget( LabelTarget node )
     {
-        _context.GetWriter()
+        context.GetWriter()
             .WriteLabel( node );
 
         return node;
@@ -381,14 +374,14 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitLoop( LoopExpression node )
     {
-        using var writer = _context.EnterExpression( "Loop" );
+        using var writer = context.EnterExpression( "Loop" );
 
         writer.WriteExpression( node.Body );
 
         if ( node.BreakLabel != null )
         {
             VisitLabelTarget( node.BreakLabel );
-            if ( _context.Labels.TryGetValue( node.BreakLabel, out var breakLabel ) )
+            if ( context.Labels.TryGetValue( node.BreakLabel, out var breakLabel ) )
             {
                 writer.Write( ",\n" );
                 writer.Write( breakLabel, indent: true );
@@ -398,7 +391,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
         if ( node.ContinueLabel != null )
         {
             VisitLabelTarget( node.ContinueLabel );
-            if ( _context.Labels.TryGetValue( node.ContinueLabel, out var continueLabel ) )
+            if ( context.Labels.TryGetValue( node.ContinueLabel, out var continueLabel ) )
             {
                 writer.Write( ",\n" );
                 writer.Write( continueLabel, indent: true );
@@ -410,7 +403,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitSwitch( SwitchExpression node )
     {
-        using var writer = _context.EnterExpression( "Switch" );
+        using var writer = context.EnterExpression( "Switch" );
 
         writer.WriteExpression( node.SwitchValue );
         if ( node.DefaultBody != null )
@@ -429,7 +422,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override SwitchCase VisitSwitchCase( SwitchCase node )
     {
-        using var writer = _context.EnterExpression( "SwitchCase" );
+        using var writer = context.EnterExpression( "SwitchCase" );
 
         writer.WriteExpression( node.Body );
         writer.WriteExpressions( node.TestValues );
@@ -439,7 +432,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitTry( TryExpression node )
     {
-        using var writer = _context.EnterExpression( "TryCatchFinally" );
+        using var writer = context.EnterExpression( "TryCatchFinally" );
 
         writer.WriteExpression( node.Body );
         writer.Write( ",\n" );
@@ -460,7 +453,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitTypeBinary( TypeBinaryExpression node )
     {
-        using var writer = _context.EnterExpression( $"{node.NodeType}" );
+        using var writer = context.EnterExpression( $"{node.NodeType}" );
         writer.WriteExpression( node.Expression );
         writer.Write( ",\n" );
         writer.WriteType( node.TypeOperand );
@@ -469,7 +462,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override CatchBlock VisitCatchBlock( CatchBlock node )
     {
-        using var writer = _context.EnterExpression( "MakeCatchBlock" );
+        using var writer = context.EnterExpression( "MakeCatchBlock" );
 
         writer.WriteType( node.Test );
         writer.Write( ",\n" );
@@ -501,7 +494,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     protected override Expression VisitUnary( UnaryExpression node )
     {
-        using var writer = _context.EnterExpression( $"{node.NodeType}" );
+        using var writer = context.EnterExpression( $"{node.NodeType}" );
 
         writer.WriteExpression( node.Operand );
 
@@ -516,7 +509,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
 
     private void VisitInitializers( ReadOnlyCollection<ElementInit> initializers )
     {
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
 
         writer.Write( "new[] {\n", indent: true );
         writer.Indent();
@@ -545,7 +538,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
             return;
         }
 
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
 
         writer.Write( ",\n" );
         writer.Write( "new[] {\n", indent: true );
@@ -575,7 +568,7 @@ internal class ExpressionVisitor : global::System.Linq.Expressions.ExpressionVis
             return;
         }
 
-        var writer = _context.GetWriter();
+        var writer = context.GetWriter();
 
         writer.Write( ",\n" );
         writer.Write( "new[] {\n", indent: true );
