@@ -20,8 +20,8 @@ public partial class ReferenceManager
     private readonly string _globalPackagesFolder;
 
     private readonly XsAssemblyLoadContext _assemblyLoadContext = new();
-    
-    private readonly List<Assembly> _assemblyReferences = 
+
+    private readonly List<Assembly> _assemblyReferences =
     [
         typeof(string).Assembly,
         typeof(Enumerable).Assembly
@@ -40,7 +40,7 @@ public partial class ReferenceManager
     public ReferenceManager( string cachePath = null )
     {
         _cachePath = cachePath ?? Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget", "xs-packages" );
-        
+
         try
         {
             if ( !Directory.Exists( _cachePath ) )
@@ -63,9 +63,9 @@ public partial class ReferenceManager
     public IEnumerable<Assembly> ReferenceAssemblies => _assemblyReferences;
 
     public IEnumerable<Assembly> Assemblies => _assemblyReferences.Concat( _assemblyLoadContext.Assemblies );
-    
+
     public ReferenceManager AddReference( Assembly assembly )
-    { 
+    {
         _assemblyReferences.Add( assembly );
         return this;
     }
