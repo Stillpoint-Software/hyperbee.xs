@@ -5,7 +5,7 @@ namespace Hyperbee.XS.Tests;
 [TestClass]
 public class XsParserReturnTests
 {
-    public XsParser Xs { get; } = new();
+    public static XsParser Xs { get; } = new();
 
     [TestMethod]
     public void Compile_ShouldSucceed_WithVoidReturn()

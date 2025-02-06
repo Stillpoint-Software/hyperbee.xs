@@ -8,7 +8,7 @@ namespace Hyperbee.XS.Extensions.Tests;
 [TestClass]
 public class ForEachParseExtensionTests
 {
-    public XsParser XsParser { get; set; } = new
+    public static XsParser Xs { get; set; } = new
     (
         new XsConfig
         {
@@ -20,7 +20,7 @@ public class ForEachParseExtensionTests
     [TestMethod]
     public void Compile_ShouldSucceed_WithExtensions()
     {
-        var expression = XsParser.Parse(
+        var expression = Xs.Parse(
             """
             var array = new int[] { 1,2,3 };
             var x = 0;

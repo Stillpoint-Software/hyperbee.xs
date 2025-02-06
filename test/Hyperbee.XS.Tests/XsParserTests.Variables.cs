@@ -7,7 +7,7 @@ namespace Hyperbee.XS.Tests;
 [TestClass]
 public class XsParserVariableTests
 {
-    public XsParser Xs { get; set; } = new
+    public static XsParser Xs { get; set; } = new
     (
         new XsConfig { ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ) }
     );

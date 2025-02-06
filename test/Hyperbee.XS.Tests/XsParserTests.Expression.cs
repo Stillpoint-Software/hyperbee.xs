@@ -5,7 +5,7 @@ namespace Hyperbee.XS.Tests;
 [TestClass]
 public class XsParserExpressionTests
 {
-    public XsParser Xs { get; } = new();
+    public static XsParser Xs { get; } = new();
 
     [TestMethod]
     public void Compile_ShouldSucceed_Constant()

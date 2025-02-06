@@ -2,16 +2,13 @@
 using System.Reflection;
 using Hyperbee.XS.System;
 using Hyperbee.XS.System.Writer;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Hyperbee.XS.Tests;
 
 [TestClass]
 public class XsStringTests
 {
-    public XsParser Xs { get; set; } = new
+    public static XsParser Xs { get; set; } = new
     (
         new XsConfig { ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ) }
     );

@@ -8,7 +8,7 @@ namespace Hyperbee.XS.Extensions.Tests;
 [TestClass]
 public class WhileParseExtensionTests
 {
-    public XsParser XsParser { get; set; } = new
+    public static XsParser Xs { get; set; } = new
     (
         new XsConfig
         {
@@ -20,7 +20,7 @@ public class WhileParseExtensionTests
     [TestMethod]
     public void Compile_ShouldSucceed_WithExtensions()
     {
-        var expression = XsParser.Parse(
+        var expression = Xs.Parse(
             """
             var running = true;
             var x = 0;

@@ -9,7 +9,7 @@ namespace Hyperbee.XS.Extensions.Tests;
 [TestClass]
 public class DebugParseExtensionTests
 {
-    public XsParser Xs { get; set; } = new
+    public static XsParser Xs { get; set; } = new
     (
         new XsConfig
         {

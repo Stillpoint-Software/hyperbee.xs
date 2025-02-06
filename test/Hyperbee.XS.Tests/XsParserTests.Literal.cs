@@ -5,7 +5,7 @@ namespace Hyperbee.XS.Tests;
 [TestClass]
 public class XsParserLiteralTests
 {
-    public XsParser Xs { get; } = new();
+    public static XsParser Xs { get; } = new();
 
     [TestMethod]
     public void Parse_ShouldSucceed_WithStringLiteralDefault()

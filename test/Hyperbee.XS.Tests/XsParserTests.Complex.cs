@@ -8,7 +8,7 @@ namespace Hyperbee.XS.Tests;
 [TestClass]
 public class XsParserComplexTests
 {
-    public XsParser Xs { get; set; } = new
+    public static XsParser Xs { get; set; } = new
     (
         new XsConfig
         {
