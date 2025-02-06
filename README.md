@@ -207,38 +207,87 @@ To get started with XS, you need to set up a .NET project. Ensure you have .NET 
 
 Add the necessary packages:
 
-   ```
-   dotnet add package Hyperbee.XS
-   dotnet add package Hyperbee.XS.Extensions
-   ```
+```
+dotnet add package Hyperbee.XS
+dotnet add package Hyperbee.XS.Extensions
+```
 
 Create an XS script:
 
-    ```csharp
-    var config = new XsConfig { Extensions = Hyperbee.Xs.Extensions.XsExtensions };
-    var parser = new XsParser( config );
-    
-    var expression = XsParser.Parse(
-       """
-       var array = new int[] { 1,2,3 };
-       var x = 0;
-       
-       foreach ( var item in array )
-       {
-          x += item;
-       }
+```csharp
+var config = new XsConfig { Extensions = Hyperbee.Xs.Extensions.XsExtensions };
+var parser = new XsParser( config );
 
-       x + 12; // return the last expression
-       """ 
-    );
+var expression = XsParser.Parse(
+    """
+    var array = new int[] { 1,2,3 };
+    var x = 0;
     
-    var lambda = Lambda<Func<int>>( expression );
-    
-    var compiled = lambda.Compile();
-    var result = compiled();
-    
-    Assert.AreEqual( 42, result );
-    ```
+    foreach ( var item in array )
+    {
+      x += item;
+    }
+
+    x + 12; // return the last expression
+    """ 
+);
+
+var lambda = Lambda<Func<int>>( expression );
+
+var compiled = lambda.Compile();
+var result = compiled();
+
+Assert.AreEqual( 42, result );
+```
+
+---
+
+## **Additional Features**
+
+### **ToExpressionString()**
+
+XS provides a `ToExpressionString()` method that converts an expression tree into a string representing C# expression syntax.  For example:
+
+```csharp
+var expression = XsParser.Parse( "1 + 2 * 3;" );
+var expressionString = expression.ToExpressionString();
+```
+
+would output:
+
+```csharp
+var expression = Expression.Add( 
+  Expression.Constant( 1 ), 
+  Expression.Multiply( 
+    Expression.Constant( 2 ), 
+    Expression.Constant( 3 ) 
+  ) 
+);
+```
+
+### **ToXS()**
+
+XS also provides a `ToXS()` method that converts an expression tree into an XS script. For example:
+
+
+```csharp
+var expression = Expression.Add( 
+  Expression.Constant( 1 ), 
+  Expression.Multiply( 
+    Expression.Constant( 2 ), 
+    Expression.Constant( 3 ) 
+  ) 
+);
+var xs = expression.ToXS();
+```
+
+would output:
+
+```csharp
+1 + 2 * 3;
+```
+
+> Note: it is not guaranteed that the output will be the same as the original script, but it will be semantically equivalent. For example whitespace, variable names and block closure may differ.
 
 ---
 

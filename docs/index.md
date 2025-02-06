@@ -3,7 +3,7 @@ layout: default
 title: Overview
 nav_order: 1
 ---
-# XS: A Lightweight, Extensible Scripting Language for Expression Trees :rocket:
+# XS: A Lightweight, Extensible Scripting Language for Expression Trees
 
 ### **What is XS?**
 
@@ -244,6 +244,61 @@ Create an XS script:
     
     Assert.AreEqual( 42, result );
     ```
+    
+## **Additional Features**
+
+### **ToExpressionString()**
+
+XS provides a `ToExpressionString()` method that converts an expression tree into a string representing C# expression syntax.  For example:
+
+```csharp
+var expression = XsParser.Parse( "1 + 2 * 3;" );
+var expressionString = expression.ToExpressionString();
+```
+
+would output:
+
+```csharp
+var expression = Expression.Add( 
+  Expression.Constant( 1 ), 
+  Expression.Multiply( 
+    Expression.Constant( 2 ), 
+    Expression.Constant( 3 ) 
+  ) 
+);
+```
+
+#### Configuration
+
+`ToExpressionString( config )` supports configuration options to control the output format and the ability to include IExpressionWriters to help with custom expression types. See Hyperbee.XS.Extensions for examples.
+
+### **ToXS()**
+
+XS also provides a `ToXS()` method that converts an expression tree into an XS script. For example:
+
+
+```csharp
+var expression = Expression.Add( 
+  Expression.Constant( 1 ), 
+  Expression.Multiply( 
+    Expression.Constant( 2 ), 
+    Expression.Constant( 3 ) 
+  ) 
+);
+var xs = expression.ToXS();
+```
+
+would output:
+
+```csharp
+1 + 2 * 3;
+```
+
+> Note: it is not guaranteed that the output will be the same as the original script, but it will be semantically equivalent. For example whitespace, variable names and block closure may differ.
+
+#### Configuration
+
+`ToXS( config )` supports configuration options to control the output format and the ability to include IXsWriters to help with custom expression types. See Hyperbee.XS.Extensions for examples.
 
 ---
 

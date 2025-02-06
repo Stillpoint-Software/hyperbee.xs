@@ -82,8 +82,11 @@ string-literal      = DQUOTE *(%x20-21 / %x23-7E) DQUOTE
 boolean-literal     = "true" / "false"
 char-literal        = SQUOTE %x20-7E SQUOTE
 
-; Unary Expressions
-unary-expression    = ("!" / "-" / "++" / "--") primary-expression
+; Unary Operators: IsFalse, IsTrue, Not, Negate, OnesComplement
+unary-operator      = "!?" / "?" / "!" / "-" / "~"
+
+; Unary Expressions: zero or more unary operators applied to a base expression
+unary-expression    = *(unary-operator) base-expression
 
 ; Binary Expressions
 binary-expression   = primary-expression binary-operator primary-expression
@@ -91,6 +94,13 @@ binary-operator     = "**" / "%" / "*" / "/" / "+" / "-"
                     / "==" / "!=" / "<" / ">" / "<=" / ">="
                     / "&&" / "||" / "??"
                     / "&" / "|" / "^" / "<<" / ">>"
+
+; Base Expression
+base-expression    = prefix-expression / postfix-expression / primary-expression
+
+; Variable Operators Expressions: Prefix and Postfix
+prefix-expression   = ("++" / "--") identifier
+postfix-expression  = identifier ("++" / "--")
 
 ; Primary Expressions
 primary-expression  = literal
