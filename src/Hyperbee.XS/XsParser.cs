@@ -207,11 +207,14 @@ public partial class XsParser
             postfixExpression,
             primaryExpression
         ).Unary(
-            (Terms.Char( '!' ), Not),
-            (Terms.Char( '-' ), Negate),
-            (Terms.Char( '~' ), OnesComplement)
+            (Terms.Text( "?" ), IsTrue),
+            (Terms.Text( "!?" ), IsFalse),
+            (Terms.Text( "!" ), Not),
+            (Terms.Text( "-" ), Negate),
+            (Terms.Text( "~" ), OnesComplement)
         ).Named( "unary" );
 
+        
         // Binary Expressions
 
         return expression.Parser = unaryExpression

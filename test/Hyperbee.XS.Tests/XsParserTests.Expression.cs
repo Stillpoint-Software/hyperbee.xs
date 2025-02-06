@@ -47,6 +47,32 @@ public class XsParserExpressionTests
     }
 
     [TestMethod]
+    public void Compile_ShouldSucceed_UnaryIsFalse()
+    {
+        var expression = Xs.Parse( "!?false;" );
+
+        var lambda = Lambda<Func<bool>>( expression );
+
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        Assert.IsTrue( result );
+    }
+
+    [TestMethod]
+    public void Compile_ShouldSucceed_UnaryIsTrue()
+    {
+        var expression = Xs.Parse( "?true;" );
+
+        var lambda = Lambda<Func<bool>>( expression );
+
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        Assert.IsTrue( result );
+    }
+
+    [TestMethod]
     public void Compile_ShouldSucceed_UnaryNot_Grouping()
     {
         var expression = Xs.Parse( "!(false);" );

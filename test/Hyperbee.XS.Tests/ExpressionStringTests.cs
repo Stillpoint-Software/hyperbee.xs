@@ -344,6 +344,27 @@ public class ExpressionStringTests
     }
 
     [TestMethod]
+    public async Task ToExpressionString_ShouldCreate_IsTrueAndIsFalse()
+    {
+        var script = """
+            var x = ?true;
+            var y = !?false;
+            x && y;
+            """;
+
+        var expression = Xs.Parse( script );
+        var code = expression.ToExpressionString();
+
+        WriteResult( script, code );
+
+        var lambda = Expression.Lambda<Func<bool>>( expression );
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        await AssertScriptValue( code, result );
+    }
+
+    [TestMethod]
     public async Task ToExpressionString_ShouldCreate_TypeAs()
     {
         var script = """

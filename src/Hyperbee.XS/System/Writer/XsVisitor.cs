@@ -63,6 +63,9 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
             case ExpressionType.Coalesce:
                 writer.Write( " ?? " );
                 break;
+            case ExpressionType.AndAlso:
+                writer.Write( " && " );
+                break;
             case ExpressionType.And:
                 writer.Write( " & " );
                 break;
@@ -686,6 +689,16 @@ internal class XsVisitor : global::System.Linq.Expressions.ExpressionVisitor
 
             case ExpressionType.OnesComplement:
                 writer.Write( "~" );
+                writer.WriteExpression( node.Operand );
+                break;
+
+            case ExpressionType.IsFalse:
+                writer.Write( "!?" );
+                writer.WriteExpression( node.Operand );
+                break;
+
+            case ExpressionType.IsTrue:
+                writer.Write( "?" );
                 writer.WriteExpression( node.Operand );
                 break;
 

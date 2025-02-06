@@ -262,6 +262,21 @@ public class XsStringTests
     }
 
     [TestMethod]
+    public void ToXS_ShouldCreate_IsTrueAndIsFalse()
+    {
+        var script = """
+            var x = ?true;
+            var y = !?false;
+            x && y;
+            """;
+
+        var expression = Xs.Parse( script );
+        var xs = expression.ToXS();
+
+        AssertXsScript( expression, xs );
+    }
+
+    [TestMethod]
     public void ToXS_ShouldCreate_TypeAs()
     {
         var script = """
