@@ -1,9 +1,11 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.ObjectModel;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Hyperbee.Expressions;
 using Hyperbee.XS;
 using Hyperbee.XS.System;
+using Hyperbee.XS.System.Writer;
 using Parlot;
 using Parlot.Fluent;
 using static System.Linq.Expressions.Expression;
@@ -11,7 +13,7 @@ using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class StringFormatParseExtension : IParseExtension
+public class StringFormatParseExtension : IParseExtension, IExtensionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Literal;
 
@@ -22,14 +24,44 @@ public class StringFormatParseExtension : IParseExtension
         return SkipWhiteSpace( new BacktickLiteral() )
             .Then<Expression>( static ( ctx, value ) =>
             {
-                var (format, variables) = StringFormatHelper.PrepareFormat(
+                var (format, arguments) = StringFormatHelper.PrepareFormat(
                     value.ToString(),
                     ctx.Scope().Variables.EnumerateValues()
                 );
 
-                return ExpressionExtensions.StringFormat( format, variables );
+                return ExpressionExtensions.StringFormat( format, arguments );
 
             } ).Named( "format" );
+    }
+
+    public bool CanWrite( Expression node )
+    {
+        return node is StringFormatExpression;
+    }
+
+    public void WriteExpression( Expression node, ExpressionWriterContext context )
+    {
+        if ( node is not StringFormatExpression stringFormatExpression )
+            return;
+
+        using var writer = context.EnterExpression( "Hyperbee.Expressions.ExpressionExtensions.StringFormat", true, false );
+
+        var variables = new ReadOnlyCollection<Expression>( [.. stringFormatExpression.Arguments] );
+
+        writer.WriteExpression( stringFormatExpression.Format );
+        writer.WriteParamExpressions( variables );
+    }
+
+    public void WriteExpression( Expression node, XsWriterContext context )
+    {
+        if ( node is not StringFormatExpression stringFormatExpression )
+            return;
+
+        using var writer = context.GetWriter();
+
+        writer.Write( "`" );
+        writer.Write( StringFormatHelper.RevertFormat( stringFormatExpression.Format, stringFormatExpression.Arguments ) );
+        writer.Write( "`" );
     }
 }
 
@@ -75,10 +107,10 @@ internal static partial class StringFormatHelper
     [GeneratedRegex( @"\{(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\}" )]
     private static partial Regex NamedPlaceholderRegex();
 
-    public static (Expression template, Expression[] usedParameters) PrepareFormat( string format, IEnumerable<ParameterExpression> parameters )
+    public static (Expression template, ParameterExpression[] usedParameters) PrepareFormat( string format, IEnumerable<ParameterExpression> parameters )
     {
         var keyParameters = parameters.ToDictionary( x => x.Name );
-        var usedParameters = new List<Expression>();
+        var usedParameters = new List<ParameterExpression>();
         var indexMap = new Dictionary<string, int>();
         var indexCounter = 0;
 
@@ -100,5 +132,19 @@ internal static partial class StringFormatHelper
         } );
 
         return (Constant( updateFormat ), [.. usedParameters]);
+    }
+
+    public static string RevertFormat( Expression format, IReadOnlyList<Expression> parameters )
+    {
+        var formatString = (string) ((ConstantExpression) format).Value;
+        var args = parameters.OfType<ParameterExpression>().Select( x => x.Name ).ToArray();
+
+        // convert a string from "Hello {name}" to "Hello {0}"
+        for ( var i = 0; i < args.Length; i++ )
+        {
+            formatString = formatString.Replace( $"{{{i}}}", $"{{{args[i]}}}" );
+        }
+
+        return formatString;
     }
 }

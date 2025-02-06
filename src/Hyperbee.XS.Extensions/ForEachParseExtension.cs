@@ -3,13 +3,14 @@ using Hyperbee.Expressions;
 using Hyperbee.XS;
 using Hyperbee.XS.System;
 using Hyperbee.XS.System.Parsers;
+using Hyperbee.XS.System.Writer;
 using Parlot.Fluent;
 using static System.Linq.Expressions.Expression;
 using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class ForEachParseExtension : IParseExtension
+public class ForEachParseExtension : IParseExtension, IExtensionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "foreach";
@@ -57,5 +58,40 @@ public class ForEachParseExtension : IParseExtension
                     ctx.ExitScope();
                 }
             ).Named( "foreach" );
+    }
+
+    public bool CanWrite( Expression node )
+    {
+        return node is ForEachExpression;
+    }
+
+    public void WriteExpression( Expression node, ExpressionWriterContext context )
+    {
+        if ( node is not ForEachExpression forEachExpression )
+            return;
+
+        using var writer = context.EnterExpression( "Hyperbee.Expressions.ExpressionExtensions.ForEach", true, false );
+
+        writer.WriteExpression( forEachExpression.Collection );
+        writer.Write( ",\n" );
+        writer.WriteExpression( forEachExpression.Element );
+        writer.Write( ",\n" );
+        writer.WriteExpression( forEachExpression.Body );
+        writer.Write( "\n" );
+    }
+
+    public void WriteExpression( Expression node, XsWriterContext context )
+    {
+        if ( node is not ForEachExpression forEachExpression )
+            return;
+
+        using var writer = context.GetWriter();
+
+        writer.Write( "foreach( ", indent: true );
+        writer.WriteExpression( forEachExpression.Element );
+        writer.Write( " in " );
+        writer.WriteExpression( forEachExpression.Collection );
+        writer.Write( " )\n" );
+        writer.WriteExpression( forEachExpression.Body );
     }
 }

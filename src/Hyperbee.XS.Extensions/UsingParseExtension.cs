@@ -2,13 +2,14 @@
 using Hyperbee.Expressions;
 using Hyperbee.XS;
 using Hyperbee.XS.System;
+using Hyperbee.XS.System.Writer;
 using Parlot.Fluent;
 using static System.Linq.Expressions.Expression;
 using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class UsingParseExtension : IParseExtension
+public class UsingParseExtension : IParseExtension, IExtensionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "using";
@@ -41,9 +42,43 @@ public class UsingParseExtension : IParseExtension
             .And( statement )
             .Then<Expression>( static ( ctx, parts ) =>
             {
-                var ((variable, disposable), body) = parts;
+                var ((disposeVariable, disposable), body) = parts;
 
-                return ExpressionExtensions.Using( variable, disposable, body );
+                return ExpressionExtensions.Using( disposeVariable, disposable, body );
             } ).Named( "using" );
+    }
+
+    public bool CanWrite( Expression node )
+    {
+        return node is UsingExpression;
+    }
+
+    public void WriteExpression( Expression node, ExpressionWriterContext context )
+    {
+        if ( node is not UsingExpression usingExpression )
+            return;
+
+        using var writer = context.EnterExpression( "Hyperbee.Expressions.ExpressionExtensions.Using", true, false );
+
+        writer.WriteParameter( usingExpression.DisposeVariable );
+        writer.Write( ",\n" );
+        writer.WriteExpression( usingExpression.Disposable );
+        writer.Write( ",\n" );
+        writer.WriteExpression( usingExpression.Body );
+    }
+
+    public void WriteExpression( Expression node, XsWriterContext context )
+    {
+        if ( node is not UsingExpression usingExpression )
+            return;
+
+        using var writer = context.GetWriter();
+
+        writer.Write( "using (" );
+        writer.WriteParameter( usingExpression.DisposeVariable );
+        writer.Write( " = " );
+        writer.WriteExpression( usingExpression.Disposable );
+        writer.Write( ")\n" );
+        writer.WriteExpression( usingExpression.Body );
     }
 }
