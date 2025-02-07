@@ -9,14 +9,14 @@ namespace Hyperbee.Xs.Extensions;
 
 public class NuGetParseExtension : IParseExtension
 {
-    public ExtensionType Type => ExtensionType.Directive; 
-    
+    public ExtensionType Type => ExtensionType.Directive;
+
     public string Key => "nuget";
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
         return Terms.Identifier()
-            .And( 
+            .And(
                 ZeroOrOne(
                     Terms.Char( ':' ).SkipAnd( Terms.Identifier() )
                 )
@@ -25,7 +25,7 @@ public class NuGetParseExtension : IParseExtension
             .Then<Expression>( ( context, parts ) =>
             {
                 if ( context is not XsContext xsContext )
-                    throw new InvalidOperationException( $"Context must be of type {nameof(XsContext)}." );
+                    throw new InvalidOperationException( $"Context must be of type {nameof( XsContext )}." );
 
                 var packageId = parts.Item1.ToString();
                 var version = parts.Item2.ToString();
