@@ -287,18 +287,11 @@ public partial class XsParser
     {
         return new(
             "import",
-            Terms.Identifier().ElseInvalidIdentifier()
-                .And(
-                    ZeroOrMany(
-                        Terms.Char( '.' )
-                            .SkipAnd( Terms.Identifier().ElseInvalidIdentifier() )
-                    )
-                )
+            Terms.NamespaceIdentifier().ElseInvalidIdentifier()
                 .AndSkip( Terms.Char( ';' ) )
                 .Then<Expression>( ( ctx, parts ) =>
                 {
-                    var (first, rest) = parts;
-                    var ns = rest.Aggregate( first, ( current, part ) => $"{current}.{part}" ).ToString();
+                    var ns = parts.ToString();
 
                     if ( ctx is XsContext xsContext )
                         xsContext.Namespaces.Add( ns );
@@ -313,13 +306,13 @@ public partial class XsParser
         return Bounded(
             static ctx =>
             {
-                if ( ctx is not XsContext xsContext || xsContext.InitalScope )
+                if ( ctx is not XsContext xsContext || xsContext.InitialScope )
                     ctx.EnterScope( FrameType.Method );
             },
             parser.Then( ConvertToSingleExpression ),
             static ctx =>
             {
-                if ( ctx is not XsContext xsContext || xsContext.InitalScope )
+                if ( ctx is not XsContext xsContext || xsContext.InitialScope )
                     ctx.ExitScope();
 
                 ThrowIfNotEof( ctx );

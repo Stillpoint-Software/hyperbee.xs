@@ -11,11 +11,14 @@ public class XsConfig
 {
     public IReadOnlyCollection<IParseExtension> Extensions { get; set; } = ReadOnlyCollection<IParseExtension>.Empty;
 
-    public ReferenceManager ReferenceManager { get; init; }
+    public ReferenceManager ReferenceManager { private get; init; }
     internal Lazy<TypeResolver> Resolver { get; }
 
     public XsConfig( Action<ReferenceManager> references = null )
     {
+        // the ReferenceManager property is an initialization convenience for setting up the Resolver.
+        // if you don't set the ReferenceManager property, the Resolver will create one.
+
         if ( references != null )
         {
             ReferenceManager = new ReferenceManager();

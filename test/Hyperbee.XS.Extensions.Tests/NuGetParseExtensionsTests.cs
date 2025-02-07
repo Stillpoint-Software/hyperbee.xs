@@ -2,6 +2,7 @@
 using System.Reflection;
 using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
+using Hyperbee.Xs.Extensions;
 
 namespace Hyperbee.XS.Extensions.Tests;
 
@@ -9,31 +10,30 @@ namespace Hyperbee.XS.Extensions.Tests;
 public class NuGetParseExtensionTests
 {
     [TestMethod]
-    public async Task Compile_ShouldSucceed_WithExtensions()
+    public void Compile_ShouldSucceed_WithExtensions()
     {
         const string script =
             """
+            nuget Humanizer.Core;
             import Humanizer;
             
             var number = 123;
             number.ToWords( default(System.Globalization.CultureInfo) );
             """;
 
-        var rm = new ReferenceManager();
-        await rm.LoadPackageAsync( "Humanizer.Core" );
-
-        var xsConfig = new XsConfig
+        var xsConfig = new XsConfig()
         {
-            ReferenceManager = rm
+            Extensions = [new NuGetParseExtension()]
         };
 
         var xs = new XsParser( xsConfig );
-
         var expression = xs.Parse( script );
 
         var lambda = Expression.Lambda<Func<string>>( expression );
 
         var compiled = lambda.Compile();
         var result = compiled();
+
+        Assert.AreEqual( "one hundred and twenty-three", result );
     }
 }

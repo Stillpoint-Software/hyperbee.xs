@@ -55,4 +55,3 @@ public static partial class XsParsers
         return SkipWhiteSpace( new CharQuotedLiteral( quotes ) );
     }
 }
-

@@ -7,7 +7,7 @@ namespace Hyperbee.XS.Core;
 
 public sealed class TypeResolver
 {
-    private readonly ReferenceManager _referenceManager;
+    public ReferenceManager ReferenceManager { get; }
 
     private const int ConcurrencyLevel = -1;
     private const int Capacity = 32;
@@ -38,9 +38,9 @@ public sealed class TypeResolver
         if ( referenceManager == null )
             throw new ArgumentNullException( nameof( referenceManager ) );
 
-        _referenceManager = referenceManager;
+        ReferenceManager = referenceManager;
 
-        CacheExtensionMethods();
+        RegisterExtensionMethods( ReferenceManager.Assemblies );
     }
 
     public Type ResolveType( string typeName )
@@ -52,7 +52,7 @@ public sealed class TypeResolver
             if ( type != null )
                 return type;
 
-            return _referenceManager.Assemblies
+            return ReferenceManager.Assemblies
                 .SelectMany( assembly => assembly.GetTypes() )
                 .FirstOrDefault( compare => compare.Name == typeName || compare.FullName == typeName );
         } );
@@ -143,9 +143,9 @@ public sealed class TypeResolver
         return bestMatch;
     }
 
-    private void CacheExtensionMethods()
+    public void RegisterExtensionMethods( IEnumerable<Assembly> assemblies )
     {
-        Parallel.ForEach( _referenceManager.Assemblies, assembly =>
+        Parallel.ForEach( assemblies, assembly =>
         {
             foreach ( var type in assembly.GetTypes() )
             {
@@ -154,7 +154,7 @@ public sealed class TypeResolver
 
                 foreach ( var method in type.GetMethods( BindingFlags.Static | BindingFlags.Public ) )
                 {
-                    if ( !method.IsDefined( typeof( ExtensionAttribute ), false ) )
+                    if ( !method.IsDefined( typeof(ExtensionAttribute), false ) )
                         continue;
 
                     if ( !_extensionMethodCache.TryGetValue( method.Name, out var methods ) )
@@ -168,6 +168,32 @@ public sealed class TypeResolver
             }
         } );
     }
+
+    //private void CacheExtensionMethods()
+    //{
+    //    Parallel.ForEach( _referenceManager.Assemblies, assembly =>
+    //    {
+    //        foreach ( var type in assembly.GetTypes() )
+    //        {
+    //            if ( !type.IsPublic || !type.IsSealed || !type.IsAbstract ) // Only static classes
+    //                continue;
+
+    //            foreach ( var method in type.GetMethods( BindingFlags.Static | BindingFlags.Public ) )
+    //            {
+    //                if ( !method.IsDefined( typeof( ExtensionAttribute ), false ) )
+    //                    continue;
+
+    //                if ( !_extensionMethodCache.TryGetValue( method.Name, out var methods ) )
+    //                {
+    //                    methods = [];
+    //                    _extensionMethodCache[method.Name] = methods;
+    //                }
+
+    //                methods.Add( method );
+    //            }
+    //        }
+    //    } );
+    //}
 
     private static Span<Type> GetCallerTypes( Type type, IReadOnlyList<Expression> args )
     {

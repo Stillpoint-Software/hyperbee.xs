@@ -100,8 +100,9 @@ public partial class ReferenceManager
         return _assemblyLoadContext.LoadFromStream( assembly );
     }
 
-    public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = "latest" )
+    public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = null )
     {
+        version ??= "latest";
         var packagePath = await GetPackageAsync( packageId, version ).ConfigureAwait( false );
 
         if ( packagePath == null )

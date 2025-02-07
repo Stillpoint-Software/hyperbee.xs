@@ -10,9 +10,8 @@ namespace Hyperbee.XS;
 public class XsContext : ParseContext
 {
     public TypeResolver Resolver { get; }
-    public ReferenceManager ReferenceManager { get; }
 
-    internal bool InitalScope { get; }
+    internal bool InitialScope { get; }
     public ParseScope Scope { get; }
 
     public List<string> Namespaces { get; } = [];
@@ -29,10 +28,9 @@ public class XsContext : ParseContext
         : base( scanner, useNewLines )
     {
         Resolver = config.Resolver.Value;
-        ReferenceManager = config.ReferenceManager;
         DebugInfo = debugInfo;
         Scope = scope ?? new ParseScope();
-        InitalScope = scope == null;
+        InitialScope = scope == null;
 
 #if DEBUG
         OnEnterParser += ( obj, ctx ) =>
