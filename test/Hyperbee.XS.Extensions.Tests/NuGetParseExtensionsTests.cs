@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Hyperbee.Xs.Extensions;
 
 namespace Hyperbee.XS.Extensions.Tests;
