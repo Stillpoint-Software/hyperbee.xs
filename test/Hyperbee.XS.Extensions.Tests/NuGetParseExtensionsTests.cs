@@ -1,8 +1,5 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+using System.Linq.Expressions;
 using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.Core;
-using Hyperbee.XS.Core.Writer;
 
 namespace Hyperbee.XS.Extensions.Tests;
 
@@ -18,7 +15,7 @@ public class NuGetParseExtensionTests
             import Humanizer;
             
             var number = 123;
-            number.ToWords( default(System.Globalization.CultureInfo) );
+            number.ToWords();
             """;
 
         var xsConfig = new XsConfig()

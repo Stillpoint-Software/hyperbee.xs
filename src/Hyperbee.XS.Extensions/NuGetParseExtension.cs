@@ -43,9 +43,3 @@ public class NuGetParseExtension : IParseExtension
     }
 }
 
-// synchronously execute an async method on the current thread using a custom synchronization context
-// https://devblogs.microsoft.com/pfxteam/await-synchronizationcontext-and-console-apps/
-
-// this method executes all the async operations on the calling thread rather than blocking the calling
-// thread while it waits for the results of continuations on the thread pool. this method only ever
-// uses the calling thread to manage the async calls vs tying up thread pool threads.

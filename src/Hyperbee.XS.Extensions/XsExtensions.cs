@@ -15,6 +15,7 @@ public static class XsExtensions
             new AsyncParseExtension(),
             new AwaitParseExtension(),
             new DebugParseExtension(),
+            new NuGetParseExtension()
         ];
     }
 }

@@ -15,6 +15,7 @@ XS.Extensions is a collection of useful extensions for the XS language, includin
 - Usings
 - String Interpolation
 - Debugging
+- Nuget Package Management
 
 ## Contributing
 
