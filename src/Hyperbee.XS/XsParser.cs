@@ -61,13 +61,13 @@ public partial class XsParser
 
         // Directives
 
-        var directives = KeywordLookup<Expression>( "directives" )
+        var directives = KeywordLookup<Expression>( "keyword-directives" )
             .Add( ImportParser() )
             .Add( config.Extensions.Statements( ExtensionType.Directive, expression, statement ) );
 
         // Compose Statements
 
-        var terminatedStatements = KeywordLookup<Expression>( "lookup(terminated-statements)" )
+        var terminatedStatements = KeywordLookup<Expression>( "keyword-terminated" )
             .Add(
                 BreakParser(),
                 ContinueParser(),
@@ -124,7 +124,7 @@ public partial class XsParser
 
         // Expression statements
 
-        var complexExpression = KeywordLookup<Expression>()
+        var complexExpression = KeywordLookup<Expression>( "keyword-expression" )
             .Add(
                 DefaultParser( typeConstant ),
                 DeclarationParser( expression ),
@@ -217,7 +217,6 @@ public partial class XsParser
             (Terms.Text( "~" ), OnesComplement)
         ).Named( "unary" );
 
-
         // Binary Expressions
 
         return expression.Parser = unaryExpression
@@ -273,14 +272,12 @@ public partial class XsParser
 
     private static Parser<IReadOnlyList<Expression>> ArgsParser( Parser<Expression> expression )
     {
-        return ZeroOrOne( Separated( Terms.Char( ',' ), expression ) )
-            .Then( static args => args ?? [] );
+        return ZeroOrOne( Separated( Terms.Char( ',' ), expression ), [] );
     }
 
     private static Parser<IReadOnlyList<Type>> TypeArgsParser()
     {
-        return ZeroOrOne( Separated( Terms.Char( ',' ), TypeRuntime() ) )
-            .Then( static typeArgs => typeArgs ?? [] );
+        return ZeroOrOne( Separated( Terms.Char( ',' ), TypeRuntime() ), [] );
     }
 
     private static KeywordParserPair<Expression> ImportParser()

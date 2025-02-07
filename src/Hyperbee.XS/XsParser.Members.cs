@@ -66,7 +66,7 @@ public partial class XsParser
                             Between(
                                 Terms.Char( '(' ),
                                 ArgsParser( expression ),
-                                CloseParen
+                                Terms.Char( ')' ) 
                             )
                         )
                     )
@@ -89,8 +89,7 @@ public partial class XsParser
                     if ( method == null )
                         throw new InvalidOperationException( $"Method '{name}' not found on type '{type}'." );
 
-                    var extension = method.IsDefined( typeof( ExtensionAttribute ), false );
-                    var arguments = extension ? new[] { targetExpression }.Concat( args ) : args;
+                    var arguments = GetArgumentsWithDefaults( method, targetExpression, args );
 
                     return method.IsStatic
                         ? Expression.Call( method, arguments )
@@ -112,6 +111,40 @@ public partial class XsParser
                     _ => throw new InvalidOperationException( $"Member '{name}' is not a property or field." )
                 };
             } );
+
+        static IReadOnlyList<Expression> GetArgumentsWithDefaults( MethodInfo method, Expression targetExpression, IReadOnlyList<Expression> providedArgs )
+        {
+            var parameters = method.GetParameters();
+            var isExtension = method.IsDefined( typeof(ExtensionAttribute), false );
+            
+            var providedOffset = isExtension ? 1 : 0;
+            var providedCount = providedArgs.Count;
+            var totalParameters = parameters.Length;
+
+            if ( providedCount == totalParameters )
+                return providedArgs;
+
+            var methodArgs = new Expression[totalParameters];
+
+            // add provided arguments
+            if ( isExtension )
+                methodArgs[0] = targetExpression;
+
+            for ( var i = 0; i < providedCount; i++ )
+            {
+                methodArgs[i + providedOffset] = providedArgs[i];
+            }
+
+            // add missing optional parameters
+            for ( var i = providedCount + providedOffset; i < totalParameters; i++ )
+            {
+                methodArgs[i] = parameters[i].HasDefaultValue
+                    ? Expression.Constant( parameters[i].DefaultValue, parameters[i].ParameterType )
+                    : throw new ArgumentException( $"Missing required parameter: {parameters[i].Name}" );
+            }
+
+            return methodArgs;
+        }
     }
 }
 
