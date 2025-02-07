@@ -154,7 +154,7 @@ public sealed class TypeResolver
 
                 foreach ( var method in type.GetMethods( BindingFlags.Static | BindingFlags.Public ) )
                 {
-                    if ( !method.IsDefined( typeof(ExtensionAttribute), false ) )
+                    if ( !method.IsDefined( typeof( ExtensionAttribute ), false ) )
                         continue;
 
                     if ( !_extensionMethodCache.TryGetValue( method.Name, out var methods ) )

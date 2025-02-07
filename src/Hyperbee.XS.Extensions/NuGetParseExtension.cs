@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Hyperbee.Xs.Extensions.Core;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
@@ -17,7 +17,7 @@ public class NuGetParseExtension : IParseExtension
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
         return Terms.NamespaceIdentifier()
-            .And( 
+            .And(
                 ZeroOrOne(
                     Terms.Char( ':' ).SkipAnd( Terms.Identifier() )
                 )
