@@ -66,7 +66,7 @@ public partial class XsParser
                             Between(
                                 Terms.Char( '(' ),
                                 ArgsParser( expression ),
-                                Terms.Char( ')' ) 
+                                Terms.Char( ')' )
                             )
                         )
                     )
@@ -115,8 +115,8 @@ public partial class XsParser
         static IReadOnlyList<Expression> GetArgumentsWithDefaults( MethodInfo method, Expression targetExpression, IReadOnlyList<Expression> providedArgs )
         {
             var parameters = method.GetParameters();
-            var isExtension = method.IsDefined( typeof(ExtensionAttribute), false );
-            
+            var isExtension = method.IsDefined( typeof( ExtensionAttribute ), false );
+
             var providedOffset = isExtension ? 1 : 0;
             var providedCount = providedArgs.Count;
             var totalParameters = parameters.Length;
