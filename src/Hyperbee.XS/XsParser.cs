@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Parsers;
 using Parlot;
 using Parlot.Fluent;
 using static System.Linq.Expressions.Expression;
@@ -58,9 +59,11 @@ public partial class XsParser
 
         expressionStatement = expressionStatement.Debuggable();
 
-        // Imports
+        // Directives
 
-        var imports = ZeroOrMany( ImportParser() ).Named( "import-statements" );
+        var directives = KeywordLookup<Expression>( "directives" )
+            .Add( ImportParser() )
+            .Add( config.Extensions.Statements( ExtensionType.Directive, expression, statement ) );
 
         // Compose Statements
 
@@ -83,7 +86,8 @@ public partial class XsParser
 
         // Create the final parser
 
-        var xs = imports.SkipAnd( ZeroOrMany( statement ) );
+        var xs = ZeroOrMany( directives )
+            .SkipAnd( ZeroOrMany( statement ) );
 
         return SynthesizeMethod( xs );
     }
@@ -279,33 +283,32 @@ public partial class XsParser
             .Then( static typeArgs => typeArgs ?? [] );
     }
 
-
-    private static Parser<string> ImportParser()
+    private static KeywordParserPair<Expression> ImportParser()
     {
-        return Terms.Text( "import" )
-            .SkipAnd(
-                Terms.Identifier().ElseInvalidIdentifier()
+        return new(
+            "import",
+            Terms.Identifier().ElseInvalidIdentifier()
                 .And(
                     ZeroOrMany(
                         Terms.Char( '.' )
-                        .SkipAnd( Terms.Identifier().ElseInvalidIdentifier() )
+                            .SkipAnd( Terms.Identifier().ElseInvalidIdentifier() )
                     )
                 )
-            )
-            .AndSkip( Terms.Char( ';' ) )
-            .Then( ( ctx, parts ) =>
-            {
-                var (first, rest) = parts;
-                var ns = rest.Aggregate( first, ( current, part ) => $"{current}.{part}" ).ToString();
+                .AndSkip( Terms.Char( ';' ) )
+                .Then<Expression>( ( ctx, parts ) =>
+                {
+                    var (first, rest) = parts;
+                    var ns = rest.Aggregate( first, ( current, part ) => $"{current}.{part}" ).ToString();
 
-                if ( ctx is XsContext xsContext )
-                    xsContext.Namespaces.Add( ns );
+                    if ( ctx is XsContext xsContext )
+                        xsContext.Namespaces.Add( ns );
 
-                return ns;
-            } );
+                    return default;
+                } )
+        );
     }
 
-    private static Parser<Expression> SynthesizeMethod( SequenceSkipAnd<IReadOnlyList<string>, IReadOnlyList<Expression>> parser )
+    private static Parser<Expression> SynthesizeMethod( SequenceSkipAnd<IReadOnlyList<Expression>, IReadOnlyList<Expression>> parser )
     {
         return Bounded(
             static ctx =>

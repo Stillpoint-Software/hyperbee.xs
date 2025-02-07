@@ -12,12 +12,10 @@ public record ExtensionBinder(
 public enum ExtensionType
 {
     None = 0,
-    //Primary = 1,
+    Directive = 1,
     Literal = 2,
     Expression = 4,
     Terminated = 8,
-    //Binary = 10,
-    //Unary = 20,
 }
 
 public interface IParseExtension

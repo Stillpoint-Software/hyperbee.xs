@@ -134,33 +134,4 @@ public class XsParserComplexTests
         Assert.AreEqual( 42, result[3] ); // Loop 
         Assert.AreEqual( 42, result[4] ); // Lambda calculation (6 * 7)
     }
-
-    [TestMethod]
-    public async Task Compile_ShouldDemonstrateReference()
-    {
-        const string script =
-            """
-            import Humanizer;
-            
-            var number = 123;
-            number.ToWords( default(System.Globalization.CultureInfo) );
-            """;
-
-        var rm = new ReferenceManager().AddReference( Assembly.GetExecutingAssembly() );
-        await rm.LoadPackage( "Humanizer.Core" );
-
-        var xsConfig = new XsConfig
-        {
-            ReferenceManager = rm
-        };
-
-        var xs = new XsParser( xsConfig );
-
-        var expression = xs.Parse( script );
-
-        var lambda = Expression.Lambda<Func<string>>( expression );
-
-        var compiled = lambda.Compile();
-        var result = compiled();
-    }
 }

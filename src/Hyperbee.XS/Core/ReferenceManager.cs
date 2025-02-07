@@ -100,9 +100,10 @@ public partial class ReferenceManager
         return _assemblyLoadContext.LoadFromStream( assembly );
     }
 
-    public async Task<IEnumerable<Assembly>> LoadPackage( string packageId, string version = "latest" )
+    public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = "latest" )
     {
-        var packagePath = await GetPackage( packageId, version ).ConfigureAwait( false );
+        var packagePath = await GetPackageAsync( packageId, version ).ConfigureAwait( false );
+
         if ( packagePath == null )
             throw new InvalidOperationException( $"Failed to fetch package: {packageId}" );
 
@@ -110,7 +111,7 @@ public partial class ReferenceManager
         return LoadAssembliesFromPackage( packagePath );
     }
 
-    private async Task<string> GetPackage( string packageId, string version, HashSet<string> processedPackages = null )
+    private async Task<string> GetPackageAsync( string packageId, string version, HashSet<string> processedPackages = null )
     {
         processedPackages ??= [];
 
@@ -121,7 +122,7 @@ public partial class ReferenceManager
         if ( cachedPackage != null )
             return cachedPackage;
 
-        var availableVersions = await FindAvailableVersions( packageId ).ConfigureAwait( false );
+        var availableVersions = await FindAvailableVersionsAsync( packageId ).ConfigureAwait( false );
         var selectedVersion = version == "latest"
             ? availableVersions.Where( v => !v.IsPrerelease ).Max()
             : NuGetVersion.Parse( version );
@@ -138,16 +139,16 @@ public partial class ReferenceManager
             _assemblyLoadContext.LoadFromAssemblyPath( assembly.Location );
         }
 
-        var dependencies = await GetPackageDependencies( packageId, selectedVersion ).ConfigureAwait( false );
+        var dependencies = await GetPackageDependenciesAsync( packageId, selectedVersion ).ConfigureAwait( false );
         foreach ( var dependency in dependencies )
         {
-            await GetPackage( dependency.Id, dependency.Version.ToNormalizedString(), processedPackages ).ConfigureAwait( false );
+            await GetPackageAsync( dependency.Id, dependency.Version.ToNormalizedString(), processedPackages ).ConfigureAwait( false );
         }
 
         return packageFolder;
     }
 
-    private static async Task<List<PackageIdentity>> GetPackageDependencies( string packageId, NuGetVersion version )
+    private static async Task<List<PackageIdentity>> GetPackageDependenciesAsync( string packageId, NuGetVersion version )
     {
         var repository = Repository.Factory.GetCoreV3( NuGetSource );
         var metadataResource = await repository.GetResourceAsync<PackageMetadataResource>();
@@ -186,7 +187,7 @@ public partial class ReferenceManager
             : null;
     }
 
-    private static async Task<NuGetVersion[]> FindAvailableVersions( string packageId )
+    private static async Task<NuGetVersion[]> FindAvailableVersionsAsync( string packageId )
     {
         var providers = Repository.Provider.GetCoreV3();
         var repository = new SourceRepository( new PackageSource( NuGetSource ), providers );
