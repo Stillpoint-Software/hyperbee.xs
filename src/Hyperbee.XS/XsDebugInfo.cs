@@ -38,6 +38,6 @@ public class XsDebugInfo //BF XsDebugger
     //BF pass XsDebugger
     //   remove sourceLine
     //   add GetLine() to XsDebugger
-    public delegate void DebuggerCallback( int line, int column, Dictionary<string, object> variables, string sourceLine );  
+    public delegate void DebuggerCallback( int line, int column, Dictionary<string, object> variables, string sourceLine );
 }
 
