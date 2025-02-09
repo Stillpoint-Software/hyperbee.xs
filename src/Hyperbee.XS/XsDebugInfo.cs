@@ -1,22 +1,30 @@
 ﻿namespace Hyperbee.XS;
 
-public class XsDebugInfo
+public class XsDebugInfo //BF XsDebugger
 {
     internal string Source { get; set; }
     public List<Breakpoint> Breakpoints { get; set; }
-    public DebuggerCallback Debugger { get; set; }
+    public DebuggerCallback Debugger { get; set; } //BF Callback { private get; init; }
 
-    internal void InvokeDebugger( int line, int column, Dictionary<string, object> variables, string message )
-    {
-        if ( Breakpoints == null )
+    //BF Add enum for debug mode
+    /*
+        public enum DebugMode
         {
-            Debugger?.Invoke( line, column, variables, message );
-            return;
+            None,
+            Call,   // debug()
+            Step    // statements
         }
 
-        if ( Breakpoints.Any( bp => bp.Line == line && (bp.Columns == null || bp.Columns.Contain( column )) ) )
+        public DebugMode Mode { get; set; } = DebugMode.Call;
+    */
+
+    internal void InvokeDebugger( int line, int column, Dictionary<string, object> variables, string sourceLine ) //BF Invoke
+    {
+        //BF if ( Mode == DebugMode.None ) return;
+
+        if ( Breakpoints == null || Breakpoints.Any( bp => bp.Line == line && (bp.Columns == null || bp.Columns.Contain( column )) ) )
         {
-            Debugger?.Invoke( line, column, variables, message );
+            Debugger?.Invoke( line, column, variables, sourceLine );
         }
     }
 
@@ -27,6 +35,9 @@ public class XsDebugInfo
         internal bool Contain( int column ) => column >= Start && column <= End;
     }
 
-    public delegate void DebuggerCallback( int line, int column, Dictionary<string, object> variables, string message );
+    //BF pass XsDebugger
+    //   remove sourceLine
+    //   add GetLine() to XsDebugger
+    public delegate void DebuggerCallback( int line, int column, Dictionary<string, object> variables, string sourceLine );  
 }
 

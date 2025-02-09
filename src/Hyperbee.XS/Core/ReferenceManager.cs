@@ -1,14 +1,14 @@
-﻿using System.IO.Compression;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
-using System.Text.RegularExpressions;
 using NuGet.Common;
 using NuGet.Configuration;
-using NuGet.Packaging.Core;
+using NuGet.Packaging;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using System.Text.RegularExpressions;
+using NuGet.Packaging.Core;
 
 namespace Hyperbee.XS.Core;
 
@@ -16,9 +16,7 @@ public partial class ReferenceManager
 {
     private const string NuGetSource = "https://api.nuget.org/v3/index.json";
 
-    private readonly string _cachePath;
     private readonly string _globalPackagesFolder;
-
     private readonly XsAssemblyLoadContext _assemblyLoadContext = new();
 
     private readonly List<Assembly> _assemblyReferences =
@@ -33,35 +31,18 @@ public partial class ReferenceManager
     {
         var referenceManager = new ReferenceManager();
         referenceManager.AddReference( references );
-
         return referenceManager;
     }
 
-    public ReferenceManager( string cachePath = null )
+    public ReferenceManager()
     {
-        _cachePath = cachePath ?? Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget", "xs-packages" );
-
-        try
-        {
-            if ( !Directory.Exists( _cachePath ) )
-            {
-                Directory.CreateDirectory( _cachePath );
-            }
-        }
-        catch ( Exception ex )
-        {
-            throw new InvalidOperationException( $"Failed to create cache directory: {_cachePath}", ex );
-        }
-
         var settings = Settings.LoadDefaultSettings( null );
         _globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder( settings );
     }
 
     public IEnumerable<string> Packages => _loadedPackages;
-
     public IEnumerable<Assembly> PackageAssemblies => _assemblyLoadContext.Assemblies;
     public IEnumerable<Assembly> ReferenceAssemblies => _assemblyReferences;
-
     public IEnumerable<Assembly> Assemblies => _assemblyReferences.Concat( _assemblyLoadContext.Assemblies );
 
     public ReferenceManager AddReference( Assembly assembly )
@@ -90,21 +71,16 @@ public partial class ReferenceManager
         return _assemblyLoadContext.LoadFromAssemblyPath( assemblyPath );
     }
 
-    public Assembly LoadFromAssemblyName( AssemblyName assemblyName )
-    {
-        return _assemblyLoadContext.LoadFromAssemblyName( assemblyName );
-    }
-
-    public Assembly LoadFromStream( Stream assembly )
-    {
-        return _assemblyLoadContext.LoadFromStream( assembly );
-    }
-
-    public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = null )
+    public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = default, CancellationToken cancellation = default )
     {
         version ??= "latest";
-        var packagePath = await GetPackageAsync( packageId, version ).ConfigureAwait( false );
 
+        var packagePath = await GetPackageAsync( 
+            packageId, 
+            version, 
+            cancellation 
+        ).ConfigureAwait( false );
+        
         if ( packagePath == null )
             throw new InvalidOperationException( $"Failed to fetch package: {packageId}" );
 
@@ -112,129 +88,144 @@ public partial class ReferenceManager
         return LoadAssembliesFromPackage( packagePath );
     }
 
-    private async Task<string> GetPackageAsync( string packageId, string version, HashSet<string> processedPackages = null )
+    private async Task<string> GetPackageAsync( string packageId, string version, CancellationToken cancellation )
     {
-        processedPackages ??= [];
+        var packageResource = await GetPackageResourceAsync( cancellation )
+            .ConfigureAwait( false );
 
-        if ( !processedPackages.Add( $"{packageId}@{version}" ) )
-            return null;
+        var resolvedPackages = await ResolvePackageDependenciesAsync( 
+            packageId, 
+            version, 
+            cancellation 
+        ).ConfigureAwait( false );
 
-        var cachedPackage = FindCachedPackage( packageId, version );
-        if ( cachedPackage != null )
-            return cachedPackage;
+        string packageIdFolder = null;
 
-        var availableVersions = await FindAvailableVersionsAsync( packageId ).ConfigureAwait( false );
-        var selectedVersion = version == "latest"
-            ? availableVersions.Where( v => !v.IsPrerelease ).Max()
-            : NuGetVersion.Parse( version );
-
-        cachedPackage = FindCachedPackage( packageId, selectedVersion.ToString() );
-        if ( cachedPackage != null )
-            return cachedPackage;
-
-        var packageFolder = await DownloadPackage( packageId, selectedVersion ).ConfigureAwait( false );
-
-        var assemblies = LoadAssembliesFromPackage( packageFolder );
-        foreach ( var assembly in assemblies )
+        foreach ( var package in resolvedPackages )
         {
-            _assemblyLoadContext.LoadFromAssemblyPath( assembly.Location );
+            var packageFolder = Path.Combine( _globalPackagesFolder, package.Id.ToLower(), package.Version.ToString() );
+
+            if ( package.Id.Equals( packageId, StringComparison.OrdinalIgnoreCase ) )
+            {
+                packageIdFolder = packageFolder; 
+            }
+
+            if ( Directory.Exists( packageFolder ) )
+            {
+                continue;
+            }
+
+            var packagePath = await DownloadPackageAsync( 
+                packageResource, 
+                packageFolder, 
+                package, 
+                cancellation 
+            ).ConfigureAwait( false );
+
+            await ExtractPackageAsync( 
+                packagePath, 
+                cancellation 
+            ).ConfigureAwait( false );
         }
 
-        var dependencies = await GetPackageDependenciesAsync( packageId, selectedVersion ).ConfigureAwait( false );
-        foreach ( var dependency in dependencies )
-        {
-            await GetPackageAsync( dependency.Id, dependency.Version.ToNormalizedString(), processedPackages ).ConfigureAwait( false );
-        }
-
-        return packageFolder;
+        return packageIdFolder;
     }
 
-    private static async Task<List<PackageIdentity>> GetPackageDependenciesAsync( string packageId, NuGetVersion version )
+    private static async Task<FindPackageByIdResource> GetPackageResourceAsync( CancellationToken cancellation )
     {
         var repository = Repository.Factory.GetCoreV3( NuGetSource );
-        var metadataResource = await repository.GetResourceAsync<PackageMetadataResource>();
+        
+        return await repository.GetResourceAsync<FindPackageByIdResource>( cancellation )
+            .ConfigureAwait( false );
+    }
 
-        var metadata = await metadataResource.GetMetadataAsync( packageId, true, false, NullSourceCacheContext.Instance, NullLogger.Instance, CancellationToken.None );
-        var packageMetadata = metadata.FirstOrDefault( m => m.Identity.Version == version );
+    private static async Task<List<PackageIdentity>> ResolvePackageDependenciesAsync( string packageId, string version, CancellationToken cancellation )
+    {
+        var repository = Repository.Factory.GetCoreV3( NuGetSource );
+        
+        var metadataResource = await repository.GetResourceAsync<PackageMetadataResource>( cancellation )
+            .ConfigureAwait( false );
+
+        var versions = await metadataResource.GetMetadataAsync( 
+            packageId, 
+            true, 
+            false, 
+            NullSourceCacheContext.Instance, 
+            NullLogger.Instance, 
+            cancellation 
+        ).ConfigureAwait( false );
+
+        var packageMetadata = (version == "latest")
+            ? versions
+                .Where( m => !m.Identity.Version.IsPrerelease ) 
+                .MaxBy( m => m.Identity.Version ) 
+            : versions.FirstOrDefault( m => m.Identity.Version == NuGetVersion.Parse( version ) );
 
         if ( packageMetadata == null )
-            return [];
+            throw new InvalidOperationException( $"Package metadata not found for {packageId} ({version})" );
 
-        var dependencies = new List<PackageIdentity>();
+        var identities = new List<PackageIdentity> { packageMetadata.Identity };
 
         foreach ( var dependency in packageMetadata.DependencySets.SelectMany( ds => ds.Packages ) )
         {
-            // Only add direct dependencies, do not resolve sub-dependencies
             if ( dependency.VersionRange.MinVersion != null )
             {
-                dependencies.Add( new PackageIdentity( dependency.Id, dependency.VersionRange.MinVersion ) );
+                identities.Add( new PackageIdentity( dependency.Id, dependency.VersionRange.MinVersion ) );
             }
         }
 
-        return dependencies;
+        return identities;
     }
-
-    private string FindCachedPackage( string packageId, string version )
+    
+    private static async Task<string> DownloadPackageAsync( FindPackageByIdResource packageResource, string packageFolder, PackageIdentity package, CancellationToken cancellation )
     {
-        var globalPackageFolder = Path.Combine( _globalPackagesFolder, packageId.ToLower(), version );
-
-        if ( Directory.Exists( globalPackageFolder ) )
-            return globalPackageFolder;
-
-        var localCacheFolder = Path.Combine( _cachePath, packageId.ToLower(), version );
-
-        return Directory.Exists( localCacheFolder )
-            ? localCacheFolder
-            : null;
-    }
-
-    private static async Task<NuGetVersion[]> FindAvailableVersionsAsync( string packageId )
-    {
-        var providers = Repository.Provider.GetCoreV3();
-        var repository = new SourceRepository( new PackageSource( NuGetSource ), providers );
-        var metadataResource = await repository.GetResourceAsync<PackageMetadataResource>().ConfigureAwait( false );
-
-        var metadata = await metadataResource.GetMetadataAsync( packageId, true, false, NullSourceCacheContext.Instance, NullLogger.Instance, new CancellationToken() ).ConfigureAwait( false );
-        return metadata.Select( m => m.Identity.Version ).ToArray();
-    }
-
-    private async Task<string> DownloadPackage( string packageId, NuGetVersion version )
-    {
-        var repository = Repository.Factory.GetCoreV3( NuGetSource );
-        var packageResource = await repository.GetResourceAsync<FindPackageByIdResource>().ConfigureAwait( false );
-
-        var packageFolder = Path.Combine( _cachePath, packageId.ToLower(), version.ToString() );
         Directory.CreateDirectory( packageFolder );
 
-        var packagePath = Path.Combine( packageFolder, $"{packageId}.{version}.nupkg" );
+        var packagePath = Path.Combine( packageFolder, $"{package.Id}.{package.Version}.nupkg" );
 
-        if ( File.Exists( packagePath ) )
+        if ( !File.Exists( packagePath ) )
         {
-            return packageFolder;
+            await using var packageStream = File.Create( packagePath );
+            
+            await packageResource.CopyNupkgToStreamAsync( 
+                package.Id, 
+                package.Version, 
+                packageStream, 
+                NullSourceCacheContext.Instance, 
+                NullLogger.Instance, 
+                cancellation 
+            ).ConfigureAwait( false );
         }
 
-        var packageStream = File.Create( packagePath );
-        await using ( packageStream.ConfigureAwait( false ) )
-        {
-            await packageResource.CopyNupkgToStreamAsync( packageId, version, packageStream, NullSourceCacheContext.Instance, NullLogger.Instance, new CancellationToken() ).ConfigureAwait( false );
-        }
-
-        ExtractPackage( packagePath, packageFolder );
-        return packageFolder;
+        return packagePath;
     }
 
-    private static void ExtractPackage( string packagePath, string destinationFolder )
+    private static async Task ExtractPackageAsync( string packagePath, CancellationToken cancellation )
     {
-        if ( !File.Exists( packagePath ) )
-            throw new FileNotFoundException( $"Package file not found: {packagePath}" );
+        using var packageReader = new PackageArchiveReader( packagePath );
 
-        ZipFile.ExtractToDirectory( packagePath, destinationFolder, overwriteFiles: true );
+        var packageFolder = Path.GetDirectoryName( packagePath )!;
+        var packageFiles = await packageReader.GetFilesAsync( cancellation ).ConfigureAwait( false );
+
+        foreach ( var file in packageFiles )
+        {
+            var targetPath = Path.Combine( packageFolder, file );
+            var directory = Path.GetDirectoryName( targetPath );
+
+            if ( !string.IsNullOrEmpty( directory ) && !Directory.Exists( directory ) )
+            {
+                Directory.CreateDirectory( directory );
+            }
+
+            await using var fileStream = File.Create( targetPath );
+            await using var packageStream = packageReader.GetStream( file );
+            await packageStream.CopyToAsync( fileStream, cancellation ).ConfigureAwait( false );
+        }
     }
 
     private List<Assembly> LoadAssembliesFromPackage( string packageFolder )
     {
         var libPath = Path.Combine( packageFolder, "lib" );
-
         if ( !Directory.Exists( libPath ) )
             return [];
 
@@ -253,10 +244,9 @@ public partial class ReferenceManager
             return [];
 
         var assemblies = new List<Assembly>();
-
-        foreach ( var dll in Directory.GetFiles( selectedLibPath, "*.dll", SearchOption.AllDirectories ) )
+        foreach ( var assemblyPath in Directory.GetFiles( selectedLibPath, "*.dll", SearchOption.AllDirectories ) )
         {
-            var assembly = _assemblyLoadContext.LoadFromAssemblyPath( dll );
+            var assembly = _assemblyLoadContext.LoadFromAssemblyPath( assemblyPath );
             assemblies.Add( assembly );
         }
 
@@ -266,26 +256,19 @@ public partial class ReferenceManager
     private static string SelectBestMatchingFramework( List<string> availableFrameworks )
     {
         var currentRuntime = GetCurrentRuntimeVersion();
-
-        var bestMatch = availableFrameworks
+        return availableFrameworks
             .Where( v => v.StartsWith( currentRuntime ) )
             .OrderByDescending( v => v )
-            .FirstOrDefault();
-
-        return bestMatch ?? availableFrameworks.Last();
+            .FirstOrDefault() ?? availableFrameworks.Last();
     }
 
     private static string GetCurrentRuntimeVersion()
     {
         var framework = RuntimeInformation.FrameworkDescription;
         var match = NetVersionRegex().Match( framework );
-
-        if ( match.Success && int.TryParse( match.Groups[1].Value, out int version ) && version >= 8 )
-        {
-            return $"net{version}.0";
-        }
-
-        return "net8.0";
+        return match.Success && int.TryParse( match.Groups[1].Value, out int version ) && version >= 8
+            ? $"net{version}.0"
+            : "net8.0";
     }
 
     [GeneratedRegex( @"\.NET (\d+)" )]
@@ -297,12 +280,7 @@ public partial class ReferenceManager
 
         protected override Assembly Load( AssemblyName assemblyName )
         {
-            var existingAssembly = Default.Assemblies
-                .FirstOrDefault( a => a.GetName().FullName == assemblyName.FullName );
-
-            return existingAssembly != null
-                ? existingAssembly
-                : null; // Delegate back to default Load behavior (fallback)
+            return Default.Assemblies.FirstOrDefault( a => a.GetName().FullName == assemblyName.FullName );
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Hyperbee.XS;
+﻿namespace Hyperbee.XS.Core;
 
 public static class BufferExtensions
 {

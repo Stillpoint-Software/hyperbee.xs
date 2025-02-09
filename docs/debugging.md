@@ -8,12 +8,10 @@ nav_order: 4
 
 XS supports debug expressions (breakpoints), and statement debugging.
 
-## Description
-
 Debug expressions are used to set breakpoints directly into your scripts. They can be used to conditionally or unconditionally debug your code.
 You can also enable statement debugging in the XS configuration to enable statement debugging. In this case, the debugger will be called for every statement in the script.
 
-## Syntax
+## Breakpoints
 
 ```xs
 debug(expression); // Conditional debug breakpoint
@@ -33,17 +31,25 @@ debug();        // Unconditional debug breakpoint
 ### Example `XsConfig` Setup
 
 ```csharp
-var config = new XsConfig
+var debugInfo = new XsDebugInfo
 {
-    Debugger = (line, column, variables) =>
+    Debugger = (line, column, variables, message) =>
     {
-        Console.WriteLine($"Debugging at Line: {line}, Column: {column}");
+        Console.WriteLine($"Debugging at Line: {line}, Column: {column} - {message}");
+
         foreach (var kvp in variables)
         {
             Console.WriteLine($"Variable {kvp.Key} = {kvp.Value}");
         }
     }
 };
+
+var expression = Xs.Parse( script, debugInfo );
+
+var lambda = Expression.Lambda<Func<int>>( expression );
+var compiled = lambda.Compile();
+var result = compiled();
+
 ```
 
 ### Debugging Syntax
