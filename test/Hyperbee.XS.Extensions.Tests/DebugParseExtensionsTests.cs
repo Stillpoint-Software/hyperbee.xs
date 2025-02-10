@@ -77,18 +77,21 @@ public class DebugParseExtensionTests
         var calc = (int a, int b) => a * b;
         results.Add( calc(6, 7) );
 
+        debug();
+        
         results;
         """;
 
-        var debugInfo = new XsDebugInfo()
+        var debugger = new XsDebugger()
         {
-            Debugger = ( l, c, v, m ) =>
+            BreakMode = BreakMode.Statements,
+            Callback = d =>
             {
-                Console.WriteLine( $"Line: {l}, Column: {c}, Variables: {v}, Message: {m}" );
+                Console.WriteLine( $"Line: {d.Line}, Column: {d.Column}, Variables: {d.Variables}, Text: {d.SourceLine}" );
             }
         };
 
-        var expression = Xs.Parse( script, debugInfo );
+        var expression = Xs.Parse( script, debugger );
 
         var code = expression.ToExpressionString();
 

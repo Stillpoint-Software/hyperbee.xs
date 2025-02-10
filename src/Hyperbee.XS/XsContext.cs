@@ -17,17 +17,17 @@ public class XsContext : ParseContext
 
     public bool RequireTermination { get; set; } = true;
 
-    public XsDebugInfo DebugInfo { get; init; }
+    public XsDebugger Debugger { get; init; }
 
 #if DEBUG
     public Stack<object> ParserStack { get; } = new();
 #endif
 
-    public XsContext( XsConfig config, XsDebugInfo debugInfo, Scanner scanner, ParseScope scope = null, bool useNewLines = false )
+    public XsContext( XsConfig config, XsDebugger debugger, Scanner scanner, ParseScope scope = null, bool useNewLines = false )
         : base( scanner, useNewLines )
     {
         Resolver = config.Resolver.Value;
-        DebugInfo = debugInfo;
+        Debugger = debugger;
         Scope = scope ?? new ParseScope();
         InitialScope = scope == null;
 

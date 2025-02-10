@@ -28,13 +28,10 @@ public partial class XsParser
 
     // Parse
 
-    public Expression Parse( string script, XsDebugInfo debugInfo = null, ParseScope scope = null )
+    public Expression Parse( string script, XsDebugger debugger = null, ParseScope scope = null )
     {
-        if ( debugInfo != null )
-            debugInfo.Source = script;
-
         var scanner = new Scanner( script );
-        var context = new XsContext( _config, debugInfo, scanner, scope ) { WhiteSpaceParser = WhitespaceOrNewLineOrComment() };
+        var context = new XsContext( _config, debugger, scanner, scope ) { WhiteSpaceParser = WhitespaceOrNewLineOrComment() };
 
         try
         {

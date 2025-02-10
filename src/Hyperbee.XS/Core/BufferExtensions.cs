@@ -1,46 +1,49 @@
 ﻿namespace Hyperbee.XS.Core;
 
-public static class BufferExtensions
+public static class BufferHelper
 {
-    public static string GetLine( this string buffer, int line, int column, bool showCaret = false )
+    public static ReadOnlySpan<char> GetLine( ReadOnlySpan<char> buffer, int offset )
     {
-        if ( string.IsNullOrEmpty( buffer ) || line <= 0 )
-            return string.Empty;
-
-        var currentLine = 1;
-        var lineStart = 0;
-        var span = buffer.AsSpan();
-
-        for ( var i = 0; i < span.Length; i++ )
-        {
-            if ( span[i] != '\r' && span[i] != '\n' )
-                continue;
-
-            // Handle line endings (normalize for \r\n, \n, or \r)
-            if ( span[i] == '\r' && i + 1 < span.Length && span[i + 1] == '\n' )
-                i++;
-
-            currentLine++;
-
-            if ( currentLine > line )
-                return FormatLine( span[lineStart..i], line, column, showCaret );
-
-            lineStart = i + 1;
-        }
-
-        return currentLine != line
-            ? string.Empty // Line number is out of range
-            : FormatLine( span[lineStart..], line, column, showCaret );
+        return GetLine( buffer, offset, out _ );
     }
 
-    private static string FormatLine( ReadOnlySpan<char> lineSpan, int line, int column, bool showCaret )
+    public static ReadOnlySpan<char> GetLine( ReadOnlySpan<char> buffer, int offset, out int caret )
     {
-        var lineText = lineSpan.ToString();
+        caret = 0;
 
-        if ( !showCaret || column <= 0 || column > lineSpan.Length + 1 )
-            return lineText;
+        if ( (uint) offset >= (uint) buffer.Length )
+        {
+            return ReadOnlySpan<char>.Empty;
+        }
 
-        var caretLine = new string( ' ', column - 1 ) + "^";
-        return $"(Line: {line}, Column: {column})\n{lineText}\n{caretLine}";
+        // If offset is on a newline character, move left
+        if ( buffer[offset] == '\r' || buffer[offset] == '\n' )
+        {
+            if ( offset > 0 && (buffer[offset - 1] == '\r' || buffer[offset - 1] == '\n') )
+            {
+                return ReadOnlySpan<char>.Empty;
+            }
+
+            offset--;
+        }
+
+        // Find the left boundary
+        var start = offset;
+        while ( start > 0 && buffer[start - 1] != '\r' && buffer[start - 1] != '\n' )
+        {
+            start--;
+        }
+
+        // Find the right boundary
+        int end = offset;
+        while ( end < buffer.Length && buffer[end] != '\r' && buffer[end] != '\n' )
+        {
+            end++;
+        }
+
+        // Compute caret position relative to the extracted line
+        caret = offset - start;
+
+        return buffer.Slice( start, end - start );
     }
 }

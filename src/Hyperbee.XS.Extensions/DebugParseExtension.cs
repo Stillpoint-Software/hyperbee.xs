@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.ObjectModel;
+using System.Linq.Expressions;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Parsers;
@@ -28,24 +29,23 @@ public class DebugParseExtension : IParseExtension
                 if ( context is not XsContext xsContext )
                     throw new InvalidOperationException( $"Context must be of type {nameof( XsContext )}." );
 
-                if ( xsContext.DebugInfo == null )
+                if ( xsContext.Debugger == null || xsContext.Debugger.BreakMode != BreakMode.Call )
                     return Empty();
 
-                var span = context.Scanner.Cursor.Position;
-                var debugInfo = xsContext.DebugInfo;
-                var debuggerCallback = debugInfo.Debugger;
+                var position = xsContext.Scanner.Cursor.Position;
+                var tryBreak = xsContext.Debugger.TryBreak;
 
-                var target = debuggerCallback.Target != null
-                    ? Constant( debuggerCallback.Target )
+                var target = tryBreak.Target != null
+                    ? Constant( tryBreak.Target )
                     : null;
 
                 var debugExpression = Call(
                     target,
-                    debuggerCallback.Method,
-                    Constant( span.Line ),
-                    Constant( span.Column ),
+                    tryBreak.Method,
+                    Constant( position.Line ),
+                    Constant( position.Column ),
                     XsParsersHelper.CaptureVariables( xsContext.Scope.Variables ),
-                    Constant( context.Scanner.Buffer.GetLine( span.Line, span.Column, true ) )
+                    Constant( BufferHelper.GetLine( xsContext.Scanner.Buffer, position.Offset ).ToString() )
                 );
 
                 return (condition != null)

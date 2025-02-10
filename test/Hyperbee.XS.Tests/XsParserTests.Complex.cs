@@ -98,11 +98,11 @@ public class XsParserComplexTests
         results;
         """;
 
-        var debugInfo = new XsDebugInfo()
+        var debugger = new XsDebugger()
         {
-            Debugger = ( l, c, v, m ) =>
+            Callback = x =>
             {
-                Console.WriteLine( $"Line: {l}, Column: {c}, Variables: {v}, Message: {m}" );
+                Console.WriteLine( $"Line: {x.Line}, Column: {x.Column}, Variables: {x.Variables}, Text: {x.SourceLine}" );
             },
             Breakpoints = [
                 new( 1 ),                // all of line 1   
@@ -110,7 +110,7 @@ public class XsParserComplexTests
             ]
         };
 
-        var expression = Xs.Parse( script, debugInfo );
+        var expression = Xs.Parse( script, debugger );
 
         var code = expression.ToExpressionString();
 

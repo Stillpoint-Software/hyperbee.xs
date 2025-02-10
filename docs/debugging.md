@@ -18,54 +18,48 @@ debug(expression); // Conditional debug breakpoint
 debug();           // Unconditional debug breakpoint
 ```
 
-## Examples
+## Example Usage 1
 
+This example sets up the debugger to break on every `debug()` call in the script.
+
+### Debug Breakpoint Calls
 ```xs
 var x = 42;
 debug(x == 42); // Conditional debug breakpoint
 debug();        // Unconditional debug breakpoint
 ```
 
-## Detailed Example
-
-### Example `XsConfig` Setup
+### `XsDebugger` Setup
 
 ```csharp
-var debugInfo = new XsDebugInfo
+var debugger = new XsDebugger()
 {
-    Debugger = (line, column, variables, message) =>
+    BreakMode = BreakMode.Call,  // DEBUG ON `debug()` CALLS
+    Callback = x =>
     {
-        Console.WriteLine($"Debugging at Line: {line}, Column: {column} - {message}");
+        Console.WriteLine($"Debugging at Line: {x.Line}, Column: {x.Column} - {x.SourceLine}");
 
-        foreach (var kvp in variables)
+        foreach (var kvp in x.Variables)
         {
             Console.WriteLine($"Variable {kvp.Key} = {kvp.Value}");
         }
     }
 };
 
-var expression = Xs.Parse( script, debugInfo );
+var expression = Xs.Parse( script, debugger );
 
 var lambda = Expression.Lambda<Func<int>>( expression );
 var compiled = lambda.Compile();
 var result = compiled();
-
 ```
 
-### Debugging Syntax
+## Example Usage 2
 
-```xs
-var x = 42;
-debug(x == 42); // Conditional debug breakpoint
-debug();        // Unconditional debug breakpoint
-```
+This example sets up the debugger to break on every statement in the script.
 
-### Complex Debugging Example
-
+### Debug Statement Stepping
 ```xs
 var results = new List<int>(5);
-
-debug(); 
 
 var c = 0;
 if (1 + 1 == 2)
@@ -83,6 +77,29 @@ else
 }
 results.Add(c);
 
-
 results;
+```
+
+### `XsDebugger` Setup
+
+```csharp
+var debugger = new XsDebugger()
+{
+    BreakMode = BreakMode.Statements, // DEBUG STATEMENTS
+    Callback = x =>
+    {
+        Console.WriteLine($"Debugging at Line: {x.Line}, Column: {x.Column} - {x.SourceLine}");
+
+        foreach (var kvp in x.Variables)
+        {
+            Console.WriteLine($"Variable {kvp.Key} = {kvp.Value}");
+        }
+    }
+};
+
+var expression = Xs.Parse( script, debugger );
+
+var lambda = Expression.Lambda<Func<int>>( expression );
+var compiled = lambda.Compile();
+var result = compiled();
 ```
