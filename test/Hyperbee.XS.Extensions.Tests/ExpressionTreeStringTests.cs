@@ -341,6 +341,33 @@ public class ExpressionTreeStringTests
         await AssertScriptValue( code, result );
     }
 
+    [TestMethod]
+    public async Task ToXsString_ShouldCreate_WithExtensions()
+    {
+        const string script =
+            """
+            package Humanizer.Core;
+            using Humanizer;
+            
+            var number = 123;
+            number.ToWords();
+            """;
+
+        var expression = Xs.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
+
+        WriteResult( script, newScript );
+
+        var newExpression = Xs.Parse( newScript );
+        var lambda = Expression.Lambda<Func<string>>( newExpression );
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        var code = expression.ToExpressionString( Config );
+
+        await AssertScriptValue( code, result );
+    }
+
     public static async Task AssertScriptValue<T>( string code, T result )
     {
         var scriptOptions = ScriptOptions.Default.WithReferences(

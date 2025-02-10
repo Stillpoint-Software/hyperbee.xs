@@ -163,20 +163,19 @@ XS supports `debug();` statements and line level debugging, allowing users to cr
 This feature automates a process that is laborious when using manual expression trees.
 
 ```
-    var debugInfo = new XsDebugInfo()
+var debugger = new XsDebugger()
+{
+    Handler = d =>
     {
-        Debugger = ( l, c, v, m ) =>
-        {
-            Console.WriteLine( $"Line: {l}, Column: {c}, Variables: {v}, Message: {m}" );
-            Debugger.Break();
-        }
-    };
+        Console.WriteLine( $"Line: {d.Line}, Column: {d.Column}, Variables: {d.Variables}, Text: {d.SourceLine}" );
+    }
+};
 
-    var expression = Xs.Parse( script, debugInfo );
+var expression = Xs.Parse( script, debugger );
 
-    var lambda = Expression.Lambda<Func<List<int>>>( expression );
-    var compiled = lambda.Compile();
-    var result = compiled();
+var lambda = Expression.Lambda<Func<List<int>>>( expression );
+var compiled = lambda.Compile();
+var result = compiled();
 ```
 
 #### **Performance**:

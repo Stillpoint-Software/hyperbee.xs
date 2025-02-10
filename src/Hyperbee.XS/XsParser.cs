@@ -59,7 +59,7 @@ public partial class XsParser
         // Directives
 
         var directives = KeywordLookup<Expression>( "keyword-directives" )
-            .Add( UsingNamespaceParser() )
+            .Add( UsingDirectiveParser() )
             .Add( config.Extensions.Statements( ExtensionType.Directive, expression, statement ) );
 
         // Compose Statements
@@ -84,7 +84,7 @@ public partial class XsParser
         // Create the final parser
 
         var xs = ZeroOrMany( directives )
-            .SkipAnd( ZeroOrMany( statement ) );
+            .And( ZeroOrMany( statement ) );
 
         return SynthesizeMethod( xs );
     }
@@ -277,25 +277,25 @@ public partial class XsParser
         return ZeroOrOne( Separated( Terms.Char( ',' ), TypeRuntime() ), [] );
     }
 
-    private static KeywordParserPair<Expression> UsingNamespaceParser()
+    private static KeywordParserPair<Expression> UsingDirectiveParser()
     {
         return new(
             "using",
             Terms.NamespaceIdentifier().ElseInvalidIdentifier()
                 .AndSkip( Terms.Char( ';' ) )
-                .Then<Expression>( ( ctx, parts ) =>
+                .Then( ( ctx, parts ) =>
                 {
                     var ns = parts.ToString();
 
                     if ( ctx is XsContext xsContext )
                         xsContext.Namespaces.Add( ns );
 
-                    return default;
+                    return new DirectiveExpression( $"using {ns}" ) as Expression;
                 } )
         );
     }
 
-    private static Parser<Expression> SynthesizeMethod( SequenceSkipAnd<IReadOnlyList<Expression>, IReadOnlyList<Expression>> parser )
+    private static Parser<Expression> SynthesizeMethod( Sequence<IReadOnlyList<Expression>, IReadOnlyList<Expression>> parser )
     {
         return Bounded(
             static ctx =>
@@ -303,7 +303,10 @@ public partial class XsParser
                 if ( ctx is not XsContext xsContext || xsContext.InitialScope )
                     ctx.EnterScope( FrameType.Method );
             },
-            parser.Then( ConvertToSingleExpression ),
+            parser.Then( (ctx, parts ) => {
+                var (directives, body) = parts;
+                return ConvertToSingleExpression ( ctx, [..directives, ..body] );
+            } ),
             static ctx =>
             {
                 if ( ctx is not XsContext xsContext || xsContext.InitialScope )

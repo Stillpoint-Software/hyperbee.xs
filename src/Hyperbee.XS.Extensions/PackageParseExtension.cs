@@ -1,14 +1,17 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.ObjectModel;
+using System.Linq.Expressions;
+using Hyperbee.Expressions;
 using Hyperbee.Xs.Extensions.Core;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Parsers;
+using Hyperbee.XS.Core.Writer;
 using Parlot.Fluent;
 using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class PackageParseExtension : IParseExtension
+public class PackageParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Directive;
 
@@ -38,8 +41,32 @@ public class PackageParseExtension : IParseExtension
                     resolver.RegisterExtensionMethods( assemblies );
                 } );
 
-                return Expression.Empty();
+                return XsExpressionExtensions.Directive( $"package {packageId}{(!string.IsNullOrWhiteSpace(version) ? $":{version}" : string.Empty)}" );
             } );
+    }
+
+    public bool CanWrite( Expression node )
+    {
+        return node is DirectiveExpression;
+    }
+
+    public void WriteExpression( Expression node, ExpressionWriterContext context )
+    {
+        if ( node is not DirectiveExpression directiveExpression )
+            return;
+
+        using var writer = context.EnterExpression( "Hyperbee.XS.XsExpressionExtensions.Directive", true, false );
+        writer.Write( $"\"{directiveExpression.Directive}\"", indent: true );
+    }
+
+    public void WriteExpression( Expression node, XsWriterContext context )
+    {
+        if ( node is not DirectiveExpression directiveExpression )
+            return;
+
+        using var writer = context.GetWriter();
+
+        writer.Write( directiveExpression.Directive );
     }
 }
 

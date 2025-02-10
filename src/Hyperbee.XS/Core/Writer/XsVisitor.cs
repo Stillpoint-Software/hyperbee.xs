@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Hyperbee.XS.Core.Writer;
 
@@ -420,7 +422,13 @@ internal class XsVisitor( XsWriterContext context ) : global::System.Linq.Expres
     {
         using var writer = context.GetWriter();
 
-        if ( node.Object != null )
+        var startArgument = 0;
+        if( node.Method.IsDefined( typeof( ExtensionAttribute ), inherit: false ) )
+        {
+            writer.WriteExpression( node.Arguments[0] );
+            startArgument = 1;
+        }
+        else if ( node.Object != null )
         {
             writer.WriteExpression( node.Object );
         }
@@ -432,16 +440,25 @@ internal class XsVisitor( XsWriterContext context ) : global::System.Linq.Expres
         writer.Write( "." );
         writer.WriteMethodInfo( node.Method );
 
-
         writer.Write( "(" );
 
         var count = node.Arguments.Count;
 
-        for ( var i = 0; i < count; i++ )
+        for ( var i = startArgument; i < count; i++ )
         {
             var argument = node.Arguments[i];
 
-            writer.WriteExpression( argument );
+            if(argument is ConstantExpression constValue && constValue.Value == null )
+            {
+                writer.Write( "default(" );
+                writer.WriteType( constValue.Type );
+                writer.Write( ")" );
+            }
+            else
+            {
+                writer.WriteExpression( argument );
+            }
+
             if ( i < count - 1 )
                 writer.Write( "," );
         }

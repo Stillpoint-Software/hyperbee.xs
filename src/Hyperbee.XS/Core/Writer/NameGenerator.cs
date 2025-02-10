@@ -13,6 +13,7 @@ internal static class NameGenerator
 
         var uniqueName = baseName;
         var counter = 1;
+
         while ( lookup.ContainsValue( uniqueName ) || Keywords.IsKeyword( uniqueName ) )
         {
             uniqueName = $"{baseName}{counter}";
@@ -22,64 +23,76 @@ internal static class NameGenerator
         return uniqueName;
     }
 
-    private static string InferName( Type type )
+    private static string InferName(Type type)
     {
-        var typeName = type.Name;
+        var typeName = type.Name.AsSpan();
+        var result = new char[typeName.Length];
+        var resultIndex = 0;
 
-        if ( type.IsGenericType )
+        var start = 0;
+        var end = typeName.Length;
+
+        if (char.IsLower(typeName[0]))
         {
-            var backtickIndex = typeName.IndexOf( '`' );
-            if ( backtickIndex > 0 )
+            result[resultIndex++] = char.ToLowerInvariant(typeName[0]);
+            start = 1;
+        }
+
+        for (var i = start + 1; i < end; i++)
+        {
+            if (typeName[i] == '`')
             {
-                typeName = typeName[..backtickIndex];
+                end = i;
+                break;
+            }
+
+            if (char.IsLower(typeName[i - 1]) && char.IsUpper(typeName[i]))
+            {
+                AppendTypePart(result, ref resultIndex, typeName, start, i);
+                start = i;
             }
         }
 
-        var parts = SplitTypeNameByCasing( typeName );
-        var shortParts = parts.Select( part => part.Length > 3 ? part[..3] : part );
-
-        return string.Join( string.Empty, shortParts )
-            .Insert( 0, shortParts.First()[..1].ToLowerInvariant() )
-            .Remove( 1, 1 );
-
-        static List<string> SplitTypeNameByCasing( ReadOnlySpan<char> typeName )
+        if (start < typeName.Length)
         {
-            var parts = new List<string>();
-            var start = 0;
+            AppendTypePart(result, ref resultIndex, typeName, start, end);
+        }
 
-            for ( var i = 1; i < typeName.Length; i++ )
+        return new string(result, 0, resultIndex);
+
+        static void AppendTypePart(char[] result, ref int resultIndex, ReadOnlySpan<char> typeName, int start, int end)
+        {
+            var length = end - start;
+            var shortPart = length > 3
+                ? typeName.Slice(start, 3)
+                : typeName.Slice(start, length);
+
+            foreach (var ch in shortPart)
             {
-                if ( char.IsLower( typeName[i - 1] ) && char.IsUpper( typeName[i] ) )
-                {
-                    parts.Add( typeName[start..i].ToString() );
-                    start = i;
-                }
+                result[resultIndex++] = ch;
             }
-
-            if ( start < typeName.Length )
-            {
-                parts.Add( typeName[start..].ToString() );
-            }
-
-            return parts;
         }
     }
-
 }
 
 internal static class Keywords
 {
-    private static readonly HashSet<string> _keywords =
-    [
-        "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue",
-        "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally",
-        "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock",
-        "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private", "protected",
-        "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string",
-        "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort",
-        "using", "virtual", "void", "volatile", "while"
-    ];
+    private static readonly HashSet<string> _keywords;
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    internal static bool IsKeyword( string name ) => _keywords.Contains( name );
+    static Keywords()
+    {
+        _keywords = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue",
+            "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally",
+            "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock",
+            "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private", "protected",
+            "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string",
+            "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort",
+            "using", "virtual", "void", "volatile", "while"
+        };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsKeyword(string name) => _keywords.Contains(name);
 }

@@ -100,9 +100,9 @@ public class XsParserComplexTests
 
         var debugger = new XsDebugger()
         {
-            Callback = x =>
+            Handler = d =>
             {
-                Console.WriteLine( $"Line: {x.Line}, Column: {x.Column}, Variables: {x.Variables}, Text: {x.SourceLine}" );
+                Console.WriteLine( $"Line: {d.Line}, Column: {d.Column}, Variables: {d.Variables}, Text: {d.SourceLine}" );
             },
             Breakpoints = [
                 new( 1 ),                // all of line 1   

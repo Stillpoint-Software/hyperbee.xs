@@ -13,6 +13,8 @@ nav_order: 11
 var isPositive = +x;
 var isNegative = -x;
 var isNot = !x;
+var isTrue = ?(1 == 1);
+var isFalse = !?(true);
 ```
 
 ## Binary Operators

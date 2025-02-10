@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Hyperbee.XS.Core;
 
 namespace Hyperbee.XS;
 
@@ -22,13 +21,13 @@ public struct DebugBreak
 public class XsDebugger
 {
     public List<Breakpoint> Breakpoints { get; set; }
-    public DebuggerCallback Callback { private get; init; }
+    public DebuggerCallback Handler { private get; init; }
 
     public BreakMode BreakMode { get; set; } = BreakMode.Call;
 
     public bool TryBreak( int line, int column, Dictionary<string, object> variables, string sourceLine )
     {
-        if ( BreakMode == BreakMode.None || Callback == null )
+        if ( BreakMode == BreakMode.None || Handler == null )
             return false;
 
         if ( Breakpoints != null && !AnyBreakpoint( line, column ) )
@@ -43,7 +42,7 @@ public class XsDebugger
             SourceLine = sourceLine
         };
 
-        Callback( debugBreak );
+        Handler( debugBreak );
         return true;
     }
 

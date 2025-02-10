@@ -9,32 +9,33 @@
     <Import_RootNamespace>docs</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)language\async-await.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\casting.md" />
     <None Include="$(MSBuildThisFileDirectory)language\conditionals.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\loop.md" />
-    <None Include="$(MSBuildThisFileDirectory)debugging.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\package-directive.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\tuples.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\using-directive.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\variables.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\language.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\while.md" />
+    <None Include="$(MSBuildThisFileDirectory)extensions.md" />
     <None Include="$(MSBuildThisFileDirectory)language\for.md" />
     <None Include="$(MSBuildThisFileDirectory)language\foreach.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\switch.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\try-catch-finally.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\using-statement.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\async-await.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\string-interpolation.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\operators.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\casting.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\method-calls.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\lambdas.md" />
     <None Include="$(MSBuildThisFileDirectory)language\generics.md" />
-    <None Include="$(MSBuildThisFileDirectory)examples.md" />
-    <None Include="$(MSBuildThisFileDirectory)language\type-system.md" />
-    <None Include="$(MSBuildThisFileDirectory)extensions.md" />
     <None Include="$(MSBuildThisFileDirectory)grammar.md" />
     <None Include="$(MSBuildThisFileDirectory)index.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\lambdas.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\language.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\loop.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\method-calls.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\operators.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\package-directive.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\string-interpolation.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\switch.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\try-catch-finally.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\tuples.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\type-system.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\using-directive.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\using-statement.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\variables.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\while.md" />
     <None Include="$(MSBuildThisFileDirectory)_config.yml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)language\" />
   </ItemGroup>
 </Project>

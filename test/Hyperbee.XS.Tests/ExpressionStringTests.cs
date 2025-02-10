@@ -528,11 +528,11 @@ public class ExpressionStringTests
 
     public async Task AssertScriptValue<T>( string code, T result )
     {
-        var name = typeof( T ).Name;
+        var typeName = typeof( T ).Name;
 
         var scriptResult = await CSharpScript.EvaluateAsync<T>(
             code +
-            $"var lambda = Expression.Lambda<Func<{name}>>( expression );" +
+            $"var lambda = Expression.Lambda<Func<{typeName}>>( expression );" +
             "var compiled = lambda.Compile();" +
             "return compiled();", ScriptOptions );
 

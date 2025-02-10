@@ -85,7 +85,7 @@ public class DebugParseExtensionTests
         var debugger = new XsDebugger()
         {
             BreakMode = BreakMode.Statements,
-            Callback = d =>
+            Handler = d =>
             {
                 Console.WriteLine( $"Line: {d.Line}, Column: {d.Column}, Variables: {d.Variables}, Text: {d.SourceLine}" );
             }
