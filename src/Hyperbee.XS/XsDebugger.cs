@@ -7,7 +7,7 @@ public enum BreakMode
 {
     None,
     Call, // debug()
-    Statements 
+    Statements
 }
 
 public struct DebugBreak
@@ -16,7 +16,7 @@ public struct DebugBreak
     public int Line { get; init; }
     public int Column { get; init; }
     public string SourceLine { get; init; }
-    public ReadOnlyDictionary<string,object> Variables { get; init; }
+    public ReadOnlyDictionary<string, object> Variables { get; init; }
 }
 
 public class XsDebugger
@@ -59,6 +59,6 @@ public class XsDebugger
         internal bool Contain( int column ) => column >= Start && column <= End;
     }
 
-    public delegate void DebuggerCallback( DebugBreak debugBreak );  
+    public delegate void DebuggerCallback( DebugBreak debugBreak );
 }
 
