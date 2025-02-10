@@ -5,7 +5,7 @@ parent: Language
 nav_order: 20
 ---
 
-## Description
+# Variables
 
 Variables in XS are used to store data that can be referenced and manipulated in a program. 
 In XS, variables are declared using the `var` keyword.

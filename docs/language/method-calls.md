@@ -5,7 +5,7 @@ parent: Language
 nav_order: 10
 ---
 
-## Description
+# Method Calls
 
 Method calls are used to invoke methods on objects. You can pass arguments to the method and receive a return value.
 

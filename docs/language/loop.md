@@ -5,7 +5,7 @@ parent: Language
 nav_order: 9
 ---
 
-## Description
+# Loop
 
 The `loop` construct is used to create an infinite loop that can be terminated using a `break` statement.
 

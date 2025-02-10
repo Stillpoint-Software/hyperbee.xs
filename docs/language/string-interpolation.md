@@ -7,10 +7,6 @@ nav_order: 13
 
 # String Interpolation
 
-String interpolation in XS allows you to embed expressions within string literals.
-
-## Description
-
 String interpolation is a way to construct strings by embedding expressions within string literals. XS uses backtick-delimited strings for interpolation.
 
 ## Syntax

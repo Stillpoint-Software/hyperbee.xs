@@ -5,7 +5,7 @@ parent: Language
 nav_order: 3
 ---
 
-## Description
+# Casting
 
 Casting is used to convert a value from one type to another. XS supports direct casting, type checking, and safe casting.
 

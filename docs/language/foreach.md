@@ -5,7 +5,7 @@ parent: Language
 nav_order: 6
 ---
 
-## Description
+# Foreach Loop
 
 The `foreach` loop is used to iterate over a collection and execute a block of code for each item. This construct requires the `Hyperbee.XS.Extensions` package.
 

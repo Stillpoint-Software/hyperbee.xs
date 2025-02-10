@@ -5,7 +5,7 @@ parent: Language
 nav_order: 21
 ---
 
-## Description
+# While Loop
 
 The `while` loop is used to repeat a block of code while a specified condition is true. This construct requires the `Hyperbee.XS.Extensions` package.
 

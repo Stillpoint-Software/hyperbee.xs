@@ -5,7 +5,7 @@ parent: Language
 nav_order: 7
 ---
 
-## Generics
+# Generics
 
 Generics in XS allow you to define classes, methods, and data structures with a placeholder for the type. This enables you to create reusable and type-safe code components.
 

@@ -5,7 +5,7 @@ parent: Language
 nav_order: 8
 ---
 
-## Description
+# Lambdas
 
 Lambdas are anonymous functions that can be used to create inline functions. They are useful for short, simple functions.
 

@@ -5,7 +5,7 @@ parent: Language
 nav_order: 15
 ---
 
-## Description
+# Try-Catch-Finally
 
 The `try` block contains code that may throw an exception. The `catch` block contains code that handles the exception if one is thrown.
 The `finally` block contains code that is always executed after the `try` block, regardless of whether an exception was thrown.

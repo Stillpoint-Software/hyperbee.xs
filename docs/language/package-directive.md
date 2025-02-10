@@ -5,7 +5,7 @@ parent: Language
 nav_order: 12
 ---
 
-## Description
+# Package
 
 The `package` directive references, or downloads, a nuget package, allowing you to use its types and methods in your code. 
 This construct requires the `Hyperbee.XS.Extensions` package.

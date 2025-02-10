@@ -5,7 +5,7 @@ parent: Language
 nav_order: 14
 ---
 
-## Description
+# Switch
 
 The `switch` statement evaluates an expression and executes the corresponding case block based on the value of the expression.
 
