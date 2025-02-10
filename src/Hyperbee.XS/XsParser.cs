@@ -303,9 +303,10 @@ public partial class XsParser
                 if ( ctx is not XsContext xsContext || xsContext.InitialScope )
                     ctx.EnterScope( FrameType.Method );
             },
-            parser.Then( (ctx, parts ) => {
+            parser.Then( ( ctx, parts ) =>
+            {
                 var (directives, body) = parts;
-                return ConvertToSingleExpression ( ctx, [..directives, ..body] );
+                return ConvertToSingleExpression( ctx, [.. directives, .. body] );
             } ),
             static ctx =>
             {

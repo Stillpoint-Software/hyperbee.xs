@@ -41,7 +41,7 @@ public class PackageParseExtension : IParseExtension, IExpressionWriter, IXsWrit
                     resolver.RegisterExtensionMethods( assemblies );
                 } );
 
-                return XsExpressionExtensions.Directive( $"package {packageId}{(!string.IsNullOrWhiteSpace(version) ? $":{version}" : string.Empty)}" );
+                return XsExpressionExtensions.Directive( $"package {packageId}{(!string.IsNullOrWhiteSpace( version ) ? $":{version}" : string.Empty)}" );
             } );
     }
 

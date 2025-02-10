@@ -423,7 +423,7 @@ internal class XsVisitor( XsWriterContext context ) : global::System.Linq.Expres
         using var writer = context.GetWriter();
 
         var startArgument = 0;
-        if( node.Method.IsDefined( typeof( ExtensionAttribute ), inherit: false ) )
+        if ( node.Method.IsDefined( typeof( ExtensionAttribute ), inherit: false ) )
         {
             writer.WriteExpression( node.Arguments[0] );
             startArgument = 1;
@@ -448,7 +448,7 @@ internal class XsVisitor( XsWriterContext context ) : global::System.Linq.Expres
         {
             var argument = node.Arguments[i];
 
-            if(argument is ConstantExpression constValue && constValue.Value == null )
+            if ( argument is ConstantExpression constValue && constValue.Value == null )
             {
                 writer.Write( "default(" );
                 writer.WriteType( constValue.Type );

@@ -23,7 +23,7 @@ internal static class NameGenerator
         return uniqueName;
     }
 
-    private static string InferName(Type type)
+    private static string InferName( Type type )
     {
         var typeName = type.Name.AsSpan();
         var result = new char[typeName.Length];
@@ -32,42 +32,42 @@ internal static class NameGenerator
         var start = 0;
         var end = typeName.Length;
 
-        if (char.IsLower(typeName[0]))
+        if ( char.IsLower( typeName[0] ) )
         {
-            result[resultIndex++] = char.ToLowerInvariant(typeName[0]);
+            result[resultIndex++] = char.ToLowerInvariant( typeName[0] );
             start = 1;
         }
 
-        for (var i = start + 1; i < end; i++)
+        for ( var i = start + 1; i < end; i++ )
         {
-            if (typeName[i] == '`')
+            if ( typeName[i] == '`' )
             {
                 end = i;
                 break;
             }
 
-            if (char.IsLower(typeName[i - 1]) && char.IsUpper(typeName[i]))
+            if ( char.IsLower( typeName[i - 1] ) && char.IsUpper( typeName[i] ) )
             {
-                AppendTypePart(result, ref resultIndex, typeName, start, i);
+                AppendTypePart( result, ref resultIndex, typeName, start, i );
                 start = i;
             }
         }
 
-        if (start < typeName.Length)
+        if ( start < typeName.Length )
         {
-            AppendTypePart(result, ref resultIndex, typeName, start, end);
+            AppendTypePart( result, ref resultIndex, typeName, start, end );
         }
 
-        return new string(result, 0, resultIndex);
+        return new string( result, 0, resultIndex );
 
-        static void AppendTypePart(char[] result, ref int resultIndex, ReadOnlySpan<char> typeName, int start, int end)
+        static void AppendTypePart( char[] result, ref int resultIndex, ReadOnlySpan<char> typeName, int start, int end )
         {
             var length = end - start;
             var shortPart = length > 3
-                ? typeName.Slice(start, 3)
-                : typeName.Slice(start, length);
+                ? typeName.Slice( start, 3 )
+                : typeName.Slice( start, length );
 
-            foreach (var ch in shortPart)
+            foreach ( var ch in shortPart )
             {
                 result[resultIndex++] = ch;
             }
@@ -81,7 +81,7 @@ internal static class Keywords
 
     static Keywords()
     {
-        _keywords = new HashSet<string>(StringComparer.Ordinal)
+        _keywords = new HashSet<string>( StringComparer.Ordinal )
         {
             "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue",
             "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally",
@@ -93,6 +93,6 @@ internal static class Keywords
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsKeyword(string name) => _keywords.Contains(name);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    internal static bool IsKeyword( string name ) => _keywords.Contains( name );
 }
