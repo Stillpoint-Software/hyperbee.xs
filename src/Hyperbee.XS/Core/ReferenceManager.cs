@@ -19,13 +19,11 @@ public partial class ReferenceManager
     private readonly string _globalPackagesFolder;
     private readonly XsAssemblyLoadContext _assemblyLoadContext = new();
 
-    private readonly List<Assembly> _assemblyReferences =
+    private readonly ConcurrentSet<Assembly> _assemblyReferences =
     [
         typeof(string).Assembly,
         typeof(Enumerable).Assembly
     ];
-
-    private readonly List<string> _loadedPackages = [];
 
     public static ReferenceManager Create( params Assembly[] references )
     {
@@ -40,7 +38,6 @@ public partial class ReferenceManager
         _globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder( settings );
     }
 
-    public IEnumerable<string> Packages => _loadedPackages;
     public IEnumerable<Assembly> PackageAssemblies => _assemblyLoadContext.Assemblies;
     public IEnumerable<Assembly> ReferenceAssemblies => _assemblyReferences;
     public IEnumerable<Assembly> Assemblies => _assemblyReferences.Concat( _assemblyLoadContext.Assemblies );
@@ -84,7 +81,6 @@ public partial class ReferenceManager
         if ( packagePath == null )
             throw new InvalidOperationException( $"Failed to fetch package: {packageId}" );
 
-        _loadedPackages.Add( $"{packageId} {version}" );
         return LoadAssembliesFromPackage( packagePath );
     }
 
@@ -257,8 +253,8 @@ public partial class ReferenceManager
     {
         var currentRuntime = GetCurrentRuntimeVersion();
         return availableFrameworks
-            .Where( v => v.StartsWith( currentRuntime ) )
-            .OrderByDescending( v => v )
+            .Where( x => x.StartsWith( currentRuntime ) )
+            .OrderByDescending( x => x )
             .FirstOrDefault() ?? availableFrameworks.Last();
     }
 
@@ -280,7 +276,7 @@ public partial class ReferenceManager
 
         protected override Assembly Load( AssemblyName assemblyName )
         {
-            return Default.Assemblies.FirstOrDefault( a => a.GetName().FullName == assemblyName.FullName );
+            return Default.Assemblies.FirstOrDefault( x => x.GetName().FullName == assemblyName.FullName );
         }
     }
 }

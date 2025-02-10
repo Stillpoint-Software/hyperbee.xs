@@ -9,14 +9,13 @@ public sealed class TypeResolver
 {
     public ReferenceManager ReferenceManager { get; }
 
-    private const int ConcurrencyLevel = -1;
-    private const int Capacity = 32;
+    private readonly ConcurrentDictionary<string, Type> _typeCache = [];
+    private readonly ConcurrentDictionary<(MethodInfo, IReadOnlyList<Type>), MethodInfo> _genericResolutionCache = [];
 
-    private readonly ConcurrentDictionary<string, Type> _typeCache = new( ConcurrencyLevel, Capacity );
-    private readonly ConcurrentDictionary<string, List<MethodInfo>> _extensionMethodCache = new( ConcurrencyLevel, Capacity );
-    private readonly ConcurrentDictionary<(MethodInfo, IReadOnlyList<Type>), MethodInfo> _genericResolutionCache = new( ConcurrencyLevel, Capacity );
+    private readonly ConcurrentDictionary<string, ConcurrentSet<MethodInfo>> _extensionMethodCache = [];
+    private readonly ConcurrentSet<Assembly> _extensionAssemblyCache = [];
 
-    private static readonly ConcurrentDictionary<Type, bool> __nullableTypeCache = new( ConcurrencyLevel, Capacity );
+    private static readonly ConcurrentDictionary<Type, bool> __nullableTypeCache = [];
 
     private static readonly Dictionary<Type, HashSet<Type>> WideningConversions = new()
     {
@@ -147,6 +146,11 @@ public sealed class TypeResolver
     {
         Parallel.ForEach( assemblies, assembly =>
         {
+            if ( !_extensionAssemblyCache.TryAdd( assembly ) )
+            {
+                return; // Already processed
+            }
+
             foreach ( var type in assembly.GetTypes() )
             {
                 if ( !type.IsPublic || !type.IsSealed || !type.IsAbstract ) // Only static classes
@@ -157,43 +161,12 @@ public sealed class TypeResolver
                     if ( !method.IsDefined( typeof( ExtensionAttribute ), false ) )
                         continue;
 
-                    if ( !_extensionMethodCache.TryGetValue( method.Name, out var methods ) )
-                    {
-                        methods = [];
-                        _extensionMethodCache[method.Name] = methods;
-                    }
-
-                    methods.Add( method );
+                    var methods = _extensionMethodCache.GetOrAdd( method.Name, _ => [] );
+                    methods.TryAdd( method );
                 }
             }
         } );
     }
-
-    //private void CacheExtensionMethods()
-    //{
-    //    Parallel.ForEach( _referenceManager.Assemblies, assembly =>
-    //    {
-    //        foreach ( var type in assembly.GetTypes() )
-    //        {
-    //            if ( !type.IsPublic || !type.IsSealed || !type.IsAbstract ) // Only static classes
-    //                continue;
-
-    //            foreach ( var method in type.GetMethods( BindingFlags.Static | BindingFlags.Public ) )
-    //            {
-    //                if ( !method.IsDefined( typeof( ExtensionAttribute ), false ) )
-    //                    continue;
-
-    //                if ( !_extensionMethodCache.TryGetValue( method.Name, out var methods ) )
-    //                {
-    //                    methods = [];
-    //                    _extensionMethodCache[method.Name] = methods;
-    //                }
-
-    //                methods.Add( method );
-    //            }
-    //        }
-    //    } );
-    //}
 
     private static Span<Type> GetCallerTypes( Type type, IReadOnlyList<Expression> args )
     {
@@ -403,3 +376,4 @@ public sealed class TypeResolver
         return p1.Length.CompareTo( p2.Length );
     }
 }
+
