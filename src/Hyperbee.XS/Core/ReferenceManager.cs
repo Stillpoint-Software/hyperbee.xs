@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using System.Text.RegularExpressions;
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Packaging;
+using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using System.Text.RegularExpressions;
-using NuGet.Packaging.Core;
 
 namespace Hyperbee.XS.Core;
 
@@ -75,12 +75,12 @@ public partial class ReferenceManager
     {
         version ??= "latest";
 
-        var packagePath = await GetPackageAsync( 
-            packageId, 
-            version, 
-            cancellation 
+        var packagePath = await GetPackageAsync(
+            packageId,
+            version,
+            cancellation
         ).ConfigureAwait( false );
-        
+
         if ( packagePath == null )
             throw new InvalidOperationException( $"Failed to fetch package: {packageId}" );
 
@@ -93,10 +93,10 @@ public partial class ReferenceManager
         var packageResource = await GetPackageResourceAsync( cancellation )
             .ConfigureAwait( false );
 
-        var resolvedPackages = await ResolvePackageDependenciesAsync( 
-            packageId, 
-            version, 
-            cancellation 
+        var resolvedPackages = await ResolvePackageDependenciesAsync(
+            packageId,
+            version,
+            cancellation
         ).ConfigureAwait( false );
 
         string packageIdFolder = null;
@@ -107,7 +107,7 @@ public partial class ReferenceManager
 
             if ( package.Id.Equals( packageId, StringComparison.OrdinalIgnoreCase ) )
             {
-                packageIdFolder = packageFolder; 
+                packageIdFolder = packageFolder;
             }
 
             if ( Directory.Exists( packageFolder ) )
@@ -115,16 +115,16 @@ public partial class ReferenceManager
                 continue;
             }
 
-            var packagePath = await DownloadPackageAsync( 
-                packageResource, 
-                packageFolder, 
-                package, 
-                cancellation 
+            var packagePath = await DownloadPackageAsync(
+                packageResource,
+                packageFolder,
+                package,
+                cancellation
             ).ConfigureAwait( false );
 
-            await ExtractPackageAsync( 
-                packagePath, 
-                cancellation 
+            await ExtractPackageAsync(
+                packagePath,
+                cancellation
             ).ConfigureAwait( false );
         }
 
@@ -134,7 +134,7 @@ public partial class ReferenceManager
     private static async Task<FindPackageByIdResource> GetPackageResourceAsync( CancellationToken cancellation )
     {
         var repository = Repository.Factory.GetCoreV3( NuGetSource );
-        
+
         return await repository.GetResourceAsync<FindPackageByIdResource>( cancellation )
             .ConfigureAwait( false );
     }
@@ -142,23 +142,23 @@ public partial class ReferenceManager
     private static async Task<List<PackageIdentity>> ResolvePackageDependenciesAsync( string packageId, string version, CancellationToken cancellation )
     {
         var repository = Repository.Factory.GetCoreV3( NuGetSource );
-        
+
         var metadataResource = await repository.GetResourceAsync<PackageMetadataResource>( cancellation )
             .ConfigureAwait( false );
 
-        var versions = await metadataResource.GetMetadataAsync( 
-            packageId, 
-            true, 
-            false, 
-            NullSourceCacheContext.Instance, 
-            NullLogger.Instance, 
-            cancellation 
+        var versions = await metadataResource.GetMetadataAsync(
+            packageId,
+            true,
+            false,
+            NullSourceCacheContext.Instance,
+            NullLogger.Instance,
+            cancellation
         ).ConfigureAwait( false );
 
         var packageMetadata = (version == "latest")
             ? versions
-                .Where( m => !m.Identity.Version.IsPrerelease ) 
-                .MaxBy( m => m.Identity.Version ) 
+                .Where( m => !m.Identity.Version.IsPrerelease )
+                .MaxBy( m => m.Identity.Version )
             : versions.FirstOrDefault( m => m.Identity.Version == NuGetVersion.Parse( version ) );
 
         if ( packageMetadata == null )
@@ -176,7 +176,7 @@ public partial class ReferenceManager
 
         return identities;
     }
-    
+
     private static async Task<string> DownloadPackageAsync( FindPackageByIdResource packageResource, string packageFolder, PackageIdentity package, CancellationToken cancellation )
     {
         Directory.CreateDirectory( packageFolder );
@@ -186,14 +186,14 @@ public partial class ReferenceManager
         if ( !File.Exists( packagePath ) )
         {
             await using var packageStream = File.Create( packagePath );
-            
-            await packageResource.CopyNupkgToStreamAsync( 
-                package.Id, 
-                package.Version, 
-                packageStream, 
-                NullSourceCacheContext.Instance, 
-                NullLogger.Instance, 
-                cancellation 
+
+            await packageResource.CopyNupkgToStreamAsync(
+                package.Id,
+                package.Version,
+                packageStream,
+                NullSourceCacheContext.Instance,
+                NullLogger.Instance,
+                cancellation
             ).ConfigureAwait( false );
         }
 
