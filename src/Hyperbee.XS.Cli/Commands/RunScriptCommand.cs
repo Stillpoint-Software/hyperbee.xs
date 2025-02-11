@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -10,6 +11,11 @@ internal class RunScriptCommand : Command<RunScriptCommand.Settings>
     {
         [CommandArgument( 0, "[script]" )]
         public string Script { get; init; }
+
+        [Description( "Show the expression tree instead of running" )]
+        [CommandOption( "-s|--show" )]
+        [DefaultValue( false )]
+        public bool? Show { get; init; }
     }
 
     public override int Execute( [NotNull] CommandContext context, [NotNull] Settings settings )
@@ -41,7 +47,7 @@ internal class RunScriptCommand : Command<RunScriptCommand.Settings>
                 }
             }
 
-            if ( show )
+            if ( show || settings.Show.Value )
             {
                 var result = Script.Show( script, settings.CreateConfig() );
 

@@ -13,7 +13,7 @@ internal class CompileCommand : Command<CompileCommand.Settings>
     internal sealed class Settings : RunSettings
     {
         [Description( "File to compile" )]
-        [CommandArgument( 0, "[file]" )]
+        [CommandArgument( 0, "<file>" )]
         public string ScriptFile { get; init; }
 
         [Description( "File path for the saved assembly" )]
@@ -39,12 +39,6 @@ internal class CompileCommand : Command<CompileCommand.Settings>
 
     public override int Execute( [NotNull] CommandContext context, [NotNull] Settings settings )
     {
-        if ( !File.Exists( settings.ScriptFile ) )
-        {
-            AnsiConsole.Markup( "[red]Invalid file[/]" );
-            return 1;
-        }
-
         try
         {
             var script = File.ReadAllText( settings.ScriptFile );
