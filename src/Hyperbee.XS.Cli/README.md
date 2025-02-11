@@ -47,9 +47,27 @@ xs run script "(1-5);"
 Result: -4
 ```
 
+### Show Expression Tree
+```
+xs run script "if( true ) 1+1; else 0;" -s
+Result:
+using System;                                                                                                                                                  │
+using System.Linq.Expressions;                                                                                                                                 │
+                                                                                                                                                                │
+var expression = Expression.Condition(                                                                                                                         │
+  Expression.Constant(true),                                                                                                                                   │
+  Expression.Add(                                                                                                                                              │
+    Expression.Constant(1),                                                                                                                                    │
+    Expression.Constant(1)                                                                                                                                     │
+  ),                                                                                                                                                           │
+  Expression.Constant(0),                                                                                                                                      │
+  typeof(Int32)                                                                                                                                                │
+);
+```
+
 ### Run a repl session
 ```
-xs run repl
+xs repl
 Starting REPL session. Type "run" to run the current block, "exit" to quit, "print" to see variables.
 
 > print
@@ -58,10 +76,11 @@ Starting REPL session. Type "run" to run the current block, "exit" to quit, "pri
 └──────┴───────┘
 > var x = 2;
 > var y = 5;
+> x + y;
 > run
 Result:
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│ 5                                                                                   │
+│ 7                                                                                   │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 > print
 ┌──────┬───────┐
