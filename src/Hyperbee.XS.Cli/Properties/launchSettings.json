@@ -2,7 +2,7 @@
   "profiles": {
     "Hyperbee.Xs.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "run repl"
+      "commandLineArgs": "repl -p Hyperbee.XS.Extensions -e ForParseExtension"
     }
   }
 }

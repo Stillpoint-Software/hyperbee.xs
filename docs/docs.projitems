@@ -38,5 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)language\" />
+    <Folder Include="$(MSBuildThisFileDirectory)cli\" />
   </ItemGroup>
 </Project>

@@ -12,12 +12,6 @@ XS.Cli added dotnet commands like:
 - compile
 - repl
 
-## Examples
-
-![XS Run Script](../../assets/cli-run-script.gif)
-
-![XS Run Script Show](../../assets/cli-run-script-show.gif)
-
 ### Install Xs.Cli using 
 
 you can install Xs.Cli using the following command:
@@ -28,14 +22,14 @@ or following Microsoft's [documentation](https://docs.microsoft.com/en-us/dotnet
 
 ### Run
 ```
-dotnet xs run script
+xs run script
 ```
 or:
 ```
-dotnet xs run file ./script.xs
+xs run file ./script.xs
 ```
 
-### Compile
+### Compile (.NET 9 or later)
 ```
 xs compile -s "1 + 1" -o "output.dll"
 ```
@@ -44,6 +38,48 @@ xs compile -s "1 + 1" -o "output.dll"
 ```
 xs repl
 ```
+
+## Examples
+
+### Run a script
+```
+xs run script "(1-5);"
+Result: -4
+```
+
+### Run a repl session
+```
+xs run repl
+Starting REPL session. Type "run" to run the current block, "exit" to quit, "print" to see variables.
+
+> print
+┌──────┬───────┐
+│ Name │ Value │
+└──────┴───────┘
+> var x = 2;
+> var y = 5;
+> run
+Result:
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ 5                                                                                   │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+> print
+┌──────┬───────┐
+│ Name │ Value │
+├──────┼───────┤
+│ x    │ 2     │
+│ y    │ 5     │
+└──────┴───────┘
+> exit
+```
+
+## Credits
+
+Special thanks to:
+
+- [Spectre.Console](https://spectreconsole.net/) for the beautiful console and command line tools. :heart:
+- [Just The Docs](https://github.com/just-the-docs/just-the-docs) for the documentation theme.
+
 
 ## Contributing
 

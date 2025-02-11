@@ -8,7 +8,6 @@ using System.Runtime.Loader;
 
 #endif
 using Hyperbee.XS;
-using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
 using Spectre.Console;
 
@@ -118,14 +117,9 @@ internal static class Script
 
 #endif
 
-    internal static string Execute( string script, IReadOnlyCollection<Assembly> references = null )
+    internal static string Execute( string script, XsConfig config = null )
     {
-        var parser = new XsParser(
-            new XsConfig
-            {
-                ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() )
-            }
-        );
+        var parser = new XsParser( config );
 
         var expression = parser.Parse( script );
 
@@ -137,14 +131,9 @@ internal static class Script
         return result?.ToString() ?? "null";
     }
 
-    internal static string Show( string script, IReadOnlyCollection<Assembly> references = null )
+    internal static string Show( string script, XsConfig config = null )
     {
-        var parser = new XsParser(
-            new XsConfig
-            {
-                ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() )
-            }
-        );
+        var parser = new XsParser( config );
 
         var expression = parser.Parse( script );
 

@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
+using NuGet.Common;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -19,7 +20,7 @@ internal class ReplCommand : Command<ReplCommand.Settings>
     {
         AnsiConsole.Markup( "[yellow]Starting REPL session. Type [green]\"run\"[/] to run the current block, [green]\"exit\"[/] to quit, [green]\"print\"[/] to see variables.[/]\n" );
 
-        var xsConfig = new XsConfig( references => references.AddReference( AssemblyHelper.GetAssembly( settings.References ) ) );
+        var xsConfig = settings.CreateConfig();
 
         var prompt = new TextPrompt<string>( "[cyan]>[/]" );
 
@@ -167,3 +168,32 @@ internal class ReplCommand : Command<ReplCommand.Settings>
 }
 
 
+internal class SpectreConsoleLogger : ILogger
+{
+    private static readonly Dictionary<LogLevel, string> LogColors = new()
+    {
+        { LogLevel.Debug, "grey" },
+        { LogLevel.Information, "white" },
+        { LogLevel.Warning, "yellow" },
+        { LogLevel.Error, "red" },
+        { LogLevel.Verbose, "blue" },
+        { LogLevel.Minimal, "green" }
+    };
+
+    public void Log( LogLevel level, string data ) => AnsiConsole.MarkupInterpolated( $"[{LogColors[level]}]{data}[/]\n" );
+    public void Log( ILogMessage message ) => Log( message.Level, message.Message );
+    public void LogDebug( string data ) => Log( LogLevel.Debug, data );
+    public void LogError( string data ) => Log( LogLevel.Error, data );
+    public void LogInformation( string data ) => Log( LogLevel.Information, data );
+    public void LogInformationSummary( string data ) => Log( LogLevel.Information, data );
+    public void LogMinimal( string data ) => Log( LogLevel.Information, data );
+    public void LogVerbose( string data ) => Log( LogLevel.Verbose, data );
+    public void LogWarning( string data ) => Log( LogLevel.Warning, data );
+    public Task LogAsync( LogLevel level, string data )
+    {
+        Log( level, data );
+        return Task.CompletedTask;
+    }
+    public Task LogAsync( ILogMessage message ) => LogAsync( message.Level, message.Message );
+
+}

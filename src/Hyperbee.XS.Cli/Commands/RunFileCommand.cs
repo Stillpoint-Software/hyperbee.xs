@@ -29,12 +29,11 @@ internal class RunFileCommand : Command<RunFileCommand.Settings>
 
         try
         {
-            var references = AssemblyHelper.GetAssembly( settings.References );
             var script = File.ReadAllText( settings.ScriptFile );
 
             if ( settings.Show.Value )
             {
-                var result = Script.Show( script, references );
+                var result = Script.Show( script, settings.CreateConfig() );
 
                 AnsiConsole.MarkupInterpolated( $"[green]Result:[/]\n" );
                 AnsiConsole.Write( new Panel( new Text( result ) )
@@ -45,7 +44,7 @@ internal class RunFileCommand : Command<RunFileCommand.Settings>
             }
             else
             {
-                var result = Script.Execute( script, references );
+                var result = Script.Execute( script, settings.CreateConfig() );
                 AnsiConsole.MarkupInterpolated( $"[green]Result:[/] {result}\n" );
             }
             return 0;

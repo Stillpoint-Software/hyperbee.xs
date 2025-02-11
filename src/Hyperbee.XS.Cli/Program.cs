@@ -11,16 +11,16 @@ partial class Program
 
         app.Configure( config =>
         {
+
+            config.AddCommand<ReplCommand>( "repl" );
+
+#if NET9_0_OR_GREATER
+            config.AddCommand<CompileCommand>( "compile" );
+#endif
             config.AddBranch<RunSettings>( "run", run =>
             {
                 run.AddCommand<RunFileCommand>( "file" );
                 run.AddCommand<RunScriptCommand>( "script" );
-
-                run.AddCommand<ReplCommand>( "repl" );
-
-#if NET9_0_OR_GREATER
-                run.AddCommand<CompileCommand>( "compile" );
-#endif
             } );
         } );
 
