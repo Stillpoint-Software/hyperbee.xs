@@ -26,7 +26,7 @@ public class XsContext : ParseContext
     public XsContext( XsConfig config, XsDebugger debugger, Scanner scanner, ParseScope scope = null, bool useNewLines = false )
         : base( scanner, useNewLines )
     {
-        Resolver = config.Resolver.Value;
+        Resolver = config.Resolver;
         Debugger = debugger;
         Scope = scope ?? new ParseScope();
         InitialScope = scope == null;

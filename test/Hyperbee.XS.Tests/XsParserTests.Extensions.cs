@@ -12,9 +12,8 @@ public class XsParserExtensionsTests
 {
     public static XsParser Xs { get; set; } = new
     (
-        new XsConfig
+        new XsConfig( new TypeResolver( ReferenceManager.Create( Assembly.GetExecutingAssembly() ) ) )
         {
-            ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ),
             Extensions = [new AnswerToEverythingParseExtension()]
         }
     );

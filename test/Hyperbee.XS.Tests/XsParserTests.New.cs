@@ -1,16 +1,11 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
-using Hyperbee.XS.Core;
 
 namespace Hyperbee.XS.Tests;
 
 [TestClass]
 public class XsParserNewExpressionTests
 {
-    public static XsParser Xs { get; set; } = new
-    (
-        new XsConfig { ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ) }
-    );
+    public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     [TestMethod]
     public void Compile_ShouldSucceed_WithNewExpression()

@@ -1,21 +1,11 @@
-﻿using System.Reflection;
-using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.Core;
-using static System.Linq.Expressions.Expression;
+﻿using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Extensions.Tests;
 
 [TestClass]
 public class AsyncParseExtensionTests
 {
-    public static XsParser Xs { get; set; } = new
-    (
-        new XsConfig
-        {
-            ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ),
-            Extensions = XsExtensions.Extensions()
-        }
-    );
+    public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     [TestMethod]
     public async Task Compile_ShouldSucceed_WithAsyncBlock()

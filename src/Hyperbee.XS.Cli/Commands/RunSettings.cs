@@ -20,9 +20,8 @@ internal class RunSettings : CommandSettings
     public XsConfig CreateConfig()
     {
         var referenceManager = new ReferenceManager();
-        var typeResolver = new TypeResolver( referenceManager );
-
-        IParseExtension[] extensions = null;
+        TypeResolver typeResolver = null;
+        IEnumerable<IParseExtension> extensions = null;
 
         AnsiConsole.Status()
             .Spinner( Spinner.Known.Default )
@@ -35,7 +34,8 @@ internal class RunSettings : CommandSettings
                 await RunSettingsHelper.LoadPackages( Packages, referenceManager );
 
                 ctx.Status( "Loading Extensions..." );
-                extensions = RunSettingsHelper.GetExtensions( Extensions, typeResolver ).ToArray();
+                typeResolver = TypeResolver.Create( referenceManager );
+                extensions = RunSettingsHelper.GetExtensions( Extensions, typeResolver );
 
             } ).GetAwaiter().GetResult();
 

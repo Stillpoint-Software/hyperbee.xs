@@ -32,15 +32,25 @@ public sealed class TypeResolver
         { typeof(float), [typeof(double)] }
     };
 
+    public static TypeResolver Create( ReferenceManager referenceManager )
+    {
+        var typeResolver = new TypeResolver( referenceManager );
+
+        typeResolver.RegisterExtensionMethods( referenceManager.Assemblies );
+
+        return typeResolver;
+    }
+
+    public static TypeResolver Create( params Assembly[] references )
+    {
+        return Create( ReferenceManager.Create( references ) );
+    }
 
     public TypeResolver( ReferenceManager referenceManager )
     {
-        if ( referenceManager == null )
-            throw new ArgumentNullException( nameof( referenceManager ) );
+        ArgumentNullException.ThrowIfNull( referenceManager, nameof( referenceManager ) );
 
         ReferenceManager = referenceManager;
-
-        RegisterExtensionMethods( ReferenceManager.Assemblies );
     }
 
     public Type ResolveType( string typeName )

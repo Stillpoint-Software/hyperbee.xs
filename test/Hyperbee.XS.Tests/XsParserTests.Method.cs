@@ -1,16 +1,11 @@
-﻿using System.Reflection;
-using Hyperbee.XS.Core;
-using static System.Linq.Expressions.Expression;
+﻿using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
 [TestClass]
 public class XsParserMethodTests
 {
-    public static XsParser Xs { get; set; } = new
-    (
-        new XsConfig { ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ) }
-    );
+    public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     [TestMethod]
     public void Compile_ShouldSucceed_WithMethodCall()
@@ -126,9 +121,7 @@ public class XsParserMethodTests
     [TestMethod]
     public void Compile_ShouldSucceed_WithExtensionMethods()
     {
-        var parser = new XsParser();
-
-        var expression = parser.Parse(
+        var expression = Xs.Parse(
             """
             var x = new int[] {1,2,3,4,5};
             x.Select( ( int i ) => i * 10 ).Sum();

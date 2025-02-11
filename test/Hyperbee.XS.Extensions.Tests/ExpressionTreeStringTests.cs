@@ -1,7 +1,5 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
 using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -10,14 +8,7 @@ namespace Hyperbee.XS.Extensions.Tests;
 [TestClass]
 public class ExpressionTreeStringTests
 {
-    public static XsParser Xs { get; set; } = new
-    (
-        new XsConfig
-        {
-            ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ),
-            Extensions = XsExtensions.Extensions()
-        }
-    );
+    public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     public ExpressionVisitorConfig Config = new( "Expression.", "\t", "expression",
             XsExtensions.Extensions().OfType<IExpressionWriter>().ToArray() );

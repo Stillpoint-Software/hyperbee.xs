@@ -1,16 +1,11 @@
-﻿using System.Reflection;
-using Hyperbee.XS.Core;
-using static System.Linq.Expressions.Expression;
+﻿using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
 [TestClass]
 public class XsParserPropertyTests
 {
-    public static XsParser Xs { get; set; } = new
-    (
-        new XsConfig { ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ) }
-    );
+    public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     [TestMethod]
     public void Compile_ShouldSucceed_WithPropertyResult()

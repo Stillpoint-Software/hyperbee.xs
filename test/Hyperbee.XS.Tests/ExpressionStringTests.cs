@@ -1,6 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
-using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -18,10 +16,7 @@ public class ExpressionStringTests
         ]
     );
 
-    public static XsParser Xs { get; set; } = new
-    (
-        new XsConfig { ReferenceManager = ReferenceManager.Create( Assembly.GetExecutingAssembly() ) }
-    );
+    public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_NestedLambdas()

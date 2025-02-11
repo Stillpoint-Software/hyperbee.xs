@@ -9,6 +9,10 @@
     <Import_RootNamespace>docs</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)cli\cli.md" />
+    <None Include="$(MSBuildThisFileDirectory)cli\repl.md" />
+    <None Include="$(MSBuildThisFileDirectory)cli\compile.md" />
+    <None Include="$(MSBuildThisFileDirectory)cli\run.md" />
     <None Include="$(MSBuildThisFileDirectory)debugging.md" />
     <None Include="$(MSBuildThisFileDirectory)examples.md" />
     <None Include="$(MSBuildThisFileDirectory)language\async-await.md" />
@@ -38,6 +42,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)language\" />
-    <Folder Include="$(MSBuildThisFileDirectory)cli\" />
   </ItemGroup>
 </Project>
