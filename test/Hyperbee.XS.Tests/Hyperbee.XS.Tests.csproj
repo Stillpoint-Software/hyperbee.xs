@@ -12,9 +12,9 @@
   <ItemGroup>
     <PackageReference Include="Hyperbee.Expressions" Version="1.1.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.12.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.7.3" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.7.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0-preview-25107-01" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.8.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Hyperbee.XS\Hyperbee.XS.csproj" />
