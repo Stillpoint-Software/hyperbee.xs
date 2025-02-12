@@ -1,0 +1,52 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"},{"aliases":[],"name":"razor"}]}}
+
+#!pwsh
+
+$version = "1.2.1"
+dotnet pack -c Release
+
+copy src\Hyperbee.XS\bin\Release\Hyperbee.XS.$version.nupkg C:\Development\.nuget
+copy src\Hyperbee.XS.Extensions\bin\Release\Hyperbee.XS.Extensions.$version.nupkg C:\Development\.nuget
+copy src\Hyperbee.XS.Interactive\bin\Release\Hyperbee.XS.Interactive.$version.nupkg C:\Development\.nuget
+
+#!csharp
+
+#i nuget:C:/Development/.nuget
+#r "nuget:Hyperbee.XS"
+#r "nuget:Hyperbee.XS.Extensions"
+#r "nuget:Hyperbee.XS.Interactive"
+
+#!xs
+
+#!xs
+
+var x = 1+5;
+x;
+
+#!xs
+
+#!xs
+
+x = 10;
+
+#!xs-show
+
+#!xs-show
+
+var x = 1+5;
+x;
+
+#!csharp
+
+var z = "testing";
+
+#!xs
+
+#!share --from csharp --name "z" --as "zz"
+#!whos
+
+#!xs
+
+zz;
