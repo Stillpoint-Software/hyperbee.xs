@@ -1,6 +1,9 @@
 ﻿using System.Linq.Expressions;
+using Hyperbee.Collections;
 using Hyperbee.Xs.Extensions;
+using Hyperbee.Xs.Interactive.Extensions;
 using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Writer;
 using Microsoft.DotNet.Interactive;
 
 using static System.Linq.Expressions.Expression;
@@ -15,8 +18,11 @@ public class XsBaseKernel : Kernel
 
     public XsBaseKernel( string name ) : base( name )
     {
-        var referenceManager = new ReferenceManager();
-        var typeResolver = TypeResolver.Create( referenceManager );
+        var typeResolver = TypeResolver.Create( 
+            typeof( object ).Assembly,
+            typeof( Enumerable ).Assembly,
+            typeof( DisplayExtensions ).Assembly // pull in .NET Interactive helpers?
+        );
 
         Config = new XsConfig( typeResolver )
         {
@@ -28,7 +34,10 @@ public class XsBaseKernel : Kernel
                 new UsingParseExtension(),
                 new AsyncParseExtension(),
                 new AwaitParseExtension(),
-                new PackageParseExtension()
+                new PackageParseExtension(),
+
+                // Notebook Helpers
+                new DisplayParseExtension()
             ]
         };
 
@@ -37,14 +46,15 @@ public class XsBaseKernel : Kernel
         RegisterForDisposal( () =>
         {
             Scope.ExitScope();
-            Values = [];
+            Scope = null;
+            Values = null;
+            Config = null;
         } );
     }
 
-
     protected static BlockExpression WrapWithPersistentState(
         Expression userExpression,
-        IDictionary<string, ParameterExpression> symbols,
+        LinkedDictionary<string, ParameterExpression> symbols,
         Dictionary<string, object> values )
     {
         var localVariables = new Dictionary<string, ParameterExpression>();
@@ -54,7 +64,7 @@ public class XsBaseKernel : Kernel
         var valuesConst = Constant( values );
         var indexerProperty = typeof( Dictionary<string, object> ).GetProperty( "Item" )!;
 
-        foreach ( var (name, parameter) in symbols )
+        foreach ( var (name, parameter) in symbols.EnumerateItems( LinkedNode.Single ) )
         {
             var local = Variable( parameter.Type, name );
             localVariables[name] = local;
@@ -98,12 +108,10 @@ public class XsBaseKernel : Kernel
         );
     }
 
-    private class ParameterReplacer : ExpressionVisitor
+    private class ParameterReplacer( Dictionary<string, ParameterExpression> locals ) : ExpressionVisitor
     {
-        private readonly Dictionary<string, ParameterExpression> _locals;
-        public ParameterReplacer( Dictionary<string, ParameterExpression> locals ) => _locals = locals;
         protected override Expression VisitParameter( ParameterExpression node ) =>
-            node.Name != null && _locals.TryGetValue( node.Name, out var replacement )
+            node.Name != null && locals.TryGetValue( node.Name, out var replacement )
                 ? replacement
                 : base.VisitParameter( node );
     }

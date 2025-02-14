@@ -31,7 +31,7 @@ public class AsyncParseExtension : IParseExtension, IExpressionWriter, IXsWriter
             ).Named( "async block" )
             .Then<Expression>( static ( ctx, parts ) =>
                 ExpressionExtensions.BlockAsync(
-                    [.. ctx.Scope().Variables.EnumerateValues( Collections.KeyScope.Current )],
+                    [.. ctx.Scope().Variables.EnumerateValues( Collections.LinkedNode.Current )],
                     [.. parts]
                 )
             ),

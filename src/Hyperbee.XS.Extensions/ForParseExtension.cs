@@ -40,7 +40,7 @@ public class ForParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 
                     // Call ToArray to ensure the variables remain in scope for reduce.
                     var variables = ctx.Scope().Variables
-                        .EnumerateValues( KeyScope.Current ).ToArray();
+                        .EnumerateValues( LinkedNode.Current ).ToArray();
 
                     return ExpressionExtensions.For( variables, initialization, test, iteration, body );
                 } ),

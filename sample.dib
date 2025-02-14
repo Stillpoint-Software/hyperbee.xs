@@ -22,31 +22,65 @@ copy src\Hyperbee.XS.Interactive\bin\Release\Hyperbee.XS.Interactive.$version.nu
 
 #!xs
 
+package Humanizer.Core;
+using Humanizer;
+using System.Collections.Generic;
+
 var x = 1+5;
+var y = 10;
+var b = new Dictionary<string, int>();
+
+b["x"] = x;
+b["y"] = 42;
+
 x;
 
 #!xs
 
 #!xs
 
-x = 10;
+var y = "hi";
+y;
 
-#!xs-show
+#!xs
 
-#!xs-show
+#!xs
 
-var x = 1+5;
+display( ( x + 123 ).ToWords() );
+display( b, "application/json" );
 x;
+
+#!xs-show
+
+#!xs-show
+
+if( true ) 1+5; else 0;
 
 #!csharp
 
-var z = "testing";
+var simple = "hello";
+display(simple);
+
+class Person {
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+var complex = new Person { Name = "John", Age = 30 };
+display(complex);
 
 #!xs
 
-#!share --from csharp --name "z" --as "zz"
+#!xs
+
+#!share --from csharp --name "simple" --as "zSimple"
+#!share --from csharp --name "complex" --as "zComplex"
+
+display(zSimple);
+zComplex.Name;
+
+#!xs
+
+#!xs
+
 #!whos
-
-#!xs
-
-zz;
