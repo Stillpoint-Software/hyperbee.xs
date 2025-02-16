@@ -9,7 +9,7 @@ nav_order: 1
 
 XS is a lightweight scripting language designed to simplify and enhance the use of C# expression trees.
 It provides a familiar C#-like syntax while offering advanced extensibility, making it a compelling choice for developers
-building domain-specific languages (DSLs), rules engines, or dynamic runtime logic systems.
+who want to use dynamic code in their applications.
 
 XS lowers the barrier for developers who want to leverage expression trees, eliminating the complexity of manually constructing, 
 extending, and navigating expression tree syntax.
@@ -57,6 +57,11 @@ supports it through a custom `Expression` extension, that reduces to native `Exp
           x = x + item;
       }
 
+      async
+      {
+          await Task.Delay( 1000 );
+      }
+      
       x;
       """ );
 
@@ -70,8 +75,8 @@ supports it through a custom `Expression` extension, that reduces to native `Exp
 
 XS allows developers to create and execute high-level logic like this without requiring manual tree construction.
 
-XS's `IParseExtension` interface makes extension straightforward and modular. Developers can focus on the high-level 
-behavior of their custom expressions without needing to handle low-level parsing or tree construction manually. 
+Extending XS is straightforward and modular. Developers can focus on the high-level behavior of their custom 
+expressions without needing to handle low-level parsing or tree construction manually. 
   
 ---
 
@@ -279,8 +284,7 @@ equivalent. For example whitespace, variable names and block closure may differ.
 ### **Conclusion**
 
 XS addresses a gap in the .NET ecosystem by simplifying the creation and management of expression trees. With its 
-lightweight design, advanced extensibility, and performance optimizations, XS helps developers build robust,
-dynamic systems with minimal overhead and maximum flexibility.
+lightweight design, and advanced extensibility, XS helps developers build robust, dynamic systems with minimal overhead.
 
 ---
 
