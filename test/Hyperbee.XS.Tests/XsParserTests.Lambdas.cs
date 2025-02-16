@@ -1,4 +1,5 @@
-﻿using static System.Linq.Expressions.Expression;
+﻿using Hyperbee.XS.Core.Writer;
+using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
@@ -18,8 +19,8 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 1, result );
     }
@@ -35,8 +36,8 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 10, result );
     }
@@ -52,8 +53,8 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 13, result );
     }
@@ -70,8 +71,8 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }
@@ -87,8 +88,10 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var es = lambda.ToExpressionString();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "42", result );
     }
@@ -106,8 +109,8 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }
@@ -126,8 +129,10 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var es = lambda.ToExpressionString();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }

@@ -41,9 +41,10 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     private object Evaluate( Expression expression )
     {
-        Visit( expression );
+        Visit( Expression.Invoke( expression ) );
         return _resultStack.Pop();
     }
+
 
     protected override Expression VisitConstant( ConstantExpression node )
     {
@@ -68,7 +69,9 @@ public sealed class XsInterpreter : ExpressionVisitor
         Visit( node.Right );
         var right = _resultStack.Pop();
 
-        _resultStack.Push( EvaluateBinary( node, left, right ) );
+        var result = EvaluateBinary( node, left, right );
+        _resultStack.Push( result );
+
         return node;
     }
 
@@ -76,8 +79,10 @@ public sealed class XsInterpreter : ExpressionVisitor
     {
         Visit( node.Operand );
         var operand = _resultStack.Pop();
+        
+        var result = EvaluateUnary( node, operand );
+        _resultStack.Push( result );
 
-        _resultStack.Push( EvaluateUnary( node, operand ) );
         return node;
     }
 
@@ -153,34 +158,50 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     protected override Expression VisitLambda<T>( Expression<T> node )
     {
-        _scope.EnterScope( FrameType.Method );
-
-        try
-        {
-            var args = new object[node.Parameters.Count];
-
-            for ( var i = 0; i < node.Parameters.Count; i++ )
-            {
-                Visit( node.Parameters[i] ); 
-                args[i] = _resultStack.Pop(); 
-                _scope.Values[node.Parameters[i]] = args[i]; 
-            }
-
-            Visit( node.Body );
-            return node;
-        }
-        finally
-        {
-            _scope.ExitScope();
-        }
+        _resultStack.Push( node ); 
+        return node;
     }
 
     protected override Expression VisitInvocation( InvocationExpression node )
     {
         Visit( node.Expression );
 
-        if ( _resultStack.Pop() is not Delegate delegateInstance )
-            throw new InterpreterException( "Invocation target is not a valid delegate.", node );
+        if ( _resultStack.Pop() is not LambdaExpression lambdaExpr )
+            throw new InterpreterException( "Invocation target is not a valid lambda expression.", node );
+
+        _scope.EnterScope( FrameType.Method );
+
+        try
+        {
+            var arguments = new object[node.Arguments.Count];
+            for ( var i = 0; i < node.Arguments.Count; i++ )
+            {
+                Visit( node.Arguments[i] );
+                arguments[i] = _resultStack.Pop();
+            }
+
+            for ( var i = 0; i < lambdaExpr.Parameters.Count; i++ )
+                _scope.Values[lambdaExpr.Parameters[i]] = arguments[i];
+
+            Visit( lambdaExpr.Body );
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
+
+        return node;
+    }
+
+    protected override Expression VisitMethodCall( MethodCallExpression node )
+    {
+        object instance = null;
+
+        if ( node.Object != null )
+        {
+            Visit( node.Object );
+            instance = _resultStack.Pop();
+        }
 
         var arguments = new object[node.Arguments.Count];
         for ( var i = 0; i < node.Arguments.Count; i++ )
@@ -189,15 +210,45 @@ public sealed class XsInterpreter : ExpressionVisitor
             arguments[i] = _resultStack.Pop();
         }
 
-        var result = delegateInstance.DynamicInvoke( arguments );
+        var result = node.Method.Invoke( instance, arguments );
 
         _resultStack.Push( result );
+
+        return node;
+    }
+
+    protected override Expression VisitNew( NewExpression node )
+    {
+        // Evaluate constructor arguments
+        var arguments = new object[node.Arguments.Count];
+        for ( var i = 0; i < node.Arguments.Count; i++ )
+        {
+            Visit( node.Arguments[i] );
+            var argument = _resultStack.Pop();
+
+            if ( argument is LambdaExpression lambda )
+            {
+                arguments[i] = this.Interpreter( lambda );
+            }
+            else
+            {
+                arguments[i] = argument;
+            }
+        }
+
+        var constructor = node.Constructor
+            ?? throw new InterpreterException( $"No valid constructor found for type {node.Type}.", node );
+
+        var instance = constructor.Invoke( arguments );
+
+        _resultStack.Push( instance );
+
         return node;
     }
 
     private object EvaluateBinary( BinaryExpression binary, object left, object right )
     {
-        // Variable assignments
+        // Variable assignments (=, +=, -=, etc.)
 
         if ( binary.NodeType == ExpressionType.Assign )
         {
@@ -208,13 +259,37 @@ public sealed class XsInterpreter : ExpressionVisitor
             return right;
         }
 
-        // Handle type widening
+        // Arithmetic Assignments (+=, -=, etc.)
 
         var leftType = left.GetType();
+
+        if ( binary.NodeType is ExpressionType.AddAssign
+            or ExpressionType.SubtractAssign
+            or ExpressionType.MultiplyAssign
+            or ExpressionType.DivideAssign
+            or ExpressionType.ModuloAssign )
+        {
+            if ( binary.Left is not ParameterExpression variable )
+                throw new InterpreterException( $"Left side of {binary.NodeType} must be a variable.", binary );
+
+            object newValue = leftType switch
+            {
+                Type when leftType == typeof(int) => EvaluateArithmeticBinary( binary, (int) left!, (int) right! ),
+                Type when leftType == typeof(long) => EvaluateArithmeticBinary( binary, (long) left!, (long) right! ),
+                Type when leftType == typeof(float) => EvaluateArithmeticBinary( binary, (float) left!, (float) right! ),
+                Type when leftType == typeof(double) => EvaluateArithmeticBinary( binary, (double) left!, (double) right! ),
+                Type when leftType == typeof(decimal) => EvaluateArithmeticBinary( binary, (decimal) left!, (decimal) right! ),
+                _ => throw new InterpreterException( $"Unsupported assignment operation: {binary.NodeType} for type {leftType}", binary ),
+            };
+
+            _scope.Values[variable] = newValue;
+            return newValue;
+        }
+
+        // Logical Comparisons
+
         var rightType = right.GetType();
         var widenedType = GetWidenedType( leftType, rightType );
-
-        // Logical comparisons
 
         if ( binary.NodeType is ExpressionType.Equal
             or ExpressionType.NotEqual
@@ -234,7 +309,7 @@ public sealed class XsInterpreter : ExpressionVisitor
             };
         }
 
-        // Arithmetic operations
+        // Regular Arithmetic Operations
 
         return widenedType switch
         {
@@ -244,6 +319,21 @@ public sealed class XsInterpreter : ExpressionVisitor
             Type when widenedType == typeof(double) => EvaluateArithmeticBinary( binary, (double) left!, (double) right! ),
             Type when widenedType == typeof(decimal) => EvaluateArithmeticBinary( binary, (decimal) left!, (decimal) right! ),
             _ => throw new InterpreterException( $"Unsupported binary operation: {binary.NodeType}", binary )
+        };
+    }
+
+    private static T EvaluateArithmeticBinary<T>( BinaryExpression binary, T left, T right )
+        where T : INumber<T>
+    {
+        return binary.NodeType switch
+        {
+            ExpressionType.Add or ExpressionType.AddAssign => left + right,
+            ExpressionType.Subtract or ExpressionType.SubtractAssign => left - right,
+            ExpressionType.Multiply or ExpressionType.MultiplyAssign => left * right,
+            ExpressionType.Divide or ExpressionType.DivideAssign => left / right,
+            ExpressionType.Modulo or ExpressionType.ModuloAssign => left % right,
+            ExpressionType.Power => T.CreateChecked( Math.Pow( double.CreateChecked( left ), double.CreateChecked( right ) ) ),
+            _ => throw new InterpreterException( $"Unsupported arithmetic operation: {binary.NodeType}", binary )
         };
     }
 
@@ -262,22 +352,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         };
     }
 
-    private static T EvaluateArithmeticBinary<T>( BinaryExpression binary, T left, T right )
-        where T : INumber<T>
-    {
-        return binary.NodeType switch
-        {
-            ExpressionType.Add => left + right,
-            ExpressionType.Subtract => left - right,
-            ExpressionType.Multiply => left * right,
-            ExpressionType.Divide => left / right,
-            ExpressionType.Modulo => left % right,
-            ExpressionType.Power => T.CreateChecked(Math.Pow( double.CreateChecked( left ), double.CreateChecked( right ) )),
-            _ => throw new InterpreterException( $"Unsupported arithmetic operation: {binary.NodeType}", binary )
-        };
-    }
-
-    private static object EvaluateUnary( UnaryExpression unary, object operand )
+    private object EvaluateUnary( UnaryExpression unary, object operand )
     {
         if ( unary.NodeType == ExpressionType.Convert )
         {
@@ -301,14 +376,41 @@ public sealed class XsInterpreter : ExpressionVisitor
         };
     }
 
-    private static object EvaluateNumericUnary<T>( UnaryExpression unary, T operand )
+    private object EvaluateNumericUnary<T>( UnaryExpression unary, T operand )
         where T : INumber<T>
     {
-        return unary.NodeType switch
+        if ( unary.Operand is not ParameterExpression variable )
+            throw new InterpreterException( $"Unary assignment target must be a variable.", unary );
+
+        T newValue;
+        switch ( unary.NodeType )
         {
-            ExpressionType.Negate => -operand,
-            _ => throw new InterpreterException( $"Unsupported numeric unary operation: {unary.NodeType}", unary )
-        };
+            case ExpressionType.Negate:
+                return -operand;
+
+            case ExpressionType.PreIncrementAssign:
+                newValue = operand + T.One;
+                _scope.Values[variable] = newValue;
+                return newValue; 
+
+            case ExpressionType.PreDecrementAssign:
+                newValue = operand - T.One;
+                _scope.Values[variable] = newValue;
+                return newValue; 
+
+            case ExpressionType.PostIncrementAssign:
+                newValue = operand + T.One;
+                _scope.Values[variable] = newValue;
+                return operand; 
+
+            case ExpressionType.PostDecrementAssign:
+                newValue = operand - T.One;
+                _scope.Values[variable] = newValue;
+                return operand; 
+
+            default:
+                throw new InterpreterException( $"Unsupported numeric unary operation: {unary.NodeType}", unary );
+        }
     }
 
     private static bool EvaluateLogicalUnary( UnaryExpression unary, bool operand )
