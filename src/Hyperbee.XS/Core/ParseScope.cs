@@ -11,9 +11,10 @@ public class ParseScope
 
     public LinkedDictionary<string, ParameterExpression> Variables = new();
     public Frame Frame => _frames.Peek();
+    public int Depth => _frames.Count;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public void EnterScope( FrameType frameType, LabelTarget breakLabel = null, LabelTarget continueLabel = null )
+    public virtual void EnterScope( FrameType frameType, LabelTarget breakLabel = null, LabelTarget continueLabel = null )
     {
         var parent = _frames.Count > 0 ? _frames.Peek() : null;
         var frame = new Frame( frameType, parent, breakLabel, continueLabel );
@@ -23,7 +24,7 @@ public class ParseScope
     }
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public void ExitScope()
+    public virtual void ExitScope()
     {
         _frames.Pop();
         Variables.Pop();

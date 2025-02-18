@@ -233,7 +233,7 @@ public sealed class TypeResolver
         return true;
     }
 
-    private static bool IsWideningConversion( Type from, Type to )
+    internal static bool IsWideningConversion( Type from, Type to )
     {
         return WideningConversions.TryGetValue( from, out var targets ) && targets.Contains( to );
     }

@@ -6,7 +6,7 @@ namespace Hyperbee.XS.Tests;
 public class XsParserConditionalTests
 {
     public static XsParser Xs { get; } = new();
-
+ 
     [TestMethod]
     public void Compile_ShouldSucceed_WithoutBraces()
     {
@@ -22,8 +22,8 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 1, result );
     }
@@ -45,8 +45,8 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "hello", result );
     }
@@ -66,8 +66,8 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "hello", result );
     }
@@ -90,8 +90,8 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "hello", result );
     }
@@ -114,8 +114,8 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "hello", result );
     }
@@ -211,7 +211,5 @@ public class XsParserConditionalTests
             throw;
         }
     }
-
-
 }
 
