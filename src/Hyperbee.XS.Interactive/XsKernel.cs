@@ -1,5 +1,6 @@
 ﻿using Hyperbee.Collections;
 using Hyperbee.Collections.Extensions;
+using Hyperbee.XS.Core;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -20,41 +21,12 @@ public class XsKernel() :
     Task IKernelCommandHandler<SubmitCode>.HandleAsync( SubmitCode command, KernelInvocationContext context )
     {
         try
-        { 
-            var parser = new XsParser( Config );
+        {
+            var result = Parser.Value
+                .ParseWithState( command.Code, Scope, State )
+                .InvokeWithState( Scope );
 
-            Scope.Variables.Push();
-
-            var expression = parser.Parse( command.Code, scope: Scope );
-
-            foreach( var variable in Scope.Variables )
-            {
-                if(Values.TryGetValue( variable.Key, out var value ) )
-                {
-                    if( value.GetType() != variable.Value.Type ) { 
-                        Values.Remove(variable.Key);
-                    }
-                }
-            }
-
-            var wrapExpression = WrapWithPersistentState( expression, Scope.Variables, Values );
-
-            var delegateType = expression.Type == typeof( void )
-                ? typeof( Action )
-                : typeof( Func<> ).MakeGenericType( expression.Type );
-
-            var lambda = Lambda( delegateType, wrapExpression );
-            var compiled = lambda.Compile();
-            var result = compiled.DynamicInvoke()?.ToString() ?? "null";
-
-            // Update the variables in the current scope with the new values
-            var newVariables = Scope.Variables.Pop().Dictionary;
-            foreach ( var variable in newVariables )
-            {
-                Scope.Variables[variable.Key] = variable.Value;
-            }
-
-            result.Display( PlainTextFormatter.MimeType );
+            (result?.ToString() ?? "null").Display( PlainTextFormatter.MimeType );
         }
         catch ( Exception ex )
         {
@@ -66,7 +38,7 @@ public class XsKernel() :
 
     Task IKernelCommandHandler<RequestValue>.HandleAsync( RequestValue command, KernelInvocationContext context )
     {
-        if ( Values.TryGetValue( command.Name, out var value ) )
+        if ( State.TryGetValue( command.Name, out var value ) )
         {
             context.PublishValueProduced( command, value );
         }
@@ -82,7 +54,7 @@ public class XsKernel() :
     {
         try
         {
-            var valueInfos = Values
+            var valueInfos = State
             .Select( kvp =>
             {
                 var formattedValues = FormattedValue.CreateSingleFromObject(
@@ -124,7 +96,7 @@ public class XsKernel() :
 
         Scope.Variables[LinkedNode.Current,name] = Parameter( type, name );
 
-        Values[name] = value;
+        State[name] = value;
 
         return Task.CompletedTask;
     }

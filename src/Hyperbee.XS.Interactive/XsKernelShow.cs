@@ -12,8 +12,8 @@ public class XsKernelShow() :
     public Task HandleAsync( SubmitCode command, KernelInvocationContext context )
     {
         try
-        { 
-            var parser = new XsParser( Config );
+        {
+            var parser = Parser.Value;
 
             parser.Parse( command.Code )
                 .ToExpressionString()
