@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 using Hyperbee.Collections;
 using Hyperbee.XS.Core;
 
@@ -34,17 +35,83 @@ public sealed class XsInterpreter : ExpressionVisitor
         _debugger = debugger;
     }
 
-    public Func<T> Interpreter<T>( LambdaExpression expression )
+    public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
+        where TDelegate : Delegate
     {
-        return () => (T) Evaluate( expression );
+        var invokeMethod = typeof(TDelegate).GetMethod( "Invoke" );
+        
+        if ( invokeMethod is null )
+            throw new InvalidOperationException( "Invalid delegate type." );
+
+        var returnType = invokeMethod.ReturnType;
+
+        var evalMethod = typeof(XsInterpreter)
+            .GetMethod( nameof(Evaluate), BindingFlags.NonPublic | BindingFlags.Instance )
+            ?.MakeGenericMethod( returnType );
+        
+        if ( evalMethod is null )
+            throw new InvalidOperationException( "Could not find InvokeEvaluatedExpression method." );
+
+        var handlerDelegate = Delegate.CreateDelegate(
+            typeof( Func<,,> ).MakeGenericType( typeof(LambdaExpression), typeof( object[] ), returnType ),
+            this,
+            evalMethod
+        );
+
+        var genericTypes = invokeMethod
+            .GetParameters().Select( p => p.ParameterType )
+            .Prepend( typeof(LambdaExpression) )
+            .Append( returnType )
+            .ToArray();
+
+        var curryMethod = CurryFuncs.Methods
+            .FirstOrDefault( m => m.Name == "Curry" && m.GetGenericArguments().Length == genericTypes.Length )
+            ?.MakeGenericMethod( genericTypes );
+
+        if ( curryMethod is null )
+            throw new InvalidOperationException( $"No suitable Curry method found for delegate type {typeof(TDelegate)}" );
+
+        return (TDelegate) curryMethod.Invoke( null, [handlerDelegate,expression] )!;
     }
 
-    private object Evaluate( Expression expression )
+    private T Evaluate<T>( LambdaExpression lambda, params object[] values )
     {
-        Visit( Expression.Invoke( expression ) );
-        return _resultStack.Pop();
+         _scope.EnterScope( FrameType.Method );
+
+        try
+        {
+            for ( var i = 0; i < lambda.Parameters.Count; i++ )
+                _scope.Values[lambda.Parameters[i]] = values[i];
+
+            Visit( lambda.Body );
+            return (T) _resultStack.Pop();
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
     }
 
+    private object PrepareLambdaInvocation( Closure closure )
+    {
+        _scope.EnterScope( FrameType.Method );
+        try
+        {
+            foreach ( var kvp in closure.CapturedScope )
+                _scope.Values[kvp.Key] = kvp.Value;
+
+            return this.Interpreter( closure.Lambda );
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
+    }
+
+    private object PrepareLambdaInvocation( LambdaExpression lambda )
+    {
+        return this.Interpreter( lambda );
+    }
 
     protected override Expression VisitConstant( ConstantExpression node )
     {
@@ -99,6 +166,9 @@ public sealed class XsInterpreter : ExpressionVisitor
     {
         _scope.EnterScope( FrameType.Block );
 
+        LabelTarget returnLabel = null;
+        object returnValue = null;
+
         try
         {
             foreach ( var variable in node.Variables )
@@ -107,13 +177,39 @@ public sealed class XsInterpreter : ExpressionVisitor
                 _scope.Values[variable] = AssignDefault( variable.Type ); 
             }
 
-            foreach ( var expression in node.Expressions )
-                Visit( expression );
+            // BF original code
+            //
+            //foreach ( var expression in node.Expressions )
+            //    Visit( expression );
+
+            for ( var i = 0; i < node.Expressions.Count; i++ )
+            {
+                var expr = node.Expressions[i];
+
+                // If this expression is a return, extract the return label
+                if ( expr is GotoExpression gotoExpr && gotoExpr.Kind == GotoExpressionKind.Return )
+                {
+                    returnLabel = gotoExpr.Target;
+                    Visit( gotoExpr.Value ); // Evaluate the return value
+                    returnValue = _resultStack.Pop();
+                    break; 
+                }
+
+                Visit( expr );
+
+                // Pop intermediate results unless it's the last expression OR we hit a return
+                if ( i < node.Expressions.Count - 1 )
+                    _resultStack.TryPop( out _ );
+            }
         }
         finally
         {
             _scope.ExitScope();
         }
+
+        // If we encountered a return, push the return value onto the stack
+        if ( returnLabel != null )
+            _resultStack.Push( returnValue );
 
         return node;
 
@@ -158,7 +254,31 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     protected override Expression VisitLambda<T>( Expression<T> node )
     {
-        _resultStack.Push( node ); 
+        if ( _scope.Depth == 0 )
+        {
+            _resultStack.Push( node );
+            return node;
+        }
+
+        var freeVariables = FreeVariableVisitor.GetFreeVariables( node );
+
+        if ( freeVariables.Count == 0 )
+        {
+            _resultStack.Push( node );
+            return node;
+        }
+
+        var capturedScope = new Dictionary<ParameterExpression, object>();
+
+        foreach ( var variable in freeVariables )
+        {
+            if ( !_scope.Values.TryGetValue( variable, out var value ) )
+                throw new InterpreterException( $"Captured variable '{variable.Name}' is not defined.", node );
+
+            capturedScope[variable] = value;
+        }
+
+        _resultStack.Push( new Closure( node, capturedScope ) );
         return node;
     }
 
@@ -166,24 +286,50 @@ public sealed class XsInterpreter : ExpressionVisitor
     {
         Visit( node.Expression );
 
-        if ( _resultStack.Pop() is not LambdaExpression lambdaExpr )
-            throw new InterpreterException( "Invocation target is not a valid lambda expression.", node );
+        var target = _resultStack.Pop();
+
+        if ( target is Closure closure )
+        {
+            _scope.EnterScope( FrameType.Method );
+
+            try
+            {
+                foreach ( var (param, value) in closure.CapturedScope )
+                    _scope.Values[param] = value;
+
+                for ( var i = 0; i < node.Arguments.Count; i++ )
+                {
+                    Visit( node.Arguments[i] );
+                    _scope.Values[closure.Lambda.Parameters[i]] = _resultStack.Pop();
+                }
+
+                Visit( closure.Lambda.Body );
+                return node;
+            }
+            finally
+            {
+                _scope.ExitScope();
+            }
+        }
+
+        if ( target is not LambdaExpression lambda )
+        {
+            throw new InterpreterException( "Invocation target is not a valid lambda or closure.", node );
+        }
+
+        // Direct invocation of a raw lambda (outermost lambda case)
 
         _scope.EnterScope( FrameType.Method );
 
         try
         {
-            var arguments = new object[node.Arguments.Count];
-            for ( var i = 0; i < node.Arguments.Count; i++ )
+            for ( var i = 0; i < lambda.Parameters.Count; i++ )
             {
                 Visit( node.Arguments[i] );
-                arguments[i] = _resultStack.Pop();
+                _scope.Values[lambda.Parameters[i]] = _resultStack.Pop();
             }
 
-            for ( var i = 0; i < lambdaExpr.Parameters.Count; i++ )
-                _scope.Values[lambdaExpr.Parameters[i]] = arguments[i];
-
-            Visit( lambdaExpr.Body );
+            Visit( lambda.Body );
         }
         finally
         {
@@ -195,45 +341,67 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     protected override Expression VisitMethodCall( MethodCallExpression node )
     {
+        var isStatic = node.Method.IsStatic;
         object instance = null;
 
-        if ( node.Object != null )
+        if ( !isStatic )
         {
             Visit( node.Object );
             instance = _resultStack.Pop();
         }
 
-        var arguments = new object[node.Arguments.Count];
-        for ( var i = 0; i < node.Arguments.Count; i++ )
+        var argumentCount = node.Arguments.Count;
+        var arguments = new object[argumentCount];
+
+        for ( var i = 0; i < argumentCount; i++ )
         {
             Visit( node.Arguments[i] );
-            arguments[i] = _resultStack.Pop();
+            var argument = _resultStack.Pop();
+
+            arguments[i] = argument switch
+            {
+                Closure closure => PrepareLambdaInvocation( closure ),
+                LambdaExpression lambda => PrepareLambdaInvocation( lambda ),
+                _ => argument
+            };
         }
 
         var result = node.Method.Invoke( instance, arguments );
+        _resultStack.Push( result );
+        return node;
+    }
+
+    protected override Expression VisitMember( MemberExpression node )
+    {
+        Visit( node.Expression );
+        var instance = _resultStack.Pop();
+
+        var result = node.Member switch
+        {
+            PropertyInfo prop => prop.GetValue( instance ),
+            FieldInfo field => field.GetValue( instance ),
+            _ => throw new InterpreterException( $"Unsupported member access: {node.Member.Name}", node )
+        };
 
         _resultStack.Push( result );
-
         return node;
     }
 
     protected override Expression VisitNew( NewExpression node )
     {
-        // Evaluate constructor arguments
         var arguments = new object[node.Arguments.Count];
+
         for ( var i = 0; i < node.Arguments.Count; i++ )
         {
             Visit( node.Arguments[i] );
             var argument = _resultStack.Pop();
 
-            if ( argument is LambdaExpression lambda )
+            arguments[i] = argument switch
             {
-                arguments[i] = this.Interpreter( lambda );
-            }
-            else
-            {
-                arguments[i] = argument;
-            }
+                Closure closure => PrepareLambdaInvocation( closure ),
+                LambdaExpression lambda => PrepareLambdaInvocation( lambda ),
+                _ => argument
+            };
         }
 
         var constructor = node.Constructor
@@ -243,6 +411,26 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         _resultStack.Push( instance );
 
+        return node;
+    }
+
+    protected override Expression VisitNewArray( NewArrayExpression node )
+    {
+        var elementType = node.Type.GetElementType();
+        var elements = new object[node.Expressions.Count];
+
+        for ( var i = 0; i < node.Expressions.Count; i++ )
+        {
+            Visit( node.Expressions[i] );
+            elements[i] = _resultStack.Pop();
+        }
+
+        var array = Array.CreateInstance( elementType!, elements.Length );
+
+        for ( var i = 0; i < elements.Length; i++ )
+            array.SetValue( elements[i], i );
+
+        _resultStack.Push( array );
         return node;
     }
 
@@ -362,31 +550,30 @@ public sealed class XsInterpreter : ExpressionVisitor
             return Convert.ChangeType( convertible, unary.Type );
         }
 
-        var operandType = operand.GetType();
-
-        return operandType switch
+        return operand switch
         {
-            Type when operandType == typeof( int ) => EvaluateNumericUnary( unary, (int) operand ),
-            Type when operandType == typeof( long ) => EvaluateNumericUnary( unary, (long) operand ),
-            Type when operandType == typeof( float ) => EvaluateNumericUnary( unary, (float) operand ),
-            Type when operandType == typeof( double ) => EvaluateNumericUnary( unary, (double) operand ),
-            Type when operandType == typeof( decimal ) => EvaluateNumericUnary( unary, (decimal) operand ),
-            Type when operandType == typeof( bool ) => EvaluateLogicalUnary( unary, (bool) operand ),
-            _ => throw new InterpreterException( $"Unsupported unary operation for type {operandType}", unary )
+            int intValue => EvaluateNumericUnary( unary, intValue ),
+            long longValue => EvaluateNumericUnary( unary, longValue ),
+            float floatValue => EvaluateNumericUnary( unary, floatValue ),
+            double doubleValue => EvaluateNumericUnary( unary, doubleValue ),
+            decimal decimalValue => EvaluateNumericUnary( unary, decimalValue ),
+            bool boolValue => EvaluateLogicalUnary( unary, boolValue ),
+            _ => throw new InterpreterException( $"Unsupported unary operation for type {operand.GetType()}", unary )
         };
     }
 
     private object EvaluateNumericUnary<T>( UnaryExpression unary, T operand )
         where T : INumber<T>
     {
+        if ( unary.NodeType == ExpressionType.Negate )
+            return -operand;
+
         if ( unary.Operand is not ParameterExpression variable )
             throw new InterpreterException( $"Unary assignment target must be a variable.", unary );
 
         T newValue;
         switch ( unary.NodeType )
         {
-            case ExpressionType.Negate:
-                return -operand;
 
             case ExpressionType.PreIncrementAssign:
                 newValue = operand + T.One;
@@ -436,5 +623,76 @@ public sealed class XsInterpreter : ExpressionVisitor
             return leftType;
 
         throw new InvalidOperationException( $"No valid widening conversion between {leftType} and {rightType}." );
+    }
+
+    private sealed class FreeVariableVisitor : ExpressionVisitor
+    {
+        private readonly HashSet<ParameterExpression> _declaredVariables = [];
+        private readonly HashSet<ParameterExpression> _freeVariables = [];
+
+        public static HashSet<ParameterExpression> GetFreeVariables( Expression expression )
+        {
+            var visitor = new FreeVariableVisitor();
+            visitor.Visit( expression );
+            return visitor._freeVariables;
+        }
+
+        protected override Expression VisitLambda<T>( Expression<T> node )
+        {
+            _declaredVariables.UnionWith( node.Parameters );
+
+            return base.VisitLambda( node );
+        }
+
+        protected override Expression VisitParameter( ParameterExpression node )
+        {
+            if ( !_declaredVariables.Contains( node ) )
+            {
+                _freeVariables.Add( node );
+            }
+
+            return base.VisitParameter( node );
+        }
+    }
+
+    private sealed class Closure
+    {
+        public LambdaExpression Lambda { get; }
+        public Dictionary<ParameterExpression, object> CapturedScope { get; }
+
+        public Closure( LambdaExpression lambda, Dictionary<ParameterExpression, object> capturedScope )
+        {
+            Lambda = lambda;
+            CapturedScope = capturedScope;
+        }
+    }
+
+    public static class CurryFuncs
+    {
+        public static readonly MethodInfo[] Methods = typeof(CurryFuncs).GetMethods();
+
+        public static Func<R> Curry<C, R>( Func<C, object[], R> f, C c ) =>
+            () => f( c, [] );
+
+        public static Func<T1, R> Curry<C, T1, R>( Func<C, object[], R> f, C c ) =>
+            t1 => f( c, [t1] );
+
+        public static Func<T1, T2, R> Curry<C, T1, T2, R>( Func<C, object[], R> f, C c ) =>
+            ( t1, t2 ) => f( c, [t1, t2] );
+
+        public static Func<T1, T2, T3, R> Curry<C, T1, T2, T3, R>( Func<C, object[], R> f, C c ) =>
+            ( t1, t2, t3 ) => f( c, [t1, t2, t3] );
+
+        public static Func<T1, T2, T3, T4, R> Curry<C, T1, T2, T3, T4, R>( Func<C, object[], R> f, C c ) =>
+            ( t1, t2, t3, t4 ) => f( c, [t1, t2, t3, t4] );
+
+        public static Func<T1, T2, T3, T4, T5, R> Curry<C, T1, T2, T3, T4, T5, R>( Func<C, object[], R> f, C c ) =>
+            ( t1, t2, t3, t4, t5 ) => f( c, [t1, t2, t3, t4, t5] );
+
+        public static Func<T1, T2, T3, T4, T5, T6, R> Curry<C, T1, T2, T3, T4, T5, T6, R>( Func<C, object[], R> f, C c ) =>
+            ( t1, t2, t3, t4, t5, t6 ) => f( c, [t1, t2, t3, t4, t5, t6] );
+
+        public static Func<T1, T2, T3, T4, T5, T6, T7, R> Curry<C, T1, T2, T3, T4, T5, T6, T7, R>( Func<C, object[], R> f, C c ) =>
+            ( t1, t2, t3, t4, t5, t6, t7 ) => f( c, [t1, t2, t3, t4, t5, t6, t7] );
     }
 }

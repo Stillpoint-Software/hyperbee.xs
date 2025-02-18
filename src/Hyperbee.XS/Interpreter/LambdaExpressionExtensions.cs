@@ -15,24 +15,35 @@ public static class LambdaExpressionExtensions
         if ( !typeof(Delegate).IsAssignableFrom( lambda.Type ) )
             throw new InvalidOperationException( "LambdaExpression must be convertible to a delegate." );
 
-        var invokeMethod = lambda.Type.GetMethod( "Invoke" )
-                           ?? throw new InvalidOperationException( "Invalid delegate type." );
+        var invokeMethod = lambda.Type.GetMethod( "Invoke" );
+        
+        if ( invokeMethod is null )
+            throw new InvalidOperationException( "Invalid delegate type." );
 
-        var returnType = invokeMethod.ReturnType;
+        var paramTypes = invokeMethod.GetParameters()
+            .Select( p => p.ParameterType )
+            .Append( invokeMethod.ReturnType )
+            .ToArray();
+
+        var delegateType = Expression.GetDelegateType( paramTypes );
 
         var method = typeof(XsInterpreter)
             .GetMethod( nameof(XsInterpreter.Interpreter), BindingFlags.Public | BindingFlags.Instance )?
-            .MakeGenericMethod( returnType );
+            .MakeGenericMethod( delegateType );
 
-        var interpretedDelegate = method?.Invoke( interpreter, [lambda] )
-            ?? throw new InvalidOperationException( "Failed to create interpreted delegate." );
+        var interpretedDelegate = method?.Invoke( interpreter, [lambda] );
 
-        return interpretedDelegate;
+        if ( interpretedDelegate == null )
+            throw new InvalidOperationException( "Failed to create interpreted delegate." );
+
+        return interpretedDelegate; 
     }
 
     public static TDelegate Interpreter<TDelegate>( this Expression<TDelegate> lambda )
         where TDelegate : Delegate
     {
-        return (TDelegate) Interpreter((LambdaExpression) lambda); // Call the non-generic version and cast the result
+        return (TDelegate) Interpreter( (LambdaExpression) lambda );
     }
 }
+
+

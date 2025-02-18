@@ -11,6 +11,7 @@ public class ParseScope
 
     public LinkedDictionary<string, ParameterExpression> Variables = new();
     public Frame Frame => _frames.Peek();
+    public int Depth => _frames.Count;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public virtual void EnterScope( FrameType frameType, LabelTarget breakLabel = null, LabelTarget continueLabel = null )
