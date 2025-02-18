@@ -5,7 +5,7 @@ using Microsoft.DotNet.Interactive.Formatting;
 
 namespace Hyperbee.XS.Interactive;
 
-public class XsKernelShow() : 
+public class XsKernelShow() :
     XsBaseKernel( "xs-show" ),
     IKernelCommandHandler<SubmitCode>
 {

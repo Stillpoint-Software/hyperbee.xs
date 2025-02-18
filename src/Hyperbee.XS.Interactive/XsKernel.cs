@@ -11,7 +11,7 @@ using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Interactive;
 
-public class XsKernel() : 
+public class XsKernel() :
     XsBaseKernel( "xs" ),
     IKernelCommandHandler<RequestValue>,
     IKernelCommandHandler<RequestValueInfos>,
@@ -70,9 +70,9 @@ public class XsKernel() :
 
             context.Publish( new ValueInfosProduced( valueInfos, command ) );
         }
-        catch(Exception ex )
+        catch ( Exception ex )
         {
-            context.Fail(command, ex);
+            context.Fail( command, ex );
         }
 
         return Task.CompletedTask;
@@ -81,10 +81,10 @@ public class XsKernel() :
     async Task IKernelCommandHandler<SendValue>.HandleAsync( SendValue command, KernelInvocationContext context )
     {
         try
-        { 
+        {
             await SetValueAsync( command, context, SetValueAsync );
         }
-        catch( Exception ex )
+        catch ( Exception ex )
         {
             context.Fail( command, ex );
         }
@@ -94,7 +94,7 @@ public class XsKernel() :
     {
         var type = declaredType ?? value.GetType();
 
-        Scope.Variables[LinkedNode.Current,name] = Parameter( type, name );
+        Scope.Variables[LinkedNode.Current, name] = Parameter( type, name );
 
         State[name] = value;
 

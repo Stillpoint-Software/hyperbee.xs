@@ -19,7 +19,7 @@ public class XsKernelExtension : IKernelExtension, IStaticContentSource
         compositeKernel.Add(
             new XsKernel()
                 .UseWho()
-                .UseValueSharing() 
+                .UseValueSharing()
         );
 
         compositeKernel.Add( new XsKernelShow() );

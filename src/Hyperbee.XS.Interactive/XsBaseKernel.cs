@@ -14,7 +14,7 @@ public class XsBaseKernel : Kernel
 
     public XsBaseKernel( string name ) : base( name )
     {
-        var typeResolver = TypeResolver.Create( 
+        var typeResolver = TypeResolver.Create(
             typeof( object ).Assembly,
             typeof( Enumerable ).Assembly,
             typeof( DisplayExtensions ).Assembly // pull in .NET Interactive helpers?

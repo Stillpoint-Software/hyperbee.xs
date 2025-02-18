@@ -34,53 +34,53 @@ public static class StateExtensions
     private static BlockExpression WithState(
         this Expression userExpression,
         ParseScope scope,
-        Dictionary<string, object> state)
+        Dictionary<string, object> state )
     {
         var localVariables = new Dictionary<string, ParameterExpression>();
         var initExpressions = new List<Expression>();
         var updateExpressions = new List<Expression>();
 
-        var stateConst = Expression.Constant(state);
-        var indexerProperty = typeof(Dictionary<string, object>).GetProperty("Item")!;
+        var stateConst = Expression.Constant( state );
+        var indexerProperty = typeof( Dictionary<string, object> ).GetProperty( "Item" )!;
 
-        foreach (var (name, parameter) in scope.Variables.EnumerateItems(LinkedNode.Single))
+        foreach ( var (name, parameter) in scope.Variables.EnumerateItems( LinkedNode.Single ) )
         {
-            var local = Expression.Variable(parameter.Type, name);
+            var local = Expression.Variable( parameter.Type, name );
             localVariables[name] = local;
 
-            var keyExpr = Expression.Constant(name);
+            var keyExpr = Expression.Constant( name );
 
             // Assign the local variable to the value from the dictionary if it exists and is the correct type.
             initExpressions.Add(
-                (state.TryGetValue(name, out var value) && value.GetType() == parameter.Type)
-                    ? Expression.Assign(local, Expression.Convert(Expression.Property(stateConst, indexerProperty, keyExpr), parameter.Type))
-                    : Expression.Assign(local, Expression.Default(parameter.Type))
+                (state.TryGetValue( name, out var value ) && value.GetType() == parameter.Type)
+                    ? Expression.Assign( local, Expression.Convert( Expression.Property( stateConst, indexerProperty, keyExpr ), parameter.Type ) )
+                    : Expression.Assign( local, Expression.Default( parameter.Type ) )
             );
 
             var localAsObject = parameter.Type.IsValueType
-                ? Expression.Convert(local, typeof(object))
-                : (Expression)local;
+                ? Expression.Convert( local, typeof( object ) )
+                : (Expression) local;
 
             updateExpressions.Add(
-                Expression.Assign(Expression.Property(stateConst, indexerProperty, keyExpr), localAsObject)
+                Expression.Assign( Expression.Property( stateConst, indexerProperty, keyExpr ), localAsObject )
             );
         }
 
-        var replacer = new ParameterReplacer(localVariables);
+        var replacer = new ParameterReplacer( localVariables );
 
         // Capture the user expression result and wrap in a try-finally block.
-        var tryBlock = replacer.Visit(userExpression);
+        var tryBlock = replacer.Visit( userExpression );
 
         // remove variables from top level block
-        if (tryBlock is BlockExpression block)
-            tryBlock = Expression.Block(block.Expressions);
+        if ( tryBlock is BlockExpression block )
+            tryBlock = Expression.Block( block.Expressions );
 
-        var tryFinally = Expression.TryFinally(tryBlock, Expression.Block(updateExpressions));
+        var tryFinally = Expression.TryFinally( tryBlock, Expression.Block( updateExpressions ) );
 
         // Create the wrapping block.
         var blockExpressions = new List<Expression>();
-        blockExpressions.AddRange(initExpressions);
-        blockExpressions.Add(tryFinally);
+        blockExpressions.AddRange( initExpressions );
+        blockExpressions.Add( tryFinally );
 
         return Expression.Block(
             localVariables.Values,
@@ -101,14 +101,14 @@ public static class StateExtensions
     {
         private readonly Dictionary<string, ParameterExpression> _locals;
 
-        public ParameterReplacer(Dictionary<string, ParameterExpression> locals)
+        public ParameterReplacer( Dictionary<string, ParameterExpression> locals )
         {
             _locals = locals;
         }
 
-        protected override Expression VisitParameter(ParameterExpression node) =>
-            node.Name != null && _locals.TryGetValue(node.Name, out var replacement)
+        protected override Expression VisitParameter( ParameterExpression node ) =>
+            node.Name != null && _locals.TryGetValue( node.Name, out var replacement )
                 ? replacement
-                : base.VisitParameter(node);
+                : base.VisitParameter( node );
     }
 }

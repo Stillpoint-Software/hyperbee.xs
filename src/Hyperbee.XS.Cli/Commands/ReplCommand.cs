@@ -120,6 +120,7 @@ internal class SpectreConsoleLogger : ILogger
         Log( level, data );
         return Task.CompletedTask;
     }
+
     public Task LogAsync( ILogMessage message ) => LogAsync( message.Level, message.Message );
 
 }

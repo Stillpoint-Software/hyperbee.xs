@@ -1,24 +1,24 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
+using Microsoft.DotNet.Interactive;
 using Parlot.Fluent;
 
-using static Parlot.Fluent.Parsers;
 using static System.Linq.Expressions.Expression;
-using Microsoft.DotNet.Interactive;
-using System.Reflection;
+using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Interactive.Extensions;
 
 public class DisplayParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     private static readonly MethodInfo DisplayMethodInfo = typeof( KernelInvocationContextExtensions )
-        .GetMethod( nameof( KernelInvocationContextExtensions.Display ), 
-            [ 
-                typeof( KernelInvocationContext ), 
-                typeof( object ), 
-                typeof( string[] ) 
+        .GetMethod( nameof( KernelInvocationContextExtensions.Display ),
+            [
+                typeof( KernelInvocationContext ),
+                typeof( object ),
+                typeof( string[] )
             ] );
 
     public ExtensionType Type => ExtensionType.Terminated;
@@ -35,14 +35,14 @@ public class DisplayParseExtension : IParseExtension, IExpressionWriter, IXsWrit
                     Terms.Char( ')' )
                 )
             .AndSkip( Terms.Char( ';' ) )
-            .Then<Expression>( (ctx, expressions) =>
+            .Then<Expression>( ( ctx, expressions ) =>
             {
                 var parts = expressions?.ToArray();
 
                 if ( parts == null || parts.Length == 0 )
                     throw new SyntaxException( "display requires at least one argument." );
 
-                var paramArray = new Expression[parts.Length -1];
+                var paramArray = new Expression[parts.Length - 1];
 
                 for ( var i = 1; i < parts.Length; i++ )
                 {
@@ -57,7 +57,7 @@ public class DisplayParseExtension : IParseExtension, IExpressionWriter, IXsWrit
                     Convert( parts[0], typeof( object ) ),
                     NewArrayInit( typeof( string ), paramArray )
                 );
-      
+
             } );
     }
 
@@ -66,8 +66,8 @@ public class DisplayParseExtension : IParseExtension, IExpressionWriter, IXsWrit
         return node is DirectiveExpression;
     }
 
-    public void WriteExpression( Expression node, ExpressionWriterContext context ){}
+    public void WriteExpression( Expression node, ExpressionWriterContext context ) { }
 
-    public void WriteExpression( Expression node, XsWriterContext context ){}
+    public void WriteExpression( Expression node, XsWriterContext context ) { }
 }
 
