@@ -1,9 +1,10 @@
 ﻿using System.Linq.Expressions;
+using Hyperbee.XS.Core.Writer;
 
 namespace Hyperbee.XS.Tests;
 
 [TestClass]
-public class XsParserNewExpressionTests
+public class XsParserNewTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
@@ -17,8 +18,9 @@ public class XsParserNewExpressionTests
             """ );
 
         var lambda = Expression.Lambda<Func<TestClass>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.IsNotNull( result );
         Assert.AreEqual( 42, result.PropertyValue );
@@ -37,8 +39,8 @@ public class XsParserNewExpressionTests
 
             var lambda = Expression.Lambda<Func<int>>( expression );
 
-            var compiled = lambda.Compile();
-            var result = compiled();
+            var function = lambda.CompileEx( preferInterpret: true );
+            var result = function();
 
             Assert.AreEqual( 42, result );
         }
@@ -58,8 +60,8 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<int[]>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 5, result.Length );
     }
@@ -74,8 +76,10 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<int[,]>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var es = lambda.ToExpressionString();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 10, result.Length );
     }
@@ -92,8 +96,10 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<int[]>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var es = lambda.ToExpressionString();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 2, result.Length );
     }
@@ -110,8 +116,8 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<List<int>>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 2, result.Count );
     }
@@ -132,8 +138,8 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<int[][]>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 3, result.Length );
         Assert.AreEqual( 3, result[0].Length );
@@ -155,8 +161,8 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<List<int>>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.IsInstanceOfType<List<int>>( result );
     }
@@ -172,8 +178,10 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var es = lambda.ToExpressionString();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 0, result );
     }
@@ -189,8 +197,10 @@ public class XsParserNewExpressionTests
 
         var lambda = Expression.Lambda<Func<TestClass>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var es = lambda.ToExpressionString();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.IsNull( result );
     }

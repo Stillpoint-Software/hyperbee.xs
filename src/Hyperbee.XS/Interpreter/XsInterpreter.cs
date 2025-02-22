@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Hyperbee.Collections;
 using Hyperbee.XS.Core;
 
@@ -23,11 +24,69 @@ public class InterpretScope : ParseScope
     }
 }
 
+internal readonly struct ControlFrame
+{
+    public ControlFrameType Type { get; }
+    public GotoExpression GotoExpr { get; }
+    public LambdaExpression LambdaExpr { get; }
+    public LabelTarget TargetLabel { get; }
+    public object State { get; }
+
+    private ControlFrame( ControlFrameType type, GotoExpression gotoExpr, object state = null )
+    {
+        Type = type;
+        GotoExpr = gotoExpr;
+        State = state;
+    }
+
+    private ControlFrame( ControlFrameType type, LabelTarget targetLabel, object state = null )
+    {
+        Type = type;
+        TargetLabel = targetLabel;
+        State = state;
+    }
+
+    private ControlFrame( ControlFrameType type, LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> capturedScope )
+    {
+        Type = type;
+        LambdaExpr = lambdaExpr;
+        State = capturedScope;
+    }
+
+    public static ControlFrame CreateGoto( GotoExpression gotoExpr, object value = null ) =>
+        new(ControlFrameType.Goto, gotoExpr, value);
+
+    public static ControlFrame CreateReturn( LabelTarget target, object value = null ) =>
+        new(ControlFrameType.Return, target, value);
+
+    public static ControlFrame CreateClosure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> scope ) =>
+        new(ControlFrameType.Closure, lambdaExpr, scope);
+}
+
+internal enum ControlFrameType
+{
+    Goto,
+    Return,
+    Scan,
+    Closure
+}
+
 public sealed class XsInterpreter : ExpressionVisitor
 {
     private readonly InterpretScope _scope;
     private readonly XsDebugger _debugger;
+    
     private readonly Stack<object> _resultStack = new();
+
+    private Dictionary<GotoExpression, GotoNavigation> _gotoNavigation;
+    private GotoNavigation _currentNavigation;
+    private InterpreterMode _mode;
+
+    private enum InterpreterMode
+    {
+        Evaluating,
+        Navigating
+    }
 
     public XsInterpreter( XsDebugger debugger = null )
     {
@@ -71,12 +130,23 @@ public sealed class XsInterpreter : ExpressionVisitor
         if ( curryMethod is null )
             throw new InvalidOperationException( $"No suitable Curry method found for delegate type {typeof(TDelegate)}" );
 
+        PrepareNavigationMap( expression );
+
         return (TDelegate) curryMethod.Invoke( null, [handlerDelegate,expression] )!;
+
+        void PrepareNavigationMap( Expression root )
+        {
+            if ( _gotoNavigation != null )
+                return;
+
+            var navigator = new GotoNavigationVisitor();
+            _gotoNavigation = navigator.Analyze( root );
+        }
     }
 
     private T Evaluate<T>( LambdaExpression lambda, params object[] values )
     {
-         _scope.EnterScope( FrameType.Method );
+        _scope.EnterScope( FrameType.Method );
 
         try
         {
@@ -92,114 +162,123 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
     }
 
-    private object PrepareLambdaInvocation( Closure closure )
+    //// Visit
+
+    //public override Expression Visit( Expression node )
+    //{
+    //    if ( _mode != InterpreterMode.Navigating || _currentNavigation == null || _currentNavigation.CommonAncestor != node )
+    //    {
+    //        return base.Visit( node );
+    //    }
+
+    //    var nextStep = _currentNavigation.GetNextStep();
+            
+    //    if ( nextStep == null )
+    //    {
+    //        _currentNavigation = null;
+    //        _mode = InterpreterMode.Evaluating;
+    //        return node;
+    //    }
+
+    //    return Visit( nextStep );
+
+    //}
+
+    // Goto
+
+    protected override Expression VisitGoto( GotoExpression node )
     {
-        _scope.EnterScope( FrameType.Method );
-        try
+        if ( !_gotoNavigation.TryGetValue( node, out var navigation ) )
+            throw new InterpreterException( $"Undefined label target: {node.Target.Name}", node );
+
+        _resultStack.Clear();
+
+        if ( node.Kind == GotoExpressionKind.Return && node.Value != null )
         {
-            foreach ( var kvp in closure.CapturedScope )
-                _scope.Values[kvp.Key] = kvp.Value;
-
-            return this.Interpreter( closure.Lambda );
+            Visit( node.Value );
         }
-        finally
+
+        _mode = InterpreterMode.Navigating;
+        _currentNavigation = navigation;
+
+        return node;
+    }
+
+    protected override Expression VisitLabel( LabelExpression node )
+    {
+        if ( _mode == InterpreterMode.Navigating && _currentNavigation!.TargetLabel == node.Target )
         {
-            _scope.ExitScope();
+            _mode = InterpreterMode.Evaluating;
+            _currentNavigation.Reset();
+            _currentNavigation = null;
         }
-    }
-
-    private object PrepareLambdaInvocation( LambdaExpression lambda )
-    {
-        return this.Interpreter( lambda );
-    }
-
-    protected override Expression VisitConstant( ConstantExpression node )
-    {
-        _resultStack.Push( node.Value! );
-        return node;
-    }
-
-    protected override Expression VisitParameter( ParameterExpression node )
-    {
-        if ( !_scope.Values.TryGetValue( node, out var value ) )
-            throw new InterpreterException( $"Parameter '{node.Name}' not found.", node );
-
-        _resultStack.Push( value );
-        return node;
-    }
-
-    protected override Expression VisitBinary( BinaryExpression node )
-    {
-        Visit( node.Left );
-        var left = _resultStack.Pop();
-
-        Visit( node.Right );
-        var right = _resultStack.Pop();
-
-        var result = EvaluateBinary( node, left, right );
-        _resultStack.Push( result );
 
         return node;
     }
 
-    protected override Expression VisitUnary( UnaryExpression node )
+    // Block
+
+    enum BlockState
     {
-        Visit( node.Operand );
-        var operand = _resultStack.Pop();
-        
-        var result = EvaluateUnary( node, operand );
-        _resultStack.Push( result );
-
-        return node;
-    }
-
-    protected override Expression VisitConditional( ConditionalExpression node )
-    {
-        Visit( node.Test );
-        var condition = (bool) _resultStack.Pop();
-
-        Visit( condition ? node.IfTrue : node.IfFalse );
-        return node;
-    }
+        InitializeVariables,
+        HandleStatements,
+        Complete
+    };
 
     protected override Expression VisitBlock( BlockExpression node )
     {
-        _scope.EnterScope( FrameType.Block );
+        var state = BlockState.InitializeVariables;
+        int statementIndex = 0;
 
-        LabelTarget returnLabel = null;
-        object returnValue = null;
+        _scope.EnterScope( FrameType.Block );
 
         try
         {
-            foreach ( var variable in node.Variables )
+            Navigate:
+
+            if ( _mode == InterpreterMode.Navigating )
             {
-                _scope.Variables[variable.Name!] = variable;
-                _scope.Values[variable] = AssignDefault( variable.Type ); 
+                var nextStep = _currentNavigation.GetNextStep();
+                statementIndex = node.Expressions.IndexOf( nextStep );
             }
 
-            // BF original code
-            //
-            //foreach ( var expression in node.Expressions )
-            //    Visit( expression );
-
-            for ( var i = 0; i < node.Expressions.Count; i++ )
+            while ( true )
             {
-                var expr = node.Expressions[i];
-
-                // If this expression is a return, extract the return label
-                if ( expr is GotoExpression gotoExpr && gotoExpr.Kind == GotoExpressionKind.Return )
+                switch ( state )
                 {
-                    returnLabel = gotoExpr.Target;
-                    Visit( gotoExpr.Value ); // Evaluate the return value
-                    returnValue = _resultStack.Pop();
-                    break; 
+                    case BlockState.InitializeVariables:
+                        foreach ( var variable in node.Variables )
+                        {
+                            _scope.Variables[variable.Name!] = variable;
+                            _scope.Values[variable] = Default( variable.Type );
+                        }
+
+                        state = BlockState.HandleStatements;
+                        break;
+
+                    case BlockState.HandleStatements:
+                        if ( statementIndex >= node.Expressions.Count )
+                        {
+                            state = BlockState.Complete;
+                            break;
+                        }
+
+                        Visit( node.Expressions[statementIndex] );
+
+                        if ( _mode == InterpreterMode.Navigating )
+                        {
+                            if ( _currentNavigation.CommonAncestor == node )
+                                goto Navigate;
+
+                            return node!;
+                        }
+
+                        statementIndex++;
+                        break;
+
+                    case BlockState.Complete:
+                        return node;
                 }
-
-                Visit( expr );
-
-                // Pop intermediate results unless it's the last expression OR we hit a return
-                if ( i < node.Expressions.Count - 1 )
-                    _resultStack.TryPop( out _ );
             }
         }
         finally
@@ -207,56 +286,200 @@ public sealed class XsInterpreter : ExpressionVisitor
             _scope.ExitScope();
         }
 
-        // If we encountered a return, push the return value onto the stack
-        if ( returnLabel != null )
-            _resultStack.Push( returnValue );
+        static object Default( Type type ) =>
+            type == typeof(string) ? string.Empty :
+            type.IsValueType ? RuntimeHelpers.GetUninitializedObject( type ) : null;
+    }
 
-        return node;
+    // Conditional
 
-        static object AssignDefault( Type type )
+    enum ConditionalState
+    {
+        Test, 
+        HandleTest, 
+        Visit, 
+        Complete
+    };
+
+    protected override Expression VisitConditional( ConditionalExpression node )
+    {
+        var state = ConditionalState.Test;
+        var continuation = ConditionalState.Complete;
+        Expression expr = null;
+
+    Navigate:
+
+        if ( _mode == InterpreterMode.Navigating )
         {
-            if ( type == typeof(string) )
-                return string.Empty;
-
-            return type.IsValueType 
-                ? Activator.CreateInstance( type ) : // default
-                null;
+            expr = _currentNavigation.GetNextStep();
+            state = ConditionalState.Visit;
+            continuation = expr == node.Test ? ConditionalState.HandleTest : ConditionalState.Complete;
         }
+
+        while ( true )
+        {
+            switch ( state )
+            {
+                case ConditionalState.Test:
+                    expr = node.Test;
+                    state = ConditionalState.Visit;
+                    continuation = ConditionalState.HandleTest;
+                    break;
+
+                case ConditionalState.HandleTest:
+                    var conditionValue = (bool) _resultStack.Pop();
+                    expr = conditionValue ? node.IfTrue : node.IfFalse;
+                    state = ConditionalState.Visit;
+                    continuation = ConditionalState.Complete;
+                    break;
+
+                case ConditionalState.Visit:
+                    Visit( expr );
+
+                    if ( _mode == InterpreterMode.Navigating )
+                    {
+                        if ( _currentNavigation.CommonAncestor == node )
+                            goto Navigate;
+
+                        return node; 
+                    }
+
+                    state = continuation;
+                    break;
+
+                case ConditionalState.Complete:
+                    return node;
+            }
+        }
+    }
+
+    // Switch
+
+    enum SwitchState
+    {
+        SwitchValue,
+        HandleSwitchValue, 
+        MatchCase,
+        HandleMatchCase, 
+        EvaluateCaseBody,
+        Visit,
+        VisitCaseBody,
+        Complete 
     }
 
     protected override Expression VisitSwitch( SwitchExpression node )
     {
-        Visit( node.SwitchValue );
-        var switchValue = _resultStack.Pop(); 
+        var state = SwitchState.SwitchValue;
+        var continuation = SwitchState.Complete;
+        var caseIndex = 0;
+        var testIndex = 0;
+        object switchValue = null;
+        Expression expr = null;
 
-        foreach ( var switchCase in node.Cases )
+        Navigate:
+
+        if ( _mode == InterpreterMode.Navigating )
         {
-            foreach ( var testValue in switchCase.TestValues )
+            expr = _currentNavigation.GetNextStep();
+
+            if ( expr == node.SwitchValue )
             {
-                Visit( testValue );
-                var testResult = _resultStack.Pop();
-
-                if ( !Equals( switchValue, testResult ) )
-                    continue;
-
-                Visit( switchCase.Body );
-                return node;
+                state = SwitchState.Visit;
+                continuation = SwitchState.HandleSwitchValue;
+            }
+            else
+            {
+                var matchedCase = node.Cases.FirstOrDefault( c => c.Body == expr );
+                expr = matchedCase?.Body ?? node.DefaultBody;
+                state = expr != null ? SwitchState.Visit : SwitchState.Complete;
+                continuation = SwitchState.Complete;
             }
         }
 
-        if ( node.DefaultBody != null )
+        while ( true )
         {
-            Visit( node.DefaultBody );
-        }
+            switch ( state )
+            {
+                case SwitchState.SwitchValue:
+                    expr = node.SwitchValue;
+                    state = SwitchState.Visit;
+                    continuation = SwitchState.HandleSwitchValue;
+                    break;
 
-        return node;
+                case SwitchState.HandleSwitchValue:
+                    switchValue = _resultStack.Pop();
+                    caseIndex = 0;
+                    testIndex = 0;
+                    state = SwitchState.MatchCase;
+                    break;
+
+                case SwitchState.MatchCase:
+                    if ( caseIndex >= node.Cases.Count )
+                    {
+                        expr = node.DefaultBody;
+                        state = expr != null ? SwitchState.Visit : SwitchState.Complete;
+                        continuation = SwitchState.Complete;
+                        break;
+                    }
+
+                    var testValues = node.Cases[caseIndex].TestValues;
+                    if ( testIndex >= testValues.Count )
+                    {
+                        caseIndex++;
+                        testIndex = 0;
+                        state = SwitchState.MatchCase;
+                        break;
+                    }
+
+                    expr = testValues[testIndex];
+                    state = SwitchState.Visit;
+                    continuation = SwitchState.HandleMatchCase;
+                    break;
+
+                case SwitchState.HandleMatchCase:
+                    var testValue = _resultStack.Pop();
+
+                    if ( (switchValue != null && !switchValue.Equals( testValue )) || (switchValue == null && testValue != null) )
+                    {
+                        testIndex++;
+                        state = SwitchState.MatchCase;
+                        break;
+                    }
+
+                    expr = node.Cases[caseIndex].Body;
+                    state = SwitchState.Visit;
+                    continuation = SwitchState.Complete;
+                    break;
+
+                case SwitchState.Visit:
+                    Visit( expr! );
+
+                    if ( _mode == InterpreterMode.Navigating )
+                    {
+                        if ( _currentNavigation.CommonAncestor == node )
+                            goto Navigate;
+
+                        return node;
+                    }
+
+                    state = continuation;
+                    break;
+
+                case SwitchState.Complete:
+                    return node;
+            }
+        }
     }
+
+    // Loop
+
+    // Lambda
 
     protected override Expression VisitLambda<T>( Expression<T> node )
     {
         if ( _scope.Depth == 0 )
         {
-            _resultStack.Push( node );
+            _resultStack.Push( node ); 
             return node;
         }
 
@@ -278,65 +501,56 @@ public sealed class XsInterpreter : ExpressionVisitor
             capturedScope[variable] = value;
         }
 
-        _resultStack.Push( new Closure( node, capturedScope ) );
+        _resultStack.Push( ControlFrame.CreateClosure( node, capturedScope ) );
         return node;
     }
 
     protected override Expression VisitInvocation( InvocationExpression node )
     {
         Visit( node.Expression );
+        var targetValue = _resultStack.Pop();
 
-        var target = _resultStack.Pop();
+        LambdaExpression lambda;
+        Dictionary<ParameterExpression, object> capturedScope = null;
 
-        if ( target is Closure closure )
+        switch ( targetValue )
         {
-            _scope.EnterScope( FrameType.Method );
+            case ControlFrame closure when closure.Type == ControlFrameType.Closure:
+                lambda = closure.LambdaExpr;
+                capturedScope = closure.State as Dictionary<ParameterExpression, object>;
+                break;
 
-            try
-            {
-                foreach ( var (param, value) in closure.CapturedScope )
-                    _scope.Values[param] = value;
+            case LambdaExpression directLambda:
+                lambda = directLambda;
+                break;
 
-                for ( var i = 0; i < node.Arguments.Count; i++ )
-                {
-                    Visit( node.Arguments[i] );
-                    _scope.Values[closure.Lambda.Parameters[i]] = _resultStack.Pop();
-                }
-
-                Visit( closure.Lambda.Body );
-                return node;
-            }
-            finally
-            {
-                _scope.ExitScope();
-            }
+            default:
+                throw new InterpreterException( "Invocation target is not a valid lambda or closure.", node );
         }
-
-        if ( target is not LambdaExpression lambda )
-        {
-            throw new InterpreterException( "Invocation target is not a valid lambda or closure.", node );
-        }
-
-        // Direct invocation of a raw lambda (outermost lambda case)
 
         _scope.EnterScope( FrameType.Method );
 
         try
         {
-            for ( var i = 0; i < lambda.Parameters.Count; i++ )
+            if ( capturedScope is not null )
+            {
+                foreach ( var (param, value) in capturedScope )
+                    _scope.Values[param] = value;
+            }
+
+            for ( var i = 0; i < node.Arguments.Count; i++ )
             {
                 Visit( node.Arguments[i] );
                 _scope.Values[lambda.Parameters[i]] = _resultStack.Pop();
             }
 
             Visit( lambda.Body );
+            return node;
         }
         finally
         {
             _scope.ExitScope();
         }
-
-        return node;
     }
 
     protected override Expression VisitMethodCall( MethodCallExpression node )
@@ -350,25 +564,58 @@ public sealed class XsInterpreter : ExpressionVisitor
             instance = _resultStack.Pop();
         }
 
-        var argumentCount = node.Arguments.Count;
-        var arguments = new object[argumentCount];
+        var arguments = new object[node.Arguments.Count];
+        var capturedValues = new Dictionary<int, Dictionary<ParameterExpression, object>>();
+        var hasClosure = false;
 
-        for ( var i = 0; i < argumentCount; i++ )
+        for ( var i = 0; i < node.Arguments.Count; i++ )
         {
             Visit( node.Arguments[i] );
-            var argument = _resultStack.Pop();
+            var argValue = _resultStack.Pop();
 
-            arguments[i] = argument switch
+            switch ( argValue )
             {
-                Closure closure => PrepareLambdaInvocation( closure ),
-                LambdaExpression lambda => PrepareLambdaInvocation( lambda ),
-                _ => argument
-            };
+                case ControlFrame closure when closure.Type == ControlFrameType.Closure:
+                    hasClosure = true;
+                    arguments[i] = this.Interpreter( closure.LambdaExpr );
+                    capturedValues[i] = closure.State as Dictionary<ParameterExpression, object>;
+                    break;
+
+                case LambdaExpression lambdaExpr:
+                    arguments[i] = this.Interpreter( lambdaExpr );
+                    break;
+
+                default:
+                    arguments[i] = argValue;
+                    break;
+            }
         }
 
-        var result = node.Method.Invoke( instance, arguments );
-        _resultStack.Push( result );
-        return node;
+        if ( !hasClosure )
+        {
+            var result = node.Method.Invoke( instance, arguments );
+            _resultStack.Push( result );
+            return node;
+        }
+
+        _scope.EnterScope( FrameType.Method );
+
+        try
+        {
+            foreach ( var (_, capturedScope) in capturedValues )
+            {
+                foreach ( var (param, value) in capturedScope )
+                    _scope.Values[param] = value;
+            }
+
+            var result = node.Method.Invoke( instance, arguments );
+            _resultStack.Push( result );
+            return node;
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
     }
 
     protected override Expression VisitMember( MemberExpression node )
@@ -387,64 +634,216 @@ public sealed class XsInterpreter : ExpressionVisitor
         return node;
     }
 
+    protected override Expression VisitBinary( BinaryExpression node )
+    {
+        Visit( node.Left );
+        var left = _resultStack.Pop();
+
+        Visit( node.Right );
+        var right = _resultStack.Pop();
+
+        var result = EvaluateBinary( node, left, right );
+        _resultStack.Push( result );
+
+        return node;
+    }
+
+    protected override Expression VisitTypeBinary( TypeBinaryExpression node )
+    {
+        Visit( node.Expression );
+        var operand = _resultStack.Pop();
+
+        var result = operand is not null && node.TypeOperand.IsAssignableFrom( operand.GetType() );
+
+        _resultStack.Push( result );
+        return node;
+    }
+
+    protected override Expression VisitUnary( UnaryExpression node )
+    {
+        Visit( node.Operand );
+        var operand = _resultStack.Pop();
+
+        var result = EvaluateUnary( node, operand );
+        _resultStack.Push( result );
+
+        return node;
+    }
+
+    protected override Expression VisitDefault( DefaultExpression node )
+    {
+        var defaultValue = node.Type.IsValueType && node.Type != typeof( void )
+            ? RuntimeHelpers.GetUninitializedObject( node.Type )
+            : null;
+
+        _resultStack.Push( defaultValue );
+        return node;
+    }
+
+    protected override Expression VisitConstant( ConstantExpression node )
+    {
+        _resultStack.Push( node.Value );
+        return node;
+    }
+
+    protected override Expression VisitParameter( ParameterExpression node )
+    {
+        if ( !_scope.Values.TryGetValue( node, out var value ) )
+            throw new InterpreterException( $"Parameter '{node.Name}' not found.", node );
+
+        _resultStack.Push( value );
+        return node;
+    }
+
     protected override Expression VisitNew( NewExpression node )
     {
         var arguments = new object[node.Arguments.Count];
+        var capturedValues = new Dictionary<int, Dictionary<ParameterExpression, object>>();
+        var hasClosure = false;
 
-        for ( var i = 0; i < node.Arguments.Count; i++ )
+        for ( var index = 0; index < node.Arguments.Count; index++ )
         {
-            Visit( node.Arguments[i] );
-            var argument = _resultStack.Pop();
+            Visit( node.Arguments[index] );
+            var argValue = _resultStack.Pop();
 
-            arguments[i] = argument switch
+            switch ( argValue )
             {
-                Closure closure => PrepareLambdaInvocation( closure ),
-                LambdaExpression lambda => PrepareLambdaInvocation( lambda ),
-                _ => argument
-            };
+                case ControlFrame closure when closure.Type == ControlFrameType.Closure:
+                    hasClosure = true;
+                    arguments[index] = this.Interpreter( closure.LambdaExpr );
+                    capturedValues[index] = closure.State as Dictionary<ParameterExpression, object>;
+                    break;
+
+                case LambdaExpression lambdaExpr:
+                    arguments[index] = this.Interpreter( lambdaExpr );
+                    break;
+
+                default:
+                    arguments[index] = argValue;
+                    break;
+            }
         }
 
-        var constructor = node.Constructor
-            ?? throw new InterpreterException( $"No valid constructor found for type {node.Type}.", node );
+        var constructor = node.Constructor;
 
-        var instance = constructor.Invoke( arguments );
+        if ( constructor is null )
+        {
+            throw new InterpreterException( $"No valid constructor found for type {node.Type}.", node );
+        }
 
-        _resultStack.Push( instance );
+        if ( !hasClosure )
+        {
+            var instance = constructor.Invoke( arguments );
+            _resultStack.Push( instance );
+            return node;
+        }
 
-        return node;
+        _scope.EnterScope( FrameType.Method );
+
+        try
+        {
+            foreach ( var (_, capturedScope) in capturedValues )
+            {
+                foreach ( var (param, value) in capturedScope )
+                    _scope.Values[param] = value;
+            }
+
+            var instance = constructor.Invoke( arguments );
+            _resultStack.Push( instance );
+            return node;
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
     }
 
     protected override Expression VisitNewArray( NewArrayExpression node )
     {
         var elementType = node.Type.GetElementType();
-        var elements = new object[node.Expressions.Count];
 
-        for ( var i = 0; i < node.Expressions.Count; i++ )
+        switch ( node.NodeType )
         {
-            Visit( node.Expressions[i] );
-            elements[i] = _resultStack.Pop();
+            case ExpressionType.NewArrayInit:
+            {
+                // Handle NewArrayInit: Array initialized with values
+                var values = new object[node.Expressions.Count];
+
+                for ( var i = 0; i < node.Expressions.Count; i++ )
+                {
+                    Visit( node.Expressions[i] );
+                    values[i] = _resultStack.Pop();
+                }
+
+                var array = Array.CreateInstance( elementType!, values.Length );
+
+                for ( var i = 0; i < values.Length; i++ )
+                    array.SetValue( values[i], i );
+
+                _resultStack.Push( array );
+                break;
+            }
+            case ExpressionType.NewArrayBounds:
+            {
+                // Handle NewArrayBounds: Array created with specified dimensions
+                var lengths = new int[node.Expressions.Count];
+
+                for ( var i = 0; i < node.Expressions.Count; i++ )
+                {
+                    Visit( node.Expressions[i] );
+                    lengths[i] = (int) _resultStack.Pop();
+                }
+
+                var array = Array.CreateInstance( elementType!, lengths );
+                _resultStack.Push( array );
+                break;
+            }
+            default:
+                throw new InterpreterException( $"Unsupported array creation type: {node.NodeType}", node );
         }
 
-        var array = Array.CreateInstance( elementType!, elements.Length );
+        return node;
+    }
 
-        for ( var i = 0; i < elements.Length; i++ )
-            array.SetValue( elements[i], i );
+    protected override Expression VisitListInit( ListInitExpression node )
+    {
+        Visit( node.NewExpression );
+        var instance = _resultStack.Pop();
 
-        _resultStack.Push( array );
+        foreach ( var initializer in node.Initializers )
+        {
+            var arguments = new object[initializer.Arguments.Count];
+
+            for ( var index = 0; index < initializer.Arguments.Count; index++ )
+            {
+                Visit( initializer.Arguments[index] );
+                arguments[index] = _resultStack.Pop();
+            }
+
+            initializer.AddMethod.Invoke( instance, arguments );
+        }
+
+        _resultStack.Push( instance );
         return node;
     }
 
     private object EvaluateBinary( BinaryExpression binary, object left, object right )
     {
-        // Variable assignments (=, +=, -=, etc.)
-
-        if ( binary.NodeType == ExpressionType.Assign )
+        switch ( binary.NodeType )
         {
-            if ( binary.Left is not ParameterExpression variable )
-                throw new InterpreterException( "Left side of assignment must be a variable.", binary );
+            // Handle null-coalescing (??) operator
+            case ExpressionType.Coalesce:
+                return left ?? right;
 
-            _scope.Values[variable] = right;
-            return right;
+            // Variable assignments (=, +=, -=, etc.)
+            case ExpressionType.Assign:
+            {
+                if ( binary.Left is not ParameterExpression variable )
+                    throw new InterpreterException( "Left side of assignment must be a variable.", binary );
+
+                _scope.Values[variable] = right;
+                return right;
+            }
         }
 
         // Arithmetic Assignments (+=, -=, etc.)
@@ -542,24 +941,29 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     private object EvaluateUnary( UnaryExpression unary, object operand )
     {
-        if ( unary.NodeType == ExpressionType.Convert )
+        switch ( unary.NodeType )
         {
-            if ( operand is not IConvertible convertible )
-                throw new InterpreterException( $"Cannot convert {operand.GetType()} to {unary.Type}", unary );
+            case ExpressionType.Convert:
+                if ( operand is not IConvertible convertible )
+                    throw new InterpreterException( $"Cannot convert {operand.GetType()} to {unary.Type}", unary );
 
-            return Convert.ChangeType( convertible, unary.Type );
+                return Convert.ChangeType( convertible, unary.Type );
+
+            case ExpressionType.TypeAs:
+                return operand is null || unary.Type.IsAssignableFrom( operand.GetType() ) ? operand : null;
+
+            default:
+                return operand switch
+                {
+                    int intValue => EvaluateNumericUnary( unary, intValue ),
+                    long longValue => EvaluateNumericUnary( unary, longValue ),
+                    float floatValue => EvaluateNumericUnary( unary, floatValue ),
+                    double doubleValue => EvaluateNumericUnary( unary, doubleValue ),
+                    decimal decimalValue => EvaluateNumericUnary( unary, decimalValue ),
+                    bool boolValue => EvaluateLogicalUnary( unary, boolValue ),
+                    _ => throw new InterpreterException( $"Unsupported unary operation for type {operand.GetType()}", unary )
+                };
         }
-
-        return operand switch
-        {
-            int intValue => EvaluateNumericUnary( unary, intValue ),
-            long longValue => EvaluateNumericUnary( unary, longValue ),
-            float floatValue => EvaluateNumericUnary( unary, floatValue ),
-            double doubleValue => EvaluateNumericUnary( unary, doubleValue ),
-            decimal decimalValue => EvaluateNumericUnary( unary, decimalValue ),
-            bool boolValue => EvaluateLogicalUnary( unary, boolValue ),
-            _ => throw new InterpreterException( $"Unsupported unary operation for type {operand.GetType()}", unary )
-        };
     }
 
     private object EvaluateNumericUnary<T>( UnaryExpression unary, T operand )
@@ -654,45 +1058,5 @@ public sealed class XsInterpreter : ExpressionVisitor
             return base.VisitParameter( node );
         }
     }
-
-    private sealed class Closure
-    {
-        public LambdaExpression Lambda { get; }
-        public Dictionary<ParameterExpression, object> CapturedScope { get; }
-
-        public Closure( LambdaExpression lambda, Dictionary<ParameterExpression, object> capturedScope )
-        {
-            Lambda = lambda;
-            CapturedScope = capturedScope;
-        }
-    }
-
-    public static class CurryFuncs
-    {
-        public static readonly MethodInfo[] Methods = typeof(CurryFuncs).GetMethods();
-
-        public static Func<R> Curry<C, R>( Func<C, object[], R> f, C c ) =>
-            () => f( c, [] );
-
-        public static Func<T1, R> Curry<C, T1, R>( Func<C, object[], R> f, C c ) =>
-            t1 => f( c, [t1] );
-
-        public static Func<T1, T2, R> Curry<C, T1, T2, R>( Func<C, object[], R> f, C c ) =>
-            ( t1, t2 ) => f( c, [t1, t2] );
-
-        public static Func<T1, T2, T3, R> Curry<C, T1, T2, T3, R>( Func<C, object[], R> f, C c ) =>
-            ( t1, t2, t3 ) => f( c, [t1, t2, t3] );
-
-        public static Func<T1, T2, T3, T4, R> Curry<C, T1, T2, T3, T4, R>( Func<C, object[], R> f, C c ) =>
-            ( t1, t2, t3, t4 ) => f( c, [t1, t2, t3, t4] );
-
-        public static Func<T1, T2, T3, T4, T5, R> Curry<C, T1, T2, T3, T4, T5, R>( Func<C, object[], R> f, C c ) =>
-            ( t1, t2, t3, t4, t5 ) => f( c, [t1, t2, t3, t4, t5] );
-
-        public static Func<T1, T2, T3, T4, T5, T6, R> Curry<C, T1, T2, T3, T4, T5, T6, R>( Func<C, object[], R> f, C c ) =>
-            ( t1, t2, t3, t4, t5, t6 ) => f( c, [t1, t2, t3, t4, t5, t6] );
-
-        public static Func<T1, T2, T3, T4, T5, T6, T7, R> Curry<C, T1, T2, T3, T4, T5, T6, T7, R>( Func<C, object[], R> f, C c ) =>
-            ( t1, t2, t3, t4, t5, t6, t7 ) => f( c, [t1, t2, t3, t4, t5, t6, t7] );
-    }
 }
+

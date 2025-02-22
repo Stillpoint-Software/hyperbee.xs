@@ -15,7 +15,7 @@ public class XsParserGotoTests
             label1:
                 var x = 10;
                 if (x > 5) {
-                    goto label2;
+                    goto label2; 
                 }
                 x = 0;
             label2:
@@ -23,8 +23,9 @@ public class XsParserGotoTests
             """ );
 
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 11, result );
     }

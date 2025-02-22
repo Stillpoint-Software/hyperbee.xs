@@ -15,8 +15,6 @@ public class XsParserComplexTests
 
         var expression = Xs.Parse( script );
 
-        var code = expression.ToExpressionString();
-
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
         var result = compiled();

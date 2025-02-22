@@ -13,8 +13,9 @@ public class XsParserLiteralTests
         var expression = Xs.Parse( "\"Some String\";" );
 
         var lambda = Lambda<Func<string>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "Some String", result );
     }
@@ -24,8 +25,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 'c';" );
         var lambda = Lambda<Func<char>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 'c', result );
     }
@@ -35,8 +37,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 12345;" );
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 12345, result );
     }
@@ -46,8 +49,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 12345N;" );
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 12345, result );
     }
@@ -57,8 +61,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 12345L;" );
         var lambda = Lambda<Func<long>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 12345L, result );
     }
@@ -68,8 +73,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 123.45F;" );
         var lambda = Lambda<Func<float>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 123.45F, result );
     }
@@ -79,8 +85,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 123.45D;" );
         var lambda = Lambda<Func<double>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 123.45D, result );
     }
@@ -90,8 +97,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "123.45D;" );
         var lambda = Lambda<Func<double>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 123.45D, result );
     }
@@ -101,8 +109,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "123.45D.ToString();" );
         var lambda = Lambda<Func<string>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "123.45", result );
     }
@@ -112,8 +121,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "(123.45D + 7D).ToString();" );
         var lambda = Lambda<Func<string>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( "130.45", result );
     }
@@ -123,8 +133,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 12345L as int;" );
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 12345, result );
     }
@@ -134,8 +145,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 12345L as? long;" );
         var lambda = Lambda<Func<long?>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 12345, result );
     }
@@ -145,8 +157,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 12345L as? int;" );
         var lambda = Lambda<Func<int?>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( null, result );
     }
@@ -156,8 +169,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "var x = 12345L as? int ?? 10;" );
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 10, result );
     }
@@ -167,8 +181,9 @@ public class XsParserLiteralTests
     {
         var expression = Xs.Parse( "12345L is long;" );
         var lambda = Lambda<Func<bool>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.IsTrue( result );
     }
