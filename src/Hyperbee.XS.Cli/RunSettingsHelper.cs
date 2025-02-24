@@ -91,7 +91,7 @@ internal static class RunSettingsHelper
 
         foreach ( var package in packages.Split( ';' ) )
         {
-            await referenceManager.LoadPackageAsync( package, "latest", new SpectreConsoleLogger() );
+            await referenceManager.LoadPackageAsync( package, version: null, source: null, new SpectreConsoleLogger() );
         }
     }
 }

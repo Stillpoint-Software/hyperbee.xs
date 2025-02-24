@@ -7,7 +7,7 @@ namespace Hyperbee.XS;
 
 public class XsConfig( TypeResolver resolver = null )
 {
-    public IReadOnlyCollection<IParseExtension> Extensions { get; init; } = [];
+    public List<IParseExtension> Extensions { get; init; } = [];
     internal TypeResolver Resolver { get; } = resolver ?? new TypeResolver( new ReferenceManager() );
 }
 

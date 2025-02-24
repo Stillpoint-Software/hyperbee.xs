@@ -12,8 +12,8 @@ namespace Hyperbee.XS;
 
 public partial class XsParser
 {
-    private readonly Parser<Expression> _xs;
-    private readonly XsConfig _config;
+    private Parser<Expression> _xs;
+    private XsConfig _config;
 
     public XsParser()
         : this( default )
@@ -24,6 +24,18 @@ public partial class XsParser
     {
         _config = config ?? new XsConfig();
         _xs = CreateParser( _config );
+    }
+
+    public void Reset( XsConfig config )
+    {
+        _config = config ?? new XsConfig();
+        _xs = CreateParser( _config );
+    }
+
+    public void AddExtensions( params IParseExtension[] extension )
+    {
+        _config.Extensions.AddRange( extension );
+        Reset( _config );
     }
 
     // Parse
