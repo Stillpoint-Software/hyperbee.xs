@@ -33,7 +33,7 @@
     <PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.75" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.49.2-preview.0.72" />
     <PackageReference Include="System.Reflection.Metadata" Version="9.0.2" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.1" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.2" />
   </ItemGroup>
 
   <ItemGroup>
