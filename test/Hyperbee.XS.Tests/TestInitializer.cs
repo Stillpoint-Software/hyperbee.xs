@@ -21,6 +21,11 @@ public static class TestInitializer
 
 public static class TestExtensions
 {
+    public static Delegate CompileEx( this LambdaExpression expression, bool preferInterpret = false )
+    {
+        return preferInterpret ? (Delegate) expression.Interpreter() : expression.Compile();
+    }
+
     public static T CompileEx<T>( this Expression<T> expression, bool preferInterpret = false )
         where T : Delegate
     {

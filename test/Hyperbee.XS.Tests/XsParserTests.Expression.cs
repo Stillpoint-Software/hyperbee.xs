@@ -1,5 +1,4 @@
-﻿using Hyperbee.XS.Core.Writer;
-using static System.Linq.Expressions.Expression;
+﻿using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
@@ -53,8 +52,6 @@ public class XsParserExpressionTests
         var expression = Xs.Parse( "!?false;" );
 
         var lambda = Lambda<Func<bool>>( expression );
-
-        var es = lambda.ToExpressionString();
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();

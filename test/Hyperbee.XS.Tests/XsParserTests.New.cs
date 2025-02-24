@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Hyperbee.XS.Core.Writer;
+﻿using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
@@ -17,7 +16,7 @@ public class XsParserNewTests
             new TestClass(42);
             """ );
 
-        var lambda = Expression.Lambda<Func<TestClass>>( expression );
+        var lambda = Lambda<Func<TestClass>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -37,7 +36,7 @@ public class XsParserNewTests
                 new TestClass(42).PropertyThis.PropertyValue;
                 """ );
 
-            var lambda = Expression.Lambda<Func<int>>( expression );
+            var lambda = Lambda<Func<int>>( expression );
 
             var function = lambda.CompileEx( preferInterpret: true );
             var result = function();
@@ -58,7 +57,7 @@ public class XsParserNewTests
             new int[5];
             """ );
 
-        var lambda = Expression.Lambda<Func<int[]>>( expression );
+        var lambda = Lambda<Func<int[]>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -74,9 +73,7 @@ public class XsParserNewTests
             new int[2,5];
             """ );
 
-        var lambda = Expression.Lambda<Func<int[,]>>( expression );
-
-        var es = lambda.ToExpressionString();
+        var lambda = Lambda<Func<int[,]>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -94,9 +91,7 @@ public class XsParserNewTests
             new int[] {1,2};
             """ );
 
-        var lambda = Expression.Lambda<Func<int[]>>( expression );
-
-        var es = lambda.ToExpressionString();
+        var lambda = Lambda<Func<int[]>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -114,7 +109,7 @@ public class XsParserNewTests
             new List<int>() {1,2};
             """ );
 
-        var lambda = Expression.Lambda<Func<List<int>>>( expression );
+        var lambda = Lambda<Func<List<int>>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -136,7 +131,7 @@ public class XsParserNewTests
             };
             """ );
 
-        var lambda = Expression.Lambda<Func<int[][]>>( expression );
+        var lambda = Lambda<Func<int[][]>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -159,7 +154,7 @@ public class XsParserNewTests
             new List<int>();
             """ );
 
-        var lambda = Expression.Lambda<Func<List<int>>>( expression );
+        var lambda = Lambda<Func<List<int>>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -176,9 +171,7 @@ public class XsParserNewTests
             x;
             """ );
 
-        var lambda = Expression.Lambda<Func<int>>( expression );
-
-        var es = lambda.ToExpressionString();
+        var lambda = Lambda<Func<int>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
@@ -195,9 +188,7 @@ public class XsParserNewTests
             x;
             """ );
 
-        var lambda = Expression.Lambda<Func<TestClass>>( expression );
-
-        var es = lambda.ToExpressionString();
+        var lambda = Lambda<Func<TestClass>>( expression );
 
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();

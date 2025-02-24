@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Hyperbee.Collections;
@@ -76,11 +75,16 @@ public sealed class XsInterpreter : ExpressionVisitor
     private readonly InterpretScope _scope;
     private readonly XsDebugger _debugger;
     
+    private readonly Evaluator _evaluator;
+
     private readonly Stack<object> _resultStack = new();
 
     private Dictionary<GotoExpression, GotoNavigation> _gotoNavigation;
     private GotoNavigation _currentNavigation;
     private InterpreterMode _mode;
+
+    internal InterpretScope Scope => _scope;
+    internal Stack<object> ResultStack => _resultStack;
 
     private enum InterpreterMode
     {
@@ -92,6 +96,8 @@ public sealed class XsInterpreter : ExpressionVisitor
     {
         _scope = new InterpretScope();
         _debugger = debugger;
+
+        _evaluator = new Evaluator( this );
     }
 
     public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
@@ -161,28 +167,6 @@ public sealed class XsInterpreter : ExpressionVisitor
             _scope.ExitScope();
         }
     }
-
-    //// Visit
-
-    //public override Expression Visit( Expression node )
-    //{
-    //    if ( _mode != InterpreterMode.Navigating || _currentNavigation == null || _currentNavigation.CommonAncestor != node )
-    //    {
-    //        return base.Visit( node );
-    //    }
-
-    //    var nextStep = _currentNavigation.GetNextStep();
-            
-    //    if ( nextStep == null )
-    //    {
-    //        _currentNavigation = null;
-    //        _mode = InterpreterMode.Evaluating;
-    //        return node;
-    //    }
-
-    //    return Visit( nextStep );
-
-    //}
 
     // Goto
 
@@ -473,6 +457,44 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     // Loop
 
+    protected override Expression VisitLoop( LoopExpression node )
+    {
+        _scope.EnterScope( FrameType.Block );
+
+        try
+        {
+            while ( true )
+            {
+                Visit( node.Body );
+
+                if ( _mode == InterpreterMode.Navigating )
+                {
+                    if ( _currentNavigation.TargetLabel == node.BreakLabel )
+                    {
+                        _mode = InterpreterMode.Evaluating;
+                        break;
+                    }
+
+                    if ( _currentNavigation.TargetLabel == node.ContinueLabel )
+                    {
+                        _mode = InterpreterMode.Evaluating;
+                        continue;
+                    }
+
+                    return node;
+                }
+            }
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
+
+        return node;
+    }
+
+    // Try/Catch
+
     // Lambda
 
     protected override Expression VisitLambda<T>( Expression<T> node )
@@ -637,12 +659,12 @@ public sealed class XsInterpreter : ExpressionVisitor
     protected override Expression VisitBinary( BinaryExpression node )
     {
         Visit( node.Left );
-        var left = _resultStack.Pop();
+        var leftValue = _resultStack.Pop();
 
         Visit( node.Right );
-        var right = _resultStack.Pop();
+        var rightValue = _resultStack.Pop();
 
-        var result = EvaluateBinary( node, left, right );
+        var result = _evaluator.Binary( node, leftValue, rightValue );
         _resultStack.Push( result );
 
         return node;
@@ -664,9 +686,15 @@ public sealed class XsInterpreter : ExpressionVisitor
         Visit( node.Operand );
         var operand = _resultStack.Pop();
 
-        var result = EvaluateUnary( node, operand );
+        var result = _evaluator.Unary( node, operand );
         _resultStack.Push( result );
 
+        return node;
+    }
+    
+    protected override Expression VisitConstant( ConstantExpression node )
+    {
+        _resultStack.Push( node.Value );
         return node;
     }
 
@@ -680,12 +708,6 @@ public sealed class XsInterpreter : ExpressionVisitor
         return node;
     }
 
-    protected override Expression VisitConstant( ConstantExpression node )
-    {
-        _resultStack.Push( node.Value );
-        return node;
-    }
-
     protected override Expression VisitParameter( ParameterExpression node )
     {
         if ( !_scope.Values.TryGetValue( node, out var value ) )
@@ -694,6 +716,25 @@ public sealed class XsInterpreter : ExpressionVisitor
         _resultStack.Push( value );
         return node;
     }
+
+    protected override Expression VisitIndex( IndexExpression node ) 
+    {
+        Visit( node.Object );
+        var instance = _resultStack.Pop();
+
+        var arguments = new object[node.Arguments.Count];
+        for ( var i = 0; i < node.Arguments.Count; i++ )
+        {
+            Visit( node.Arguments[i] );
+            arguments[i] = _resultStack.Pop();
+        }
+
+        var result = node.Indexer!.GetValue( instance, arguments );
+        _resultStack.Push( result );
+
+        return node;
+    }
+
 
     protected override Expression VisitNew( NewExpression node )
     {
@@ -827,208 +868,6 @@ public sealed class XsInterpreter : ExpressionVisitor
         return node;
     }
 
-    private object EvaluateBinary( BinaryExpression binary, object left, object right )
-    {
-        switch ( binary.NodeType )
-        {
-            // Handle null-coalescing (??) operator
-            case ExpressionType.Coalesce:
-                return left ?? right;
-
-            // Variable assignments (=, +=, -=, etc.)
-            case ExpressionType.Assign:
-            {
-                if ( binary.Left is not ParameterExpression variable )
-                    throw new InterpreterException( "Left side of assignment must be a variable.", binary );
-
-                _scope.Values[variable] = right;
-                return right;
-            }
-        }
-
-        // Arithmetic Assignments (+=, -=, etc.)
-
-        var leftType = left.GetType();
-
-        if ( binary.NodeType is ExpressionType.AddAssign
-            or ExpressionType.SubtractAssign
-            or ExpressionType.MultiplyAssign
-            or ExpressionType.DivideAssign
-            or ExpressionType.ModuloAssign )
-        {
-            if ( binary.Left is not ParameterExpression variable )
-                throw new InterpreterException( $"Left side of {binary.NodeType} must be a variable.", binary );
-
-            object newValue = leftType switch
-            {
-                Type when leftType == typeof(int) => EvaluateArithmeticBinary( binary, (int) left!, (int) right! ),
-                Type when leftType == typeof(long) => EvaluateArithmeticBinary( binary, (long) left!, (long) right! ),
-                Type when leftType == typeof(float) => EvaluateArithmeticBinary( binary, (float) left!, (float) right! ),
-                Type when leftType == typeof(double) => EvaluateArithmeticBinary( binary, (double) left!, (double) right! ),
-                Type when leftType == typeof(decimal) => EvaluateArithmeticBinary( binary, (decimal) left!, (decimal) right! ),
-                _ => throw new InterpreterException( $"Unsupported assignment operation: {binary.NodeType} for type {leftType}", binary ),
-            };
-
-            _scope.Values[variable] = newValue;
-            return newValue;
-        }
-
-        // Logical Comparisons
-
-        var rightType = right.GetType();
-        var widenedType = GetWidenedType( leftType, rightType );
-
-        if ( binary.NodeType is ExpressionType.Equal
-            or ExpressionType.NotEqual
-            or ExpressionType.LessThan
-            or ExpressionType.GreaterThan
-            or ExpressionType.LessThanOrEqual
-            or ExpressionType.GreaterThanOrEqual )
-        {
-            return widenedType switch
-            {
-                Type when widenedType == typeof(int) => EvaluateLogicalBinary( binary, (int) left!, (int) right! ),
-                Type when widenedType == typeof(long) => EvaluateLogicalBinary( binary, (long) left!, (long) right! ),
-                Type when widenedType == typeof(float) => EvaluateLogicalBinary( binary, (float) left!, (float) right! ),
-                Type when widenedType == typeof(double) => EvaluateLogicalBinary( binary, (double) left!, (double) right! ),
-                Type when widenedType == typeof(decimal) => EvaluateLogicalBinary( binary, (decimal) left!, (decimal) right! ),
-                _ => throw new InterpreterException( $"Unsupported logical operation: {binary.NodeType}", binary )
-            };
-        }
-
-        // Regular Arithmetic Operations
-
-        return widenedType switch
-        {
-            Type when widenedType == typeof(int) => EvaluateArithmeticBinary( binary, (int) left!, (int) right! ),
-            Type when widenedType == typeof(long) => EvaluateArithmeticBinary( binary, (long) left!, (long) right! ),
-            Type when widenedType == typeof(float) => EvaluateArithmeticBinary( binary, (float) left!, (float) right! ),
-            Type when widenedType == typeof(double) => EvaluateArithmeticBinary( binary, (double) left!, (double) right! ),
-            Type when widenedType == typeof(decimal) => EvaluateArithmeticBinary( binary, (decimal) left!, (decimal) right! ),
-            _ => throw new InterpreterException( $"Unsupported binary operation: {binary.NodeType}", binary )
-        };
-    }
-
-    private static T EvaluateArithmeticBinary<T>( BinaryExpression binary, T left, T right )
-        where T : INumber<T>
-    {
-        return binary.NodeType switch
-        {
-            ExpressionType.Add or ExpressionType.AddAssign => left + right,
-            ExpressionType.Subtract or ExpressionType.SubtractAssign => left - right,
-            ExpressionType.Multiply or ExpressionType.MultiplyAssign => left * right,
-            ExpressionType.Divide or ExpressionType.DivideAssign => left / right,
-            ExpressionType.Modulo or ExpressionType.ModuloAssign => left % right,
-            ExpressionType.Power => T.CreateChecked( Math.Pow( double.CreateChecked( left ), double.CreateChecked( right ) ) ),
-            _ => throw new InterpreterException( $"Unsupported arithmetic operation: {binary.NodeType}", binary )
-        };
-    }
-
-    private static bool EvaluateLogicalBinary<T>( BinaryExpression binary, T left, T right )
-        where T : IComparable<T>
-    {
-        return binary.NodeType switch
-        {
-            ExpressionType.LessThan => left.CompareTo( right ) < 0,
-            ExpressionType.GreaterThan => left.CompareTo( right ) > 0,
-            ExpressionType.LessThanOrEqual => left.CompareTo( right ) <= 0,
-            ExpressionType.GreaterThanOrEqual => left.CompareTo( right ) >= 0,
-            ExpressionType.Equal => left.Equals( right ),
-            ExpressionType.NotEqual => !left.Equals( right ),
-            _ => throw new InterpreterException( $"Unsupported logical operation: {binary.NodeType}", binary )
-        };
-    }
-
-    private object EvaluateUnary( UnaryExpression unary, object operand )
-    {
-        switch ( unary.NodeType )
-        {
-            case ExpressionType.Convert:
-                if ( operand is not IConvertible convertible )
-                    throw new InterpreterException( $"Cannot convert {operand.GetType()} to {unary.Type}", unary );
-
-                return Convert.ChangeType( convertible, unary.Type );
-
-            case ExpressionType.TypeAs:
-                return operand is null || unary.Type.IsAssignableFrom( operand.GetType() ) ? operand : null;
-
-            default:
-                return operand switch
-                {
-                    int intValue => EvaluateNumericUnary( unary, intValue ),
-                    long longValue => EvaluateNumericUnary( unary, longValue ),
-                    float floatValue => EvaluateNumericUnary( unary, floatValue ),
-                    double doubleValue => EvaluateNumericUnary( unary, doubleValue ),
-                    decimal decimalValue => EvaluateNumericUnary( unary, decimalValue ),
-                    bool boolValue => EvaluateLogicalUnary( unary, boolValue ),
-                    _ => throw new InterpreterException( $"Unsupported unary operation for type {operand.GetType()}", unary )
-                };
-        }
-    }
-
-    private object EvaluateNumericUnary<T>( UnaryExpression unary, T operand )
-        where T : INumber<T>
-    {
-        if ( unary.NodeType == ExpressionType.Negate )
-            return -operand;
-
-        if ( unary.Operand is not ParameterExpression variable )
-            throw new InterpreterException( $"Unary assignment target must be a variable.", unary );
-
-        T newValue;
-        switch ( unary.NodeType )
-        {
-
-            case ExpressionType.PreIncrementAssign:
-                newValue = operand + T.One;
-                _scope.Values[variable] = newValue;
-                return newValue; 
-
-            case ExpressionType.PreDecrementAssign:
-                newValue = operand - T.One;
-                _scope.Values[variable] = newValue;
-                return newValue; 
-
-            case ExpressionType.PostIncrementAssign:
-                newValue = operand + T.One;
-                _scope.Values[variable] = newValue;
-                return operand; 
-
-            case ExpressionType.PostDecrementAssign:
-                newValue = operand - T.One;
-                _scope.Values[variable] = newValue;
-                return operand; 
-
-            default:
-                throw new InterpreterException( $"Unsupported numeric unary operation: {unary.NodeType}", unary );
-        }
-    }
-
-    private static bool EvaluateLogicalUnary( UnaryExpression unary, bool operand )
-    {
-        return unary.NodeType switch
-        {
-            ExpressionType.Not => !operand,
-            ExpressionType.IsFalse => !operand,
-            ExpressionType.IsTrue => operand,
-            _ => throw new InterpreterException( $"Unsupported boolean unary operation: {unary.NodeType}", unary )
-        };
-    }
-
-    private static Type GetWidenedType( Type leftType, Type rightType )
-    {
-        if ( leftType == rightType )
-            return leftType;
-
-        if ( TypeResolver.IsWideningConversion( leftType, rightType ) )
-            return rightType;
-
-        if ( TypeResolver.IsWideningConversion( rightType, leftType ) )
-            return leftType;
-
-        throw new InvalidOperationException( $"No valid widening conversion between {leftType} and {rightType}." );
-    }
-
     private sealed class FreeVariableVisitor : ExpressionVisitor
     {
         private readonly HashSet<ParameterExpression> _declaredVariables = [];
@@ -1059,4 +898,3 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
     }
 }
-

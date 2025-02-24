@@ -35,14 +35,25 @@ public sealed class GotoNavigationVisitor : ExpressionVisitor
 
     protected override Expression VisitLabel(LabelExpression node)
     {
-        _labelPaths[node.Target] = new List<Expression>(_pathStack.Reverse());
-        return base.VisitLabel(node);
+        _labelPaths[node.Target] = [.._pathStack.Reverse()];
+        return base.VisitLabel( node );
     }
 
     protected override Expression VisitGoto(GotoExpression node)
     {
-        _gotoPaths[node] = new List<Expression>(_pathStack.Reverse());
-        return base.VisitGoto(node);
+        _gotoPaths[node] = [.._pathStack.Reverse()];
+        return base.VisitGoto( node );
+    }
+
+    protected override Expression VisitLoop( LoopExpression node )
+    {
+        if ( node.BreakLabel != null )
+            _labelPaths[node.BreakLabel] = [.._pathStack.Reverse()];
+
+        if ( node.ContinueLabel != null )
+            _labelPaths[node.ContinueLabel] = [.._pathStack.Reverse()];
+
+        return base.VisitLoop( node );
     }
 
     private void ResolveNavigationPaths()
@@ -63,15 +74,14 @@ public sealed class GotoNavigationVisitor : ExpressionVisitor
         var minLength = Math.Min( gotoPath.Count, labelPath.Count );
         var ancestorIndex = 0;
 
-        while( true )
+        while ( ancestorIndex < minLength && gotoPath[ancestorIndex] == labelPath[ancestorIndex] )
         {
-            if ( gotoPath[ancestorIndex] != labelPath[ancestorIndex] )
-                break;
-
-            if ( ++ancestorIndex == minLength )
-                throw new InvalidOperationException( "Could not determine a common ancestor." );
+            ancestorIndex++;
         }
 
+        if ( ancestorIndex == 0 )
+            throw new InvalidOperationException( "Could not determine a common ancestor." );
+        
         var commonAncestorExpr = labelPath[ancestorIndex - 1];
         var steps = labelPath.Skip( ancestorIndex ).ToList();
 
