@@ -95,8 +95,8 @@ public sealed class Navigation
     public List<Expression> Steps { get; }
     public LabelTarget TargetLabel { get; }
     public bool IsReturn { get; }
-
     public Exception Exception { get; }
+
     private int _currentStepIndex;
 
     public Navigation( Expression commonAncestor = null, List<Expression> steps = null, LabelTarget targetLabel = null, bool isReturn = false, Exception exception = null )
@@ -109,8 +109,6 @@ public sealed class Navigation
         _currentStepIndex = 0;
     }
 
-    public Expression Current => _currentStepIndex < Steps.Count ? Steps[_currentStepIndex] : null;
-    public bool IsEmpty => _currentStepIndex >= Steps.Count;
     public void Reset() => _currentStepIndex = 0;
 
     public Expression GetNextStep()
