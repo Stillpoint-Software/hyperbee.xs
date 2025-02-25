@@ -23,29 +23,19 @@ public class InterpretScope : ParseScope
     }
 }
 
-internal readonly struct ControlFrame
+internal readonly struct Closure
 {
-    public ControlFrameType Type { get; }
     public LambdaExpression LambdaExpr { get; }
-    public object State { get; }
+    public Dictionary<ParameterExpression, object> CapturedScope { get; }
 
-    private ControlFrame( ControlFrameType type, LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> capturedScope )
+    private Closure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> capturedScope )
     {
-        Type = type;
         LambdaExpr = lambdaExpr;
-        State = capturedScope;
+        CapturedScope = capturedScope;
     }
 
-    public static ControlFrame CreateClosure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> scope ) =>
-        new( ControlFrameType.Closure, lambdaExpr, scope );
-}
-
-internal enum ControlFrameType
-{
-    Goto,
-    Return,
-    Scan,
-    Closure
+    public static Closure CreateClosure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> scope ) =>
+        new( lambdaExpr, scope );
 }
 
 public sealed class XsInterpreter : ExpressionVisitor
@@ -655,7 +645,7 @@ Navigate:
 
                     if ( _mode == InterpreterMode.Navigating )
                     {
-                        if ( _currentNavigation.CommonAncestor == node )
+                        if ( _currentNavigation?.CommonAncestor == node )
                             goto Navigate;
 
                         if ( _currentNavigation.Exception != null )
@@ -702,7 +692,7 @@ Navigate:
             capturedScope[variable] = value;
         }
 
-        _resultStack.Push( ControlFrame.CreateClosure( node, capturedScope ) );
+        _resultStack.Push( Closure.CreateClosure( node, capturedScope ) );
         return node;
     }
 
@@ -716,9 +706,9 @@ Navigate:
 
         switch ( targetValue )
         {
-            case ControlFrame closure when closure.Type == ControlFrameType.Closure:
+            case Closure closure:
                 lambda = closure.LambdaExpr;
-                capturedScope = closure.State as Dictionary<ParameterExpression, object>;
+                capturedScope = closure.CapturedScope;
                 break;
 
             case LambdaExpression directLambda:
@@ -776,10 +766,10 @@ Navigate:
 
             switch ( argValue )
             {
-                case ControlFrame closure when closure.Type == ControlFrameType.Closure:
+                case Closure closure:
                     hasClosure = true;
                     arguments[i] = this.Interpreter( closure.LambdaExpr );
-                    capturedValues[i] = closure.State as Dictionary<ParameterExpression, object>;
+                    capturedValues[i] = closure.CapturedScope;
                     break;
 
                 case LambdaExpression lambdaExpr:
@@ -963,10 +953,10 @@ Navigate:
 
             switch ( argValue )
             {
-                case ControlFrame closure when closure.Type == ControlFrameType.Closure:
+                case Closure closure:
                     hasClosure = true;
                     arguments[index] = this.Interpreter( closure.LambdaExpr );
-                    capturedValues[index] = closure.State as Dictionary<ParameterExpression, object>;
+                    capturedValues[index] = closure.CapturedScope;
                     break;
 
                 case LambdaExpression lambdaExpr:
