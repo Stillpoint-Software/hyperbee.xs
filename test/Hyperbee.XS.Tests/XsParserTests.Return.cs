@@ -21,10 +21,9 @@ public class XsParserReturnTests
             """ );
 
         var lambda = Lambda<Action>( expression );
-        var compiled = lambda.Compile();
 
-        // Assert no exceptions occur
-        compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        function(); // No exceptions should be thrown
     }
 
     [TestMethod]
@@ -41,8 +40,9 @@ public class XsParserReturnTests
             """ );
 
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }
@@ -110,8 +110,9 @@ public class XsParserReturnTests
             """ );
 
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }
@@ -131,8 +132,9 @@ public class XsParserReturnTests
             """ );
 
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }
@@ -156,8 +158,9 @@ public class XsParserReturnTests
             """ );
 
         var lambda = Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }
@@ -181,9 +184,8 @@ public class XsParserReturnTests
             """ );
 
         var lambda = Lambda<Action>( expression );
-        var compiled = lambda.Compile();
 
-        // Assert no exceptions occur
-        compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        function(); // No exceptions should be thrown
     }
 }

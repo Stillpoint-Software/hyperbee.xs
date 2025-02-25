@@ -100,36 +100,107 @@ public sealed class XsInterpreter : ExpressionVisitor
         _evaluator = new Evaluator( this );
     }
 
+    //public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
+    //    where TDelegate : Delegate
+    //{
+    //    var invokeMethod = typeof(TDelegate).GetMethod( "Invoke" );
+        
+    //    if ( invokeMethod is null )
+    //        throw new InvalidOperationException( "Invalid delegate type." );
+
+    //    var returnType = invokeMethod.ReturnType;
+
+    //    var evalMethod =  typeof( XsInterpreter )
+    //            .GetMethod( nameof( Evaluate ), BindingFlags.NonPublic | BindingFlags.Instance )
+    //            ?.MakeGenericMethod( returnType );
+        
+    //    if ( evalMethod is null )
+    //        throw new InvalidOperationException( "Could not find InvokeEvaluatedExpression method." );
+
+    //    var handlerDelegate = Delegate.CreateDelegate(
+    //        typeof( Func<,,> ).MakeGenericType( typeof(LambdaExpression), typeof( object[] ), returnType ),
+    //        this,
+    //        evalMethod
+    //    );
+
+    //    var genericTypes = invokeMethod
+    //        .GetParameters().Select( p => p.ParameterType )
+    //        .Prepend( typeof(LambdaExpression) )
+    //        .Append( returnType )
+    //        .ToArray();
+
+    //    var curryMethod = CurryMethods.Methods
+    //        .FirstOrDefault( m => m.Name == "Curry" && m.GetGenericArguments().Length == genericTypes.Length )
+    //        ?.MakeGenericMethod( genericTypes );
+
+    //    if ( curryMethod is null )
+    //        throw new InvalidOperationException( $"No suitable Curry method found for delegate type {typeof(TDelegate)}" );
+
+    //    PrepareNavigationMap( expression );
+
+    //    return (TDelegate) curryMethod.Invoke( null, [handlerDelegate,expression] )!;
+
+    //    void PrepareNavigationMap( Expression root )
+    //    {
+    //        if ( _gotoNavigation != null )
+    //            return;
+
+    //        var navigator = new GotoNavigationVisitor();
+    //        _gotoNavigation = navigator.Analyze( root );
+    //    }
+    //}
+
     public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
         where TDelegate : Delegate
     {
         var invokeMethod = typeof(TDelegate).GetMethod( "Invoke" );
-        
+
         if ( invokeMethod is null )
             throw new InvalidOperationException( "Invalid delegate type." );
 
         var returnType = invokeMethod.ReturnType;
 
-        var evalMethod = typeof(XsInterpreter)
-            .GetMethod( nameof(Evaluate), BindingFlags.NonPublic | BindingFlags.Instance )
-            ?.MakeGenericMethod( returnType );
-        
-        if ( evalMethod is null )
-            throw new InvalidOperationException( "Could not find InvokeEvaluatedExpression method." );
+        Delegate handlerDelegate;
 
-        var handlerDelegate = Delegate.CreateDelegate(
-            typeof( Func<,,> ).MakeGenericType( typeof(LambdaExpression), typeof( object[] ), returnType ),
-            this,
-            evalMethod
-        );
+        if ( returnType == typeof(void) )
+        {
+            var evalVoidMethod = typeof(XsInterpreter)
+                .GetMethod( nameof(EvaluateVoid), BindingFlags.NonPublic | BindingFlags.Instance );
+
+            if ( evalVoidMethod is null )
+                throw new InvalidOperationException( "Could not find EvaluateVoid method." );
+
+            handlerDelegate = Delegate.CreateDelegate(
+                typeof(Action<,>).MakeGenericType( typeof(LambdaExpression), typeof(object[]) ),
+                this,
+                evalVoidMethod
+            );
+        }
+        else
+        {
+            var evalMethod = typeof(XsInterpreter)
+                .GetMethod( nameof(Evaluate), BindingFlags.NonPublic | BindingFlags.Instance )
+                ?.MakeGenericMethod( returnType );
+
+            if ( evalMethod is null )
+                throw new InvalidOperationException( "Could not find Evaluate method." );
+
+            handlerDelegate = Delegate.CreateDelegate(
+                typeof(Func<,,>).MakeGenericType( typeof(LambdaExpression), typeof(object[]), returnType ),
+                this,
+                evalMethod
+            );
+        }
 
         var genericTypes = invokeMethod
             .GetParameters().Select( p => p.ParameterType )
             .Prepend( typeof(LambdaExpression) )
-            .Append( returnType )
+            .Concat( returnType == typeof(void) ? [] : [returnType] )
             .ToArray();
 
-        var curryMethod = CurryFuncs.Methods
+        var curryMethodSource = returnType == typeof(void) ? CurryAction.Methods : CurryFunc.Methods;
+
+        var curryMethod = curryMethodSource
             .FirstOrDefault( m => m.Name == "Curry" && m.GetGenericArguments().Length == genericTypes.Length )
             ?.MakeGenericMethod( genericTypes );
 
@@ -138,7 +209,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         PrepareNavigationMap( expression );
 
-        return (TDelegate) curryMethod.Invoke( null, [handlerDelegate,expression] )!;
+        return (TDelegate) curryMethod.Invoke( null, [handlerDelegate, expression] )!;
 
         void PrepareNavigationMap( Expression root )
         {
@@ -161,6 +232,23 @@ public sealed class XsInterpreter : ExpressionVisitor
 
             Visit( lambda.Body );
             return (T) _resultStack.Pop();
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
+    }
+
+    private void EvaluateVoid( LambdaExpression lambda, params object[] values )
+    {
+        _scope.EnterScope( FrameType.Method );
+
+        try
+        {
+            for ( var i = 0; i < lambda.Parameters.Count; i++ )
+                _scope.Values[lambda.Parameters[i]] = values[i];
+
+            Visit( lambda.Body );
         }
         finally
         {
