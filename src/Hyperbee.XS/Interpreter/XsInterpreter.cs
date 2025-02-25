@@ -209,7 +209,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     // Block
 
-    enum BlockState
+    private enum BlockState
     {
         InitializeVariables,
         HandleStatements,
@@ -219,13 +219,13 @@ public sealed class XsInterpreter : ExpressionVisitor
     protected override Expression VisitBlock( BlockExpression node )
     {
         var state = BlockState.InitializeVariables;
-        int statementIndex = 0;
+        var statementIndex = 0;
 
         _scope.EnterScope( FrameType.Block );
 
         try
         {
-Navigate:
+            Navigate:
 
             if ( _mode == InterpreterMode.Navigating )
             {
@@ -284,7 +284,7 @@ Navigate:
 
     // Conditional
 
-    enum ConditionalState
+    private enum ConditionalState
     {
         Test,
         HandleTest,
