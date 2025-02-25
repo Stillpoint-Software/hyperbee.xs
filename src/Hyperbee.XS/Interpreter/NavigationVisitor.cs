@@ -2,23 +2,23 @@
 
 namespace Hyperbee.XS.Interpreter;
 
-public sealed class GotoNavigationVisitor : ExpressionVisitor
+public sealed class NavigationVisitor : ExpressionVisitor
 {
     private readonly Stack<Expression> _pathStack = new();
     private readonly Dictionary<LabelTarget, List<Expression>> _labelPaths = new();
     private readonly Dictionary<GotoExpression, List<Expression>> _gotoPaths = new();
-    private readonly Dictionary<GotoExpression, GotoNavigation> _gotoNavigation = new();
+    private readonly Dictionary<GotoExpression, Navigation> _navigation = new();
 
-    public Dictionary<GotoExpression, GotoNavigation> Analyze(Expression root)
+    public Dictionary<GotoExpression, Navigation> Analyze(Expression root)
     {
         _gotoPaths.Clear();
         _labelPaths.Clear();
-        _gotoNavigation.Clear();
+        _navigation.Clear();
 
         Visit(root);
         ResolveNavigationPaths();
 
-        return _gotoNavigation;
+        return _navigation;
     }
 
     public override Expression Visit(Expression node)
@@ -65,11 +65,11 @@ public sealed class GotoNavigationVisitor : ExpressionVisitor
                 throw new InvalidOperationException($"Label target {gotoExpr.Target.Name} not found.");
             }
 
-            _gotoNavigation[gotoExpr] = CreateNavigationExpression(gotoPath, labelPath, gotoExpr.Target);
+            _navigation[gotoExpr] = CreateNavigationExpression(gotoPath, labelPath, gotoExpr.Target);
         }
     }
 
-    private static GotoNavigation CreateNavigationExpression( List<Expression> gotoPath, List<Expression> labelPath, LabelTarget targetLabel )
+    private static Navigation CreateNavigationExpression( List<Expression> gotoPath, List<Expression> labelPath, LabelTarget targetLabel )
     {
         var minLength = Math.Min( gotoPath.Count, labelPath.Count );
         var ancestorIndex = 0;
@@ -85,11 +85,11 @@ public sealed class GotoNavigationVisitor : ExpressionVisitor
         var commonAncestorExpr = labelPath[ancestorIndex - 1];
         var steps = labelPath.Skip( ancestorIndex ).ToList();
 
-        return new GotoNavigation( commonAncestorExpr, steps, targetLabel, false );
+        return new Navigation( commonAncestorExpr, steps, targetLabel, false );
     }
 }
 
-public sealed class GotoNavigation
+public sealed class Navigation
 {
     public Expression CommonAncestor { get; }
     public List<Expression> Steps { get; }
@@ -97,7 +97,7 @@ public sealed class GotoNavigation
     public bool IsReturn { get; }
     private int _currentStepIndex;
 
-    public GotoNavigation( Expression commonAncestor, List<Expression> steps, LabelTarget targetLabel, bool isReturn )
+    public Navigation( Expression commonAncestor, List<Expression> steps, LabelTarget targetLabel, bool isReturn )
     {
         CommonAncestor = commonAncestor;
         Steps = steps;

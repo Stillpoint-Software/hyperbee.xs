@@ -26,24 +26,8 @@ public class InterpretScope : ParseScope
 internal readonly struct ControlFrame
 {
     public ControlFrameType Type { get; }
-    //public GotoExpression GotoExpr { get; }
     public LambdaExpression LambdaExpr { get; }
-    //public LabelTarget TargetLabel { get; }
     public object State { get; }
-
-    //private ControlFrame( ControlFrameType type, GotoExpression gotoExpr, object state = null )
-    //{
-    //    Type = type;
-    //    GotoExpr = gotoExpr;
-    //    State = state;
-    //}
-
-    //private ControlFrame( ControlFrameType type, LabelTarget targetLabel, object state = null )
-    //{
-    //    Type = type;
-    //    TargetLabel = targetLabel;
-    //    State = state;
-    //}
 
     private ControlFrame( ControlFrameType type, LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> capturedScope )
     {
@@ -51,12 +35,6 @@ internal readonly struct ControlFrame
         LambdaExpr = lambdaExpr;
         State = capturedScope;
     }
-
-    //public static ControlFrame CreateGoto( GotoExpression gotoExpr, object value = null ) =>
-    //    new(ControlFrameType.Goto, gotoExpr, value);
-
-    //public static ControlFrame CreateReturn( LabelTarget target, object value = null ) =>
-    //    new(ControlFrameType.Return, target, value);
 
     public static ControlFrame CreateClosure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> scope ) =>
         new(ControlFrameType.Closure, lambdaExpr, scope);
@@ -79,8 +57,8 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     private readonly Stack<object> _resultStack = new();
 
-    private Dictionary<GotoExpression, GotoNavigation> _gotoNavigation;
-    private GotoNavigation _currentNavigation;
+    private Dictionary<GotoExpression, Navigation> _navigation;
+    private Navigation _currentNavigation;
     private InterpreterMode _mode;
 
     internal InterpretScope Scope => _scope;
@@ -99,56 +77,6 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         _evaluator = new Evaluator( this );
     }
-
-    //public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
-    //    where TDelegate : Delegate
-    //{
-    //    var invokeMethod = typeof(TDelegate).GetMethod( "Invoke" );
-        
-    //    if ( invokeMethod is null )
-    //        throw new InvalidOperationException( "Invalid delegate type." );
-
-    //    var returnType = invokeMethod.ReturnType;
-
-    //    var evalMethod =  typeof( XsInterpreter )
-    //            .GetMethod( nameof( Evaluate ), BindingFlags.NonPublic | BindingFlags.Instance )
-    //            ?.MakeGenericMethod( returnType );
-        
-    //    if ( evalMethod is null )
-    //        throw new InvalidOperationException( "Could not find InvokeEvaluatedExpression method." );
-
-    //    var handlerDelegate = Delegate.CreateDelegate(
-    //        typeof( Func<,,> ).MakeGenericType( typeof(LambdaExpression), typeof( object[] ), returnType ),
-    //        this,
-    //        evalMethod
-    //    );
-
-    //    var genericTypes = invokeMethod
-    //        .GetParameters().Select( p => p.ParameterType )
-    //        .Prepend( typeof(LambdaExpression) )
-    //        .Append( returnType )
-    //        .ToArray();
-
-    //    var curryMethod = CurryMethods.Methods
-    //        .FirstOrDefault( m => m.Name == "Curry" && m.GetGenericArguments().Length == genericTypes.Length )
-    //        ?.MakeGenericMethod( genericTypes );
-
-    //    if ( curryMethod is null )
-    //        throw new InvalidOperationException( $"No suitable Curry method found for delegate type {typeof(TDelegate)}" );
-
-    //    PrepareNavigationMap( expression );
-
-    //    return (TDelegate) curryMethod.Invoke( null, [handlerDelegate,expression] )!;
-
-    //    void PrepareNavigationMap( Expression root )
-    //    {
-    //        if ( _gotoNavigation != null )
-    //            return;
-
-    //        var navigator = new GotoNavigationVisitor();
-    //        _gotoNavigation = navigator.Analyze( root );
-    //    }
-    //}
 
     public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
         where TDelegate : Delegate
@@ -213,11 +141,11 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         void PrepareNavigationMap( Expression root )
         {
-            if ( _gotoNavigation != null )
+            if ( _navigation != null )
                 return;
 
-            var navigator = new GotoNavigationVisitor();
-            _gotoNavigation = navigator.Analyze( root );
+            var navigator = new NavigationVisitor();
+            _navigation = navigator.Analyze( root );
         }
     }
 
@@ -260,7 +188,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     protected override Expression VisitGoto( GotoExpression node )
     {
-        if ( !_gotoNavigation.TryGetValue( node, out var navigation ) )
+        if ( !_navigation.TryGetValue( node, out var navigation ) )
             throw new InterpreterException( $"Undefined label target: {node.Target.Name}", node );
 
         _resultStack.Clear();
@@ -339,7 +267,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
                         if ( _mode == InterpreterMode.Navigating )
                         {
-                            if ( _currentNavigation.CommonAncestor == node )
+                            if ( _currentNavigation.CommonAncestor == node ) //BF don't do this for throws
                                 goto Navigate;
 
                             return node!;
@@ -410,7 +338,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
                     if ( _mode == InterpreterMode.Navigating )
                     {
-                        if ( _currentNavigation.CommonAncestor == node )
+                        if ( _currentNavigation.CommonAncestor == node ) //BF don't do this for throws
                             goto Navigate;
 
                         return node; 
@@ -427,13 +355,12 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     // Switch
 
-    enum SwitchState
+    private enum SwitchState
     {
         SwitchValue,
         HandleSwitchValue, 
         MatchCase,
         HandleMatchCase, 
-        EvaluateCaseBody,
         Visit,
         VisitCaseBody,
         Complete 
@@ -528,7 +455,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
                     if ( _mode == InterpreterMode.Navigating )
                     {
-                        if ( _currentNavigation.CommonAncestor == node )
+                        if ( _currentNavigation.CommonAncestor == node ) //BF don't do this for throws
                             goto Navigate;
 
                         return node;
@@ -582,6 +509,8 @@ public sealed class XsInterpreter : ExpressionVisitor
     }
 
     // Try/Catch
+
+    // BF Create state-machine for Try/Catch
 
     // Lambda
 
@@ -799,6 +728,12 @@ public sealed class XsInterpreter : ExpressionVisitor
     protected override Expression VisitUnary( UnaryExpression node )
     {
         Visit( node.Operand ); // Visit and push operand
+
+        //BF if exception type is throw
+        // pop exception
+        // set _mode navigating
+        // set _currentNavigation
+        // return node
 
         var result = _evaluator.Unary( node );
         _resultStack.Push( result );
