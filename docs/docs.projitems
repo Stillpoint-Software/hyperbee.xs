@@ -15,6 +15,7 @@
     <None Include="$(MSBuildThisFileDirectory)cli\run.md" />
     <None Include="$(MSBuildThisFileDirectory)debugging.md" />
     <None Include="$(MSBuildThisFileDirectory)examples.md" />
+    <None Include="$(MSBuildThisFileDirectory)interactive.md" />
     <None Include="$(MSBuildThisFileDirectory)language\async-await.md" />
     <None Include="$(MSBuildThisFileDirectory)language\casting.md" />
     <None Include="$(MSBuildThisFileDirectory)language\conditionals.md" />

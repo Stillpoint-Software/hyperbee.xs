@@ -1,10 +1,13 @@
-﻿using Hyperbee.Xs.Extensions;
+﻿using System.Text.Json.Serialization;
+using Hyperbee.Xs.Extensions;
 using Hyperbee.Xs.Interactive.Extensions;
 using Hyperbee.XS.Core;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Connection;
 using Microsoft.DotNet.Interactive.Directives;
+using Microsoft.DotNet.Interactive.Events;
+
 
 #if NET9_0_OR_GREATER
 using Microsoft.DotNet.Interactive.PackageManagement;
@@ -62,7 +65,7 @@ public class XsBaseKernel : Kernel
 #endif
 
         KernelCommandEnvelope.RegisterCommand<ExtensionCommand>();
-        AddDirective<ExtensionCommand>( new KernelActionDirective( "#!extensions" )
+        AddDirective<ExtensionCommand>( new KernelActionDirective( "#!with" )
         {
             Description = "",
             Parameters =
@@ -70,16 +73,11 @@ public class XsBaseKernel : Kernel
                     new("--extension")
                     {
                         AllowImplicitName = true,
-                        Required = true
+                        Required = false
                     }
                 ],
             KernelCommandType = typeof( ExtensionCommand ),
-        },
-        ( command, ctx ) =>
-        {
-            Parser.Value.AddExtensions( [.. GetExtensions( command.Extension, TypeResolver, command, ctx )] );
-            return Task.CompletedTask;
-        } );
+        }, HandleExtension );
 
         Scope.EnterScope( FrameType.Method );
 
@@ -90,6 +88,12 @@ public class XsBaseKernel : Kernel
             State = null;
             Config = null;
         } );
+    }
+
+    private Task HandleExtension( ExtensionCommand command, KernelInvocationContext ctx )
+    {
+        Parser.Value.AddExtensions( [.. GetExtensions( command.Extension, TypeResolver, command, ctx )] );
+        return Task.CompletedTask;
     }
 
     public static IEnumerable<dynamic> GetExtensions( string value, TypeResolver typeResolver, KernelCommand command, KernelInvocationContext context )
@@ -148,3 +152,4 @@ public class XsBaseKernel : Kernel
         }
     }
 }
+

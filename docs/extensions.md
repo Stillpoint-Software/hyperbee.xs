@@ -63,12 +63,12 @@ An extension class includes logic to parse the `repeat` syntax and instantiate t
 ```csharp
 public class RepeatParseExtension : IParseExtension
 {
-    public ExtensionsType => ExtensionType.Complex;
+    public ExtensionType Type => ExtensionType.Expression;
     public string Key => "repeat";
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
-       var (config, expression, assignable, statement) = binder;
+       var (expression, statement) = binder;
 
         return Between(
             Terms.Char('('),
@@ -81,9 +81,10 @@ public class RepeatParseExtension : IParseExtension
                 statement,
                 Terms.Char('}')
             )
-        ).Then( parts =>
+        )
+        .Then<Expression>( static parts =>
         {
-            var (countExpression, body) = parts;)
+            var (countExpression, body) = parts;
             return new RepeatExpression(countExpression, body);
         });
     }

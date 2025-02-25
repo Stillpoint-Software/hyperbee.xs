@@ -90,3 +90,86 @@ zComplex.Name;
 #!xs
 
 #!whos
+
+#!csharp
+
+#r "nuget:Parlot"
+
+#!csharp
+
+using System.Collections.ObjectModel;
+using System.Linq.Expressions;
+using Hyperbee.Collections;
+using Hyperbee.Expressions;
+using Hyperbee.XS;
+using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Parsers;
+using Hyperbee.XS.Core.Writer;
+using Parlot.Fluent;
+using static Parlot.Fluent.Parsers;
+
+
+public class RepeatExpression : Expression
+{
+    public override ExpressionType NodeType => ExpressionType.Extension;
+    public override Type Type => typeof(void);
+
+    public Expression Count { get; }
+    public Expression Body { get; }
+
+    public RepeatExpression(Expression count, Expression body)
+    {
+        Count = count;
+        Body = body;
+    }
+
+    public override Expression Reduce()
+    {
+        var loopVariable = Expression.Parameter(typeof(int), "i");
+
+        return Expression.Block(
+            new[] { loopVariable },
+            Expression.Assign(loopVariable, Expression.Constant(0)),
+            Expression.Loop(
+                Expression.IfThenElse(
+                    Expression.LessThan(loopVariable, Count),
+                    Expression.Block(Body, Expression.PostIncrementAssign(loopVariable)),
+                    Expression.Break(Expression.Label())
+                )
+            )
+        );
+    }
+}
+
+public class RepeatParseExtension : IParseExtension
+{
+    public ExtensionType Type => ExtensionType.Expression;
+    public string Key => "repeat";
+
+    public Parser<Expression> CreateParser( ExtensionBinder binder )
+    {
+        var (expression, statement) = binder;
+
+        return Between(
+            Terms.Char('('),
+            expression,
+            Terms.Char(')')
+        )
+        .And( 
+             Between(
+                Terms.Char('{'),
+                statement,
+                Terms.Char('}')
+            )
+        )
+        .Then<Expression>( static parts =>
+        {
+            var (countExpression, body) = parts;
+            return new RepeatExpression(countExpression, body);
+        });
+    }
+}
+
+#!xs
+
+#!extensions --from csharp --name "RepeatParseExtension"
