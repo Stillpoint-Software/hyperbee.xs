@@ -116,7 +116,7 @@ internal sealed class BinaryEvaluator
         switch ( binary.Left )
         {
             case ParameterExpression paramExpr:
-                return _interpreter.Scope.Values[paramExpr] = rightValue;
+                return _interpreter.Scope.Values[Collections.LinkedNode.Single, paramExpr] = rightValue;
 
             case MemberExpression memberExpr:
                 return AssignToMember( memberExpr, leftInstance, rightValue );

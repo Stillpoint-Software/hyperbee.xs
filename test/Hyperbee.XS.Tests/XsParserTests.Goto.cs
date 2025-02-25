@@ -29,5 +29,64 @@ public class XsParserGotoTests
 
         Assert.AreEqual( 11, result );
     }
+
+    [TestMethod]
+    public void Compile_ShouldSucceed_WithGotoCatch()
+    {
+        var expression = Xs.Parse(
+            """
+            var x = 0;
+            try
+            {
+                goto label2; 
+            }
+            catch(ArgumentException)
+            {
+                label2:
+                x = 42;
+            }
+            x;
+            """
+        );
+
+        var lambda = Lambda<Func<int>>( expression );
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
+
+        Assert.AreEqual( 42, result );
+    }
+
+    [TestMethod]
+    public void Compile_ShouldSucceed_WithGotoFinally()
+    {
+        var expression = Xs.Parse(
+            """
+            var x = 0;
+            try
+            {
+                goto label3; 
+            }
+            catch(ArgumentException)
+            {
+                label2:
+                x = 21;
+            }
+            finally
+            {
+                label3:
+                x = 42;
+            }
+            x;
+            """
+        );
+
+        var lambda = Lambda<Func<int>>( expression );
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
+
+        Assert.AreEqual( 42, result );
+    }
 }
 

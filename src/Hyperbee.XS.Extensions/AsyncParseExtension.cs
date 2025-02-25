@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Hyperbee.Collections;
 using Hyperbee.Expressions;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
@@ -31,7 +32,7 @@ public class AsyncParseExtension : IParseExtension, IExpressionWriter, IXsWriter
             ).Named( "async block" )
             .Then<Expression>( static ( ctx, parts ) =>
                 ExpressionExtensions.BlockAsync(
-                    [.. ctx.Scope().Variables.EnumerateValues( Collections.KeyScope.Current )],
+                    [.. ctx.Scope().Variables.EnumerateValues( LinkedNode.Current )],
                     [.. parts]
                 )
             ),

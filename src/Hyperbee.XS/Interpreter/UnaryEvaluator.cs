@@ -90,22 +90,22 @@ internal sealed class UnaryEvaluator
         {
             case ExpressionType.PreIncrementAssign:
                 newValue = operand + T.One;
-                _interpreter.Scope.Values[variable] = newValue;
+                _interpreter.Scope.Values[Collections.LinkedNode.Single, variable] = newValue;
                 return newValue;
 
             case ExpressionType.PreDecrementAssign:
                 newValue = operand - T.One;
-                _interpreter.Scope.Values[variable] = newValue;
+                _interpreter.Scope.Values[Collections.LinkedNode.Single, variable] = newValue;
                 return newValue;
 
             case ExpressionType.PostIncrementAssign:
                 newValue = operand + T.One;
-                _interpreter.Scope.Values[variable] = newValue;
+                _interpreter.Scope.Values[Collections.LinkedNode.Single, variable] = newValue;
                 return operand;
 
             case ExpressionType.PostDecrementAssign:
                 newValue = operand - T.One;
-                _interpreter.Scope.Values[variable] = newValue;
+                _interpreter.Scope.Values[Collections.LinkedNode.Single, variable] = newValue;
                 return operand;
 
             default:

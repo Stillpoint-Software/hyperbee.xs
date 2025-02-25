@@ -85,7 +85,7 @@ public sealed class NavigationVisitor : ExpressionVisitor
         var commonAncestorExpr = labelPath[ancestorIndex - 1];
         var steps = labelPath.Skip( ancestorIndex ).ToList();
 
-        return new Navigation( commonAncestorExpr, steps, targetLabel, false );
+        return new Navigation( commonAncestorExpr, steps, targetLabel );
     }
 }
 
@@ -95,14 +95,17 @@ public sealed class Navigation
     public List<Expression> Steps { get; }
     public LabelTarget TargetLabel { get; }
     public bool IsReturn { get; }
+
+    public Exception Exception { get; }
     private int _currentStepIndex;
 
-    public Navigation( Expression commonAncestor, List<Expression> steps, LabelTarget targetLabel, bool isReturn )
+    public Navigation( Expression commonAncestor = null, List<Expression> steps = null, LabelTarget targetLabel = null, bool isReturn = false, Exception exception = null )
     {
         CommonAncestor = commonAncestor;
-        Steps = steps;
+        Steps = steps ??[];
         TargetLabel = targetLabel;
         IsReturn = isReturn;
+        Exception = exception;
         _currentStepIndex = 0;
     }
 

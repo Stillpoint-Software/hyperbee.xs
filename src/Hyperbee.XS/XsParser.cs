@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using Hyperbee.Collections;
 using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Parsers;
 using Parlot;
@@ -339,7 +340,7 @@ public partial class XsParser
 
         var finalType = expressions[^1].Type;
         var returnLabel = scope.Frame.ReturnLabel;
-        var locals = scope.Variables.EnumerateValues( Collections.KeyScope.Current ).ToArray();
+        var locals = scope.Variables.EnumerateValues( LinkedNode.Current ).ToArray();
 
         if ( expressions.Count == 1 && locals.Length == 0 )
             return expressions[0];
