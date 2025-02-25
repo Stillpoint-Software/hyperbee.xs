@@ -9,63 +9,63 @@ public sealed class NavigationVisitor : ExpressionVisitor
     private readonly Dictionary<GotoExpression, List<Expression>> _gotoPaths = new();
     private readonly Dictionary<GotoExpression, Navigation> _navigation = new();
 
-    public Dictionary<GotoExpression, Navigation> Analyze(Expression root)
+    public Dictionary<GotoExpression, Navigation> Analyze( Expression root )
     {
         _gotoPaths.Clear();
         _labelPaths.Clear();
         _navigation.Clear();
 
-        Visit(root);
+        Visit( root );
         ResolveNavigationPaths();
 
         return _navigation;
     }
 
-    public override Expression Visit(Expression node)
+    public override Expression Visit( Expression node )
     {
-        if (node == null)
+        if ( node == null )
             return null;
 
-        _pathStack.Push(node);
-        var result = base.Visit(node);
+        _pathStack.Push( node );
+        var result = base.Visit( node );
         _pathStack.Pop();
 
         return result;
     }
 
-    protected override Expression VisitLabel(LabelExpression node)
+    protected override Expression VisitLabel( LabelExpression node )
     {
-        _labelPaths[node.Target] = [.._pathStack.Reverse()];
+        _labelPaths[node.Target] = [.. _pathStack.Reverse()];
         return base.VisitLabel( node );
     }
 
-    protected override Expression VisitGoto(GotoExpression node)
+    protected override Expression VisitGoto( GotoExpression node )
     {
-        _gotoPaths[node] = [.._pathStack.Reverse()];
+        _gotoPaths[node] = [.. _pathStack.Reverse()];
         return base.VisitGoto( node );
     }
 
     protected override Expression VisitLoop( LoopExpression node )
     {
         if ( node.BreakLabel != null )
-            _labelPaths[node.BreakLabel] = [.._pathStack.Reverse()];
+            _labelPaths[node.BreakLabel] = [.. _pathStack.Reverse()];
 
         if ( node.ContinueLabel != null )
-            _labelPaths[node.ContinueLabel] = [.._pathStack.Reverse()];
+            _labelPaths[node.ContinueLabel] = [.. _pathStack.Reverse()];
 
         return base.VisitLoop( node );
     }
 
     private void ResolveNavigationPaths()
     {
-        foreach (var (gotoExpr, gotoPath) in _gotoPaths)
+        foreach ( var (gotoExpr, gotoPath) in _gotoPaths )
         {
-            if (!_labelPaths.TryGetValue(gotoExpr.Target, out var labelPath))
+            if ( !_labelPaths.TryGetValue( gotoExpr.Target, out var labelPath ) )
             {
-                throw new InvalidOperationException($"Label target {gotoExpr.Target.Name} not found.");
+                throw new InvalidOperationException( $"Label target {gotoExpr.Target.Name} not found." );
             }
 
-            _navigation[gotoExpr] = CreateNavigationExpression(gotoPath, labelPath, gotoExpr.Target);
+            _navigation[gotoExpr] = CreateNavigationExpression( gotoPath, labelPath, gotoExpr.Target );
         }
     }
 
@@ -81,7 +81,7 @@ public sealed class NavigationVisitor : ExpressionVisitor
 
         if ( ancestorIndex == 0 )
             throw new InvalidOperationException( "Could not determine a common ancestor." );
-        
+
         var commonAncestorExpr = labelPath[ancestorIndex - 1];
         var steps = labelPath.Skip( ancestorIndex ).ToList();
 
@@ -102,7 +102,7 @@ public sealed class Navigation
     public Navigation( Expression commonAncestor = null, List<Expression> steps = null, LabelTarget targetLabel = null, bool isReturn = false, Exception exception = null )
     {
         CommonAncestor = commonAncestor;
-        Steps = steps ??[];
+        Steps = steps ?? [];
         TargetLabel = targetLabel;
         IsReturn = isReturn;
         Exception = exception;

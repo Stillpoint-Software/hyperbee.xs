@@ -10,9 +10,9 @@ public class InterpretScope : ParseScope
 {
     public LinkedDictionary<ParameterExpression, object> Values { get; } = new();
 
-    public override void EnterScope(FrameType frameType, LabelTarget breakLabel = null, LabelTarget continueLabel = null)
+    public override void EnterScope( FrameType frameType, LabelTarget breakLabel = null, LabelTarget continueLabel = null )
     {
-        base.EnterScope(frameType, breakLabel, continueLabel);
+        base.EnterScope( frameType, breakLabel, continueLabel );
         Values.Push();
     }
 
@@ -37,7 +37,7 @@ internal readonly struct ControlFrame
     }
 
     public static ControlFrame CreateClosure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> scope ) =>
-        new(ControlFrameType.Closure, lambdaExpr, scope);
+        new( ControlFrameType.Closure, lambdaExpr, scope );
 }
 
 internal enum ControlFrameType
@@ -52,7 +52,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 {
     private readonly InterpretScope _scope;
     private readonly XsDebugger _debugger;
-    
+
     private readonly Evaluator _evaluator;
 
     private readonly Stack<object> _resultStack = new();
@@ -82,7 +82,7 @@ public sealed class XsInterpreter : ExpressionVisitor
     public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
         where TDelegate : Delegate
     {
-        var invokeMethod = typeof(TDelegate).GetMethod( "Invoke" );
+        var invokeMethod = typeof( TDelegate ).GetMethod( "Invoke" );
 
         if ( invokeMethod is null )
             throw new InvalidOperationException( "Invalid delegate type." );
@@ -91,31 +91,31 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         Delegate handlerDelegate;
 
-        if ( returnType == typeof(void) )
+        if ( returnType == typeof( void ) )
         {
-            var evalVoidMethod = typeof(XsInterpreter)
-                .GetMethod( nameof(EvaluateVoid), BindingFlags.NonPublic | BindingFlags.Instance );
+            var evalVoidMethod = typeof( XsInterpreter )
+                .GetMethod( nameof( EvaluateVoid ), BindingFlags.NonPublic | BindingFlags.Instance );
 
             if ( evalVoidMethod is null )
                 throw new InvalidOperationException( "Could not find EvaluateVoid method." );
 
             handlerDelegate = Delegate.CreateDelegate(
-                typeof(Action<,>).MakeGenericType( typeof(LambdaExpression), typeof(object[]) ),
+                typeof( Action<,> ).MakeGenericType( typeof( LambdaExpression ), typeof( object[] ) ),
                 this,
                 evalVoidMethod
             );
         }
         else
         {
-            var evalMethod = typeof(XsInterpreter)
-                .GetMethod( nameof(Evaluate), BindingFlags.NonPublic | BindingFlags.Instance )
+            var evalMethod = typeof( XsInterpreter )
+                .GetMethod( nameof( Evaluate ), BindingFlags.NonPublic | BindingFlags.Instance )
                 ?.MakeGenericMethod( returnType );
 
             if ( evalMethod is null )
                 throw new InvalidOperationException( "Could not find Evaluate method." );
 
             handlerDelegate = Delegate.CreateDelegate(
-                typeof(Func<,,>).MakeGenericType( typeof(LambdaExpression), typeof(object[]), returnType ),
+                typeof( Func<,,> ).MakeGenericType( typeof( LambdaExpression ), typeof( object[] ), returnType ),
                 this,
                 evalMethod
             );
@@ -123,18 +123,18 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         var genericTypes = invokeMethod
             .GetParameters().Select( p => p.ParameterType )
-            .Prepend( typeof(LambdaExpression) )
-            .Concat( returnType == typeof(void) ? [] : [returnType] )
+            .Prepend( typeof( LambdaExpression ) )
+            .Concat( returnType == typeof( void ) ? [] : [returnType] )
             .ToArray();
 
-        var curryMethodSource = returnType == typeof(void) ? CurryAction.Methods : CurryFunc.Methods;
+        var curryMethodSource = returnType == typeof( void ) ? CurryAction.Methods : CurryFunc.Methods;
 
         var curryMethod = curryMethodSource
             .FirstOrDefault( m => m.Name == "Curry" && m.GetGenericArguments().Length == genericTypes.Length )
             ?.MakeGenericMethod( genericTypes );
 
         if ( curryMethod is null )
-            throw new InvalidOperationException( $"No suitable Curry method found for delegate type {typeof(TDelegate)}" );
+            throw new InvalidOperationException( $"No suitable Curry method found for delegate type {typeof( TDelegate )}" );
 
         PrepareNavigationMap( expression );
 
@@ -235,7 +235,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         try
         {
-            Navigate:
+Navigate:
 
             if ( _mode == InterpreterMode.Navigating )
             {
@@ -288,7 +288,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
 
         static object Default( Type type ) =>
-            type == typeof(string) ? string.Empty :
+            type == typeof( string ) ? string.Empty :
             type.IsValueType ? RuntimeHelpers.GetUninitializedObject( type ) : null;
     }
 
@@ -296,9 +296,9 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     enum ConditionalState
     {
-        Test, 
-        HandleTest, 
-        Visit, 
+        Test,
+        HandleTest,
+        Visit,
         Complete
     };
 
@@ -308,7 +308,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         var continuation = ConditionalState.Complete;
         Expression expr = null;
 
-    Navigate:
+Navigate:
 
         if ( _mode == InterpreterMode.Navigating )
         {
@@ -342,7 +342,7 @@ public sealed class XsInterpreter : ExpressionVisitor
                         if ( _currentNavigation.CommonAncestor == node )
                             goto Navigate;
 
-                        return node; 
+                        return node;
                     }
 
                     state = continuation;
@@ -359,12 +359,12 @@ public sealed class XsInterpreter : ExpressionVisitor
     private enum SwitchState
     {
         SwitchValue,
-        HandleSwitchValue, 
+        HandleSwitchValue,
         MatchCase,
-        HandleMatchCase, 
+        HandleMatchCase,
         Visit,
         VisitCaseBody,
-        Complete 
+        Complete
     }
 
     protected override Expression VisitSwitch( SwitchExpression node )
@@ -376,7 +376,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         object switchValue = null;
         Expression expr = null;
 
-        Navigate:
+Navigate:
 
         if ( _mode == InterpreterMode.Navigating )
         {
@@ -529,19 +529,18 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         Expression expr = null;
 
+Navigate:
 
-        Navigate:
-
-        if (_mode == InterpreterMode.Navigating)
+        if ( _mode == InterpreterMode.Navigating )
         {
             expr = _currentNavigation.GetNextStep();
 
-            if (expr == node.Body)
+            if ( expr == node.Body )
             {
                 state = TryCatchState.Visit;
                 continuation = TryCatchState.Finally;
             }
-            else if (expr == node.Finally)
+            else if ( expr == node.Finally )
             {
                 state = TryCatchState.Visit;
                 continuation = TryCatchState.Complete;
@@ -549,7 +548,7 @@ public sealed class XsInterpreter : ExpressionVisitor
             else
             {
                 var exceptionHandler = node.Handlers.FirstOrDefault( c => c.Body == expr );
-                if( exceptionHandler != null )
+                if ( exceptionHandler != null )
                 {
                     expr = exceptionHandler.Body;
                     state = TryCatchState.Visit;
@@ -558,9 +557,9 @@ public sealed class XsInterpreter : ExpressionVisitor
             }
         }
 
-        while (true)
+        while ( true )
         {
-            switch (state)
+            switch ( state )
             {
                 case TryCatchState.Try:
                     expr = node.Body;
@@ -569,7 +568,7 @@ public sealed class XsInterpreter : ExpressionVisitor
                     break;
 
                 case TryCatchState.Catch:
-                    if (catchIndex >= node.Handlers.Count)
+                    if ( catchIndex >= node.Handlers.Count )
                     {
                         state = TryCatchState.Finally;
                         break;
@@ -578,10 +577,10 @@ public sealed class XsInterpreter : ExpressionVisitor
                     var handler = node.Handlers[catchIndex];
                     var exception = _currentNavigation.Exception;
 
-                    if (handler.Test.IsAssignableFrom(exception.GetType()))
+                    if ( handler.Test.IsAssignableFrom( exception.GetType() ) )
                     {
                         // create block scope for exception
-                        _scope.EnterScope(FrameType.Block);
+                        _scope.EnterScope( FrameType.Block );
 
                         _scope.Values[handler.Variable] = exception;
                         expr = handler.Body;
@@ -639,7 +638,7 @@ public sealed class XsInterpreter : ExpressionVisitor
                     break;
 
                 case TryCatchState.Finally:
-                    if (node.Finally != null)
+                    if ( node.Finally != null )
                     {
                         expr = node.Finally;
                         state = TryCatchState.Visit;
@@ -652,9 +651,9 @@ public sealed class XsInterpreter : ExpressionVisitor
                     break;
 
                 case TryCatchState.Visit:
-                    Visit(expr!);
+                    Visit( expr! );
 
-                    if (_mode == InterpreterMode.Navigating)
+                    if ( _mode == InterpreterMode.Navigating )
                     {
                         if ( _currentNavigation.CommonAncestor == node )
                             goto Navigate;
@@ -674,14 +673,14 @@ public sealed class XsInterpreter : ExpressionVisitor
             }
         }
     }
-    
+
     // Lambda
 
     protected override Expression VisitLambda<T>( Expression<T> node )
     {
         if ( _scope.Depth == 0 )
         {
-            _resultStack.Push( node ); 
+            _resultStack.Push( node );
             return node;
         }
 
@@ -855,7 +854,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
                 case IndexExpression indexExpr:
                     Visit( indexExpr.Object ); // Visit and push instance
-                    
+
                     foreach ( var arg in indexExpr.Arguments )
                     {
                         Visit( arg ); // Visit and push index arguments
@@ -870,7 +869,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
 
         Visit( node.Right ); // Visit and push rightValue
-        
+
         var result = _evaluator.Binary( node );
         _resultStack.Push( result );
 
@@ -892,7 +891,7 @@ public sealed class XsInterpreter : ExpressionVisitor
     {
         Visit( node.Operand ); // Visit and push operand
 
-        if(node.NodeType == ExpressionType.Throw )
+        if ( node.NodeType == ExpressionType.Throw )
         {
             var instance = _resultStack.Pop();
 
@@ -907,7 +906,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         return node;
     }
-    
+
     protected override Expression VisitConstant( ConstantExpression node )
     {
         _resultStack.Push( node.Value );
@@ -933,7 +932,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         return node;
     }
 
-    protected override Expression VisitIndex( IndexExpression node ) 
+    protected override Expression VisitIndex( IndexExpression node )
     {
         var arguments = new object[node.Arguments.Count];
         for ( var i = 0; i < node.Arguments.Count; i++ )
@@ -1021,39 +1020,39 @@ public sealed class XsInterpreter : ExpressionVisitor
         switch ( node.NodeType )
         {
             case ExpressionType.NewArrayInit:
-            {
-                // Handle NewArrayInit: Array initialized with values
-                var values = new object[node.Expressions.Count];
-
-                for ( var i = 0; i < node.Expressions.Count; i++ )
                 {
-                    Visit( node.Expressions[i] );
-                    values[i] = _resultStack.Pop();
+                    // Handle NewArrayInit: Array initialized with values
+                    var values = new object[node.Expressions.Count];
+
+                    for ( var i = 0; i < node.Expressions.Count; i++ )
+                    {
+                        Visit( node.Expressions[i] );
+                        values[i] = _resultStack.Pop();
+                    }
+
+                    var array = Array.CreateInstance( elementType!, values.Length );
+
+                    for ( var i = 0; i < values.Length; i++ )
+                        array.SetValue( values[i], i );
+
+                    _resultStack.Push( array );
+                    break;
                 }
-
-                var array = Array.CreateInstance( elementType!, values.Length );
-
-                for ( var i = 0; i < values.Length; i++ )
-                    array.SetValue( values[i], i );
-
-                _resultStack.Push( array );
-                break;
-            }
             case ExpressionType.NewArrayBounds:
-            {
-                // Handle NewArrayBounds: Array created with specified dimensions
-                var lengths = new int[node.Expressions.Count];
-
-                for ( var i = 0; i < node.Expressions.Count; i++ )
                 {
-                    Visit( node.Expressions[i] );
-                    lengths[i] = (int) _resultStack.Pop();
-                }
+                    // Handle NewArrayBounds: Array created with specified dimensions
+                    var lengths = new int[node.Expressions.Count];
 
-                var array = Array.CreateInstance( elementType!, lengths );
-                _resultStack.Push( array );
-                break;
-            }
+                    for ( var i = 0; i < node.Expressions.Count; i++ )
+                    {
+                        Visit( node.Expressions[i] );
+                        lengths[i] = (int) _resultStack.Pop();
+                    }
+
+                    var array = Array.CreateInstance( elementType!, lengths );
+                    _resultStack.Push( array );
+                    break;
+                }
             default:
                 throw new InterpreterException( $"Unsupported array creation type: {node.NodeType}", node );
         }

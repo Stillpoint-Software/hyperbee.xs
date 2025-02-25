@@ -17,7 +17,7 @@ public class XsParserPropertyTests
             """ );
 
         var lambda = Lambda<Func<int>>( expression );
-        
+
         var function = lambda.CompileEx( preferInterpret: true );
         var result = function();
 

@@ -171,11 +171,11 @@ internal sealed class BinaryEvaluator
 
         return widenedType switch
         {
-            Type when widenedType == typeof(int) => ArithmeticOperation( binary, (int) leftValue!, (int) rightValue! ),
-            Type when widenedType == typeof(long) => ArithmeticOperation( binary, (long) leftValue!, (long) rightValue! ),
-            Type when widenedType == typeof(float) => ArithmeticOperation( binary, (float) leftValue!, (float) rightValue! ),
-            Type when widenedType == typeof(double) => ArithmeticOperation( binary, (double) leftValue!, (double) rightValue! ),
-            Type when widenedType == typeof(decimal) => ArithmeticOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),
+            Type when widenedType == typeof( int ) => ArithmeticOperation( binary, (int) leftValue!, (int) rightValue! ),
+            Type when widenedType == typeof( long ) => ArithmeticOperation( binary, (long) leftValue!, (long) rightValue! ),
+            Type when widenedType == typeof( float ) => ArithmeticOperation( binary, (float) leftValue!, (float) rightValue! ),
+            Type when widenedType == typeof( double ) => ArithmeticOperation( binary, (double) leftValue!, (double) rightValue! ),
+            Type when widenedType == typeof( decimal ) => ArithmeticOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),
             _ => throw new InterpreterException( $"Unsupported binary operation: {binary.NodeType}", binary )
         };
     }
@@ -203,11 +203,11 @@ internal sealed class BinaryEvaluator
 
         return widenedType switch
         {
-            Type when widenedType == typeof(int) => LogicalOperation( binary, (int) leftValue!, (int) rightValue! ),
-            Type when widenedType == typeof(long) => LogicalOperation( binary, (long) leftValue!, (long) rightValue! ),
-            Type when widenedType == typeof(float) => LogicalOperation( binary, (float) leftValue!, (float) rightValue! ),
-            Type when widenedType == typeof(double) => LogicalOperation( binary, (double) leftValue!, (double) rightValue! ),
-            Type when widenedType == typeof(decimal) => LogicalOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),
+            Type when widenedType == typeof( int ) => LogicalOperation( binary, (int) leftValue!, (int) rightValue! ),
+            Type when widenedType == typeof( long ) => LogicalOperation( binary, (long) leftValue!, (long) rightValue! ),
+            Type when widenedType == typeof( float ) => LogicalOperation( binary, (float) leftValue!, (float) rightValue! ),
+            Type when widenedType == typeof( double ) => LogicalOperation( binary, (double) leftValue!, (double) rightValue! ),
+            Type when widenedType == typeof( decimal ) => LogicalOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),
             _ => throw new InterpreterException( $"Unsupported logical operation: {binary.NodeType}", binary )
         };
     }

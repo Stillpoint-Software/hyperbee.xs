@@ -6,7 +6,7 @@ namespace Hyperbee.XS.Tests;
 public class XsParserConditionalTests
 {
     public static XsParser Xs { get; } = new();
- 
+
     [TestMethod]
     public void Compile_ShouldSucceed_WithoutBraces()
     {

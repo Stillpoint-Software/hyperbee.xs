@@ -12,11 +12,11 @@ public static class LambdaExpressionExtensions
 
     internal static object Interpreter( this XsInterpreter interpreter, LambdaExpression lambda )
     {
-        if ( !typeof(Delegate).IsAssignableFrom( lambda.Type ) )
+        if ( !typeof( Delegate ).IsAssignableFrom( lambda.Type ) )
             throw new InvalidOperationException( "LambdaExpression must be convertible to a delegate." );
 
         var invokeMethod = lambda.Type.GetMethod( "Invoke" );
-        
+
         if ( invokeMethod is null )
             throw new InvalidOperationException( "Invalid delegate type." );
 
@@ -27,8 +27,8 @@ public static class LambdaExpressionExtensions
 
         var delegateType = Expression.GetDelegateType( paramTypes );
 
-        var method = typeof(XsInterpreter)
-            .GetMethod( nameof(XsInterpreter.Interpreter), BindingFlags.Public | BindingFlags.Instance )?
+        var method = typeof( XsInterpreter )
+            .GetMethod( nameof( XsInterpreter.Interpreter ), BindingFlags.Public | BindingFlags.Instance )?
             .MakeGenericMethod( delegateType );
 
         var interpretedDelegate = method?.Invoke( interpreter, [lambda] );
@@ -36,7 +36,7 @@ public static class LambdaExpressionExtensions
         if ( interpretedDelegate == null )
             throw new InvalidOperationException( "Failed to create interpreted delegate." );
 
-        return interpretedDelegate; 
+        return interpretedDelegate;
     }
 
     public static TDelegate Interpreter<TDelegate>( this Expression<TDelegate> lambda )

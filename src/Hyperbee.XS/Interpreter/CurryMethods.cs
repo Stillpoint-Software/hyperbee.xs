@@ -5,7 +5,7 @@ namespace Hyperbee.XS.Interpreter;
 
 internal static class CurryFunc
 {
-    public static readonly MethodInfo[] Methods = typeof(CurryFunc).GetMethods();
+    public static readonly MethodInfo[] Methods = typeof( CurryFunc ).GetMethods();
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Func<R> Curry<C, R>( Func<C, object[], R> f, C c ) =>
@@ -78,7 +78,7 @@ internal static class CurryFunc
 
 internal static class CurryAction
 {
-    public static readonly MethodInfo[] Methods = typeof(CurryAction).GetMethods();
+    public static readonly MethodInfo[] Methods = typeof( CurryAction ).GetMethods();
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action Curry<C>( Action<C, object[]> f, C c ) =>
@@ -115,35 +115,35 @@ internal static class CurryAction
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9, t10 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15] );
-    
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Curry<C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>( Action<C, object[]> f, C c ) =>
         ( t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16 ) => f( c, [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16] );
