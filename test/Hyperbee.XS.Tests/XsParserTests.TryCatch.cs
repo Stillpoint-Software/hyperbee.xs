@@ -26,6 +26,7 @@ public class XsParserTryCatchTests
         );
 
         var lambda = Lambda<Func<int>>( expression );
+
         var compiled = lambda.Compile();
         var result = compiled();
 
@@ -51,6 +52,7 @@ public class XsParserTryCatchTests
         );
 
         var lambda = Lambda<Func<int>>( expression );
+
         var compiled = lambda.Compile();
         var result = compiled();
 
@@ -80,6 +82,7 @@ public class XsParserTryCatchTests
         );
 
         var lambda = Lambda<Func<int>>( expression );
+
         var compiled = lambda.Compile();
         var result = compiled();
 
@@ -105,6 +108,7 @@ public class XsParserTryCatchTests
         );
 
         var lambda = Lambda<Func<int>>( expression );
+
         var compiled = lambda.Compile();
         var result = compiled();
 
@@ -134,6 +138,7 @@ public class XsParserTryCatchTests
         );
 
         var lambda = Lambda<Func<int>>( expression );
+
         var compiled = lambda.Compile();
         var result = compiled();
 
@@ -166,6 +171,7 @@ public class XsParserTryCatchTests
         );
 
         var lambda = Lambda<Func<int>>( expression );
+
         var compiled = lambda.Compile();
         var result = compiled();
 
@@ -199,6 +205,7 @@ public class XsParserTryCatchTests
         );
 
         var lambda = Lambda<Func<int>>( expression );
+
         var compiled = lambda.Compile();
         var result = compiled();
 

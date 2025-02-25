@@ -12,12 +12,14 @@ internal sealed class UnaryEvaluator
         _interpreter = interpreter;
     }
 
-    public object Unary( UnaryExpression unary, object operand )
+    public object Unary( UnaryExpression unary )
     {
+        var operand = _interpreter.ResultStack.Pop();
+
         switch ( unary.NodeType )
         {
             case ExpressionType.Convert:
-                return ConvertOperand( unary, operand );
+                return ConvertOperation( unary, operand );
 
             case ExpressionType.TypeAs:
                 return operand is null || unary.Type.IsAssignableFrom( operand.GetType() ) ? operand : null;
@@ -25,14 +27,14 @@ internal sealed class UnaryEvaluator
             case ExpressionType.Not:
             case ExpressionType.IsFalse:
             case ExpressionType.IsTrue:
-                return LogicalUnary( unary, (bool) operand );
+                return LogicalOperation( unary, (bool) operand );
 
             case ExpressionType.Negate:
             case ExpressionType.PreIncrementAssign:
             case ExpressionType.PreDecrementAssign:
             case ExpressionType.PostIncrementAssign:
             case ExpressionType.PostDecrementAssign:
-                return NumericUnary( unary, operand );
+                return NumericOperation( unary, operand );
 
             case ExpressionType.OnesComplement:
                 return OnesComplement( unary, operand );
@@ -42,7 +44,7 @@ internal sealed class UnaryEvaluator
         }
     }
 
-    private static object ConvertOperand( UnaryExpression unary, object operand )
+    private static object ConvertOperation( UnaryExpression unary, object operand )
     {
         if ( operand is not IConvertible convertible )
             throw new InterpreterException( $"Cannot convert {operand.GetType()} to {unary.Type}", unary );
@@ -50,7 +52,7 @@ internal sealed class UnaryEvaluator
         return Convert.ChangeType( convertible, unary.Type );
     }
 
-    private static bool LogicalUnary( UnaryExpression unary, bool operand )
+    private static bool LogicalOperation( UnaryExpression unary, bool operand )
     {
         return unary.NodeType switch
         {
@@ -61,20 +63,20 @@ internal sealed class UnaryEvaluator
         };
     }
 
-    private object NumericUnary( UnaryExpression unary, object operand )
+    private object NumericOperation( UnaryExpression unary, object operand )
     {
         return operand switch
         {
-            int intValue => EvaluateNumericUnary( unary, intValue ),
-            long longValue => EvaluateNumericUnary( unary, longValue ),
-            float floatValue => EvaluateNumericUnary( unary, floatValue ),
-            double doubleValue => EvaluateNumericUnary( unary, doubleValue ),
-            decimal decimalValue => EvaluateNumericUnary( unary, decimalValue ),
+            int intValue => NumericOperation( unary, intValue ),
+            long longValue => NumericOperation( unary, longValue ),
+            float floatValue => NumericOperation( unary, floatValue ),
+            double doubleValue => NumericOperation( unary, doubleValue ),
+            decimal decimalValue => NumericOperation( unary, decimalValue ),
             _ => throw new InterpreterException( $"Unsupported unary operation for type {operand.GetType()}", unary )
         };
     }
 
-    private object EvaluateNumericUnary<T>( UnaryExpression unary, T operand )
+    private object NumericOperation<T>( UnaryExpression unary, T operand )
         where T : INumber<T>
     {
         if ( unary.NodeType == ExpressionType.Negate )

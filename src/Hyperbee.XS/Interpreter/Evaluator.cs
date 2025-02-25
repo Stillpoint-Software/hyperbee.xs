@@ -15,14 +15,8 @@ internal sealed class Evaluator
     }
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public object Unary( UnaryExpression unary, object operand )
-    {
-        return _unary.Unary( unary, operand );
-    }
+    public object Unary( UnaryExpression unary ) => _unary.Unary( unary );
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public object Binary( BinaryExpression binary, object leftValue, object rightValue )
-    {
-        return _binary.Binary( binary, leftValue, rightValue );
-    }
+    public object Binary( BinaryExpression binary ) => _binary.Binary( binary );
 }

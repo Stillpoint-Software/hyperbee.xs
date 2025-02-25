@@ -14,24 +14,24 @@ internal sealed class BinaryEvaluator
         _interpreter = interpreter;
     }
 
-    public object Binary( BinaryExpression binary, object leftValue, object rightValue )
+    public object Binary( BinaryExpression binary )
     {
+        var operation = GetOperation( binary );
+
         switch ( binary.NodeType )
         {
             case ExpressionType.Coalesce:
-                return leftValue ?? rightValue;
+                return CoalesceOperation( operation );
 
             case ExpressionType.Assign:
-                return Assign( binary, rightValue );
-
             case ExpressionType.AddAssign:
             case ExpressionType.SubtractAssign:
             case ExpressionType.MultiplyAssign:
             case ExpressionType.DivideAssign:
             case ExpressionType.ModuloAssign:
-            case ExpressionType.LeftShiftAssign: 
-            case ExpressionType.RightShiftAssign: 
-                return Assign( binary, leftValue, rightValue );
+            case ExpressionType.LeftShiftAssign:
+            case ExpressionType.RightShiftAssign:
+                return AssignOperation( operation );
 
             case ExpressionType.Equal:
             case ExpressionType.NotEqual:
@@ -39,142 +39,198 @@ internal sealed class BinaryEvaluator
             case ExpressionType.GreaterThan:
             case ExpressionType.LessThanOrEqual:
             case ExpressionType.GreaterThanOrEqual:
-                return LogicalBinary( binary, leftValue, rightValue );
+                return LogicalOperation( operation );
 
             default:
-                return ArithmeticBinary( binary, leftValue, rightValue );
+                return ArithmeticOperation( operation );
         }
     }
 
-    private object Assign( BinaryExpression binary, object value )
+    private BinaryOperation GetOperation( BinaryExpression binary )
     {
+        object leftValue;
+        object leftInstance = null;
+        object[] index = null;
+
+        object rightValue = _interpreter.ResultStack.Pop();
+
         switch ( binary.Left )
         {
-            case ParameterExpression variable:
-                _interpreter.Scope.Values[variable] = value;
-                return value;
+            case ParameterExpression paramExpr:
+                leftValue = _interpreter.Scope.Values[paramExpr];
+                break;
 
             case MemberExpression memberExpr:
-                return AssignToMember( memberExpr, value );
+                leftInstance = _interpreter.ResultStack.Pop();
+                leftValue = GetMemberValue( leftInstance, memberExpr );
+                break;
 
             case IndexExpression indexExpr:
-                return AssignToIndex( indexExpr, value );
+                index = new object[indexExpr.Arguments.Count];
+                for ( var i = indexExpr.Arguments.Count - 1; i >= 0; i-- )
+                {
+                    index[i] = _interpreter.ResultStack.Pop();
+                }
+
+                leftInstance = _interpreter.ResultStack.Pop();
+                leftValue = GetIndexValue( leftInstance, indexExpr, index );
+                break;
+
+            default:
+                leftValue = _interpreter.ResultStack.Pop();
+                break;
+        }
+
+        return new BinaryOperation( binary, leftValue, rightValue, leftInstance, index );
+
+        // Helper methods
+
+        static object GetMemberValue( object instance, MemberExpression memberExpr )
+        {
+            return memberExpr.Member switch
+            {
+                PropertyInfo prop => prop.GetValue( instance )
+                    ?? throw new InterpreterException( $"Property {prop.Name} evaluated to null.", memberExpr ),
+
+                FieldInfo field => field.GetValue( instance )
+                    ?? throw new InterpreterException( $"Field {field.Name} evaluated to null.", memberExpr ),
+
+                _ => throw new InterpreterException( $"Unsupported member access: {memberExpr.Member.Name}", memberExpr )
+            };
+        }
+
+        static object GetIndexValue( object instance, IndexExpression indexExpr, object[] index )
+        {
+            return indexExpr.Indexer!.GetValue( instance, index )
+                   ?? throw new InterpreterException( $"Index access on {indexExpr.Indexer.Name} evaluated to null.", indexExpr );
+        }
+    }
+
+    private object AssignOperation( BinaryOperation operation )
+    {
+        var (binary, rightValue, leftInstance, indexArguments) = operation;
+
+        if ( binary.NodeType != ExpressionType.Assign )
+            rightValue = ArithmeticOperation( operation );
+
+        switch ( binary.Left )
+        {
+            case ParameterExpression paramExpr:
+                return _interpreter.Scope.Values[paramExpr] = rightValue;
+
+            case MemberExpression memberExpr:
+                return AssignToMember( memberExpr, leftInstance, rightValue );
+
+            case IndexExpression indexExpr:
+                return AssignToIndex( indexExpr, leftInstance, indexArguments, rightValue );
 
             default:
                 throw new InterpreterException( $"Unsupported left-hand side in assignment: {binary.Left.GetType().Name}", binary );
         }
-    }
 
-    private object Assign( BinaryExpression binary, object leftValue, object rightValue )
-    {
-        object newValue;
+        // Helper methods
 
-        switch ( binary.NodeType )
+        static object AssignToIndex( IndexExpression indexExpr, object leftInstance, object[] index, object rightValue )
         {
-            case ExpressionType.AddAssign:
-            case ExpressionType.SubtractAssign:
-            case ExpressionType.MultiplyAssign:
-            case ExpressionType.DivideAssign:
-            case ExpressionType.ModuloAssign:
-                newValue = ArithmeticBinary( binary, leftValue, rightValue );
-                break;
-
-            case ExpressionType.LeftShiftAssign:
-            case ExpressionType.RightShiftAssign:
-                newValue = ShiftBinary( binary, leftValue, rightValue );
-                break;
-
-            default:
-                throw new InterpreterException( $"Unsupported assignment operation: {binary.NodeType}", binary );
+            indexExpr.Indexer!.SetValue( leftInstance, rightValue, index );
+            return rightValue;
         }
 
-        switch ( binary.Left )
+        static object AssignToMember( MemberExpression memberExpr, object leftInstance, object rightValue )
         {
-            case ParameterExpression variable:
-                _interpreter.Scope.Values[variable] = newValue;
-                return newValue;
+            switch ( memberExpr.Member )
+            {
+                case PropertyInfo prop when prop.CanWrite:
+                    prop.SetValue( leftInstance, rightValue );
+                    return rightValue;
 
-            case MemberExpression memberExpr:
-                return AssignToMember( memberExpr, newValue );
+                case FieldInfo field:
+                    field.SetValue( leftInstance, rightValue );
+                    return rightValue;
 
-            case IndexExpression indexExpr:
-                return AssignToIndex( indexExpr, newValue );
-
-            default:
-                throw new InterpreterException( $"Unsupported left-hand side in {binary.NodeType}: {binary.Left.GetType().Name}", binary );
+                default:
+                    throw new InterpreterException( $"Cannot assign to member: {memberExpr.Member.Name}", memberExpr );
+            }
         }
     }
 
-    private object AssignToMember( MemberExpression memberExpr, object value )
+    private static object CoalesceOperation( BinaryOperation operation )
     {
-        _interpreter.Visit( memberExpr.Expression );
-        var instance = _interpreter.ResultStack.Pop();
-
-        switch ( memberExpr.Member )
-        {
-            case PropertyInfo prop when prop.CanWrite:
-                prop.SetValue( instance, value );
-                return value;
-
-            case FieldInfo field:
-                field.SetValue( instance, value );
-                return value;
-
-            default:
-                throw new InterpreterException( $"Cannot assign to member: {memberExpr.Member.Name}", memberExpr );
-        }
+        var (leftValue, rightValue) = operation;
+        return leftValue ?? rightValue;
     }
 
-    private object AssignToIndex( IndexExpression indexExpr, object value )
+    private static object ArithmeticOperation( BinaryOperation operation )
     {
-        throw new NotImplementedException(); // BF ME discuss
+        var (binary, leftValue, rightValue) = operation;
 
-        //var arguments = new object[indexExpr.Arguments.Count];
+        if ( binary.NodeType == ExpressionType.LeftShiftAssign || binary.NodeType == ExpressionType.RightShiftAssign )
+            return ShiftOperation( operation );
 
-        //for ( var i = indexExpr.Arguments.Count - 1; i >= 0; i-- )
-        //{
-        //    arguments[i] = _resultStack.Pop(); // Pop evaluated arguments
-        //}
-
-        //var instance = _resultStack.Pop(); // Pop evaluated instance
-
-        //indexExpr.Indexer.SetValue( instance, value, arguments );
-        //return value;
-    }
-
-
-    private object LogicalBinary( BinaryExpression binary, object leftValue, object rightValue )
-    {
         var widenedType = GetWidenedType( leftValue.GetType(), rightValue.GetType() );
 
         return widenedType switch
         {
-            Type when widenedType == typeof(int) => EvaluateLogicalBinary( binary, (int) leftValue!, (int) rightValue! ),
-            Type when widenedType == typeof(long) => EvaluateLogicalBinary( binary, (long) leftValue!, (long) rightValue! ),
-            Type when widenedType == typeof(float) => EvaluateLogicalBinary( binary, (float) leftValue!, (float) rightValue! ),
-            Type when widenedType == typeof(double) => EvaluateLogicalBinary( binary, (double) leftValue!, (double) rightValue! ),
-            Type when widenedType == typeof(decimal) => EvaluateLogicalBinary( binary, (decimal) leftValue!, (decimal) rightValue! ),
-            _ => throw new InterpreterException( $"Unsupported logical operation: {binary.NodeType}", binary )
-        };
-    }
-
-    private object ArithmeticBinary( BinaryExpression binary, object leftValue, object rightValue )
-    {
-        var widenedType = GetWidenedType( leftValue.GetType(), rightValue.GetType() );
-
-        return widenedType switch
-        {
-            Type when widenedType == typeof(int) => EvaluateArithmeticBinary( binary, (int) leftValue!, (int) rightValue! ),
-            Type when widenedType == typeof(long) => EvaluateArithmeticBinary( binary, (long) leftValue!, (long) rightValue! ),
-            Type when widenedType == typeof(float) => EvaluateArithmeticBinary( binary, (float) leftValue!, (float) rightValue! ),
-            Type when widenedType == typeof(double) => EvaluateArithmeticBinary( binary, (double) leftValue!, (double) rightValue! ),
-            Type when widenedType == typeof(decimal) => EvaluateArithmeticBinary( binary, (decimal) leftValue!, (decimal) rightValue! ),
+            Type when widenedType == typeof(int) => ArithmeticOperation( binary, (int) leftValue!, (int) rightValue! ),
+            Type when widenedType == typeof(long) => ArithmeticOperation( binary, (long) leftValue!, (long) rightValue! ),
+            Type when widenedType == typeof(float) => ArithmeticOperation( binary, (float) leftValue!, (float) rightValue! ),
+            Type when widenedType == typeof(double) => ArithmeticOperation( binary, (double) leftValue!, (double) rightValue! ),
+            Type when widenedType == typeof(decimal) => ArithmeticOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),
             _ => throw new InterpreterException( $"Unsupported binary operation: {binary.NodeType}", binary )
         };
     }
 
-    private static object ShiftBinary( BinaryExpression binary, object leftValue, object rightValue )
+    private static T ArithmeticOperation<T>( BinaryExpression binary, T leftValue, T rightValue )
+        where T : INumber<T>
     {
+        return binary.NodeType switch
+        {
+            ExpressionType.Add or ExpressionType.AddAssign => leftValue + rightValue,
+            ExpressionType.Subtract or ExpressionType.SubtractAssign => leftValue - rightValue,
+            ExpressionType.Multiply or ExpressionType.MultiplyAssign => leftValue * rightValue,
+            ExpressionType.Divide or ExpressionType.DivideAssign => leftValue / rightValue,
+            ExpressionType.Modulo or ExpressionType.ModuloAssign => leftValue % rightValue,
+            ExpressionType.Power => T.CreateChecked( Math.Pow( double.CreateChecked( leftValue ), double.CreateChecked( rightValue ) ) ),
+            _ => throw new InterpreterException( $"Unsupported arithmetic operation: {binary.NodeType}", binary )
+        };
+    }
+
+    private static bool LogicalOperation( BinaryOperation operation )
+    {
+        var (binary, leftValue, rightValue) = operation;
+
+        var widenedType = GetWidenedType( leftValue.GetType(), rightValue.GetType() );
+
+        return widenedType switch
+        {
+            Type when widenedType == typeof(int) => LogicalOperation( binary, (int) leftValue!, (int) rightValue! ),
+            Type when widenedType == typeof(long) => LogicalOperation( binary, (long) leftValue!, (long) rightValue! ),
+            Type when widenedType == typeof(float) => LogicalOperation( binary, (float) leftValue!, (float) rightValue! ),
+            Type when widenedType == typeof(double) => LogicalOperation( binary, (double) leftValue!, (double) rightValue! ),
+            Type when widenedType == typeof(decimal) => LogicalOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),
+            _ => throw new InterpreterException( $"Unsupported logical operation: {binary.NodeType}", binary )
+        };
+    }
+
+    private static bool LogicalOperation<T>( BinaryExpression binary, T leftValue, T rightValue )
+        where T : IComparable<T>
+    {
+        return binary.NodeType switch
+        {
+            ExpressionType.LessThan => leftValue.CompareTo( rightValue ) < 0,
+            ExpressionType.GreaterThan => leftValue.CompareTo( rightValue ) > 0,
+            ExpressionType.LessThanOrEqual => leftValue.CompareTo( rightValue ) <= 0,
+            ExpressionType.GreaterThanOrEqual => leftValue.CompareTo( rightValue ) >= 0,
+            ExpressionType.Equal => leftValue.Equals( rightValue ),
+            ExpressionType.NotEqual => !leftValue.Equals( rightValue ),
+            _ => throw new InterpreterException( $"Unsupported logical operation: {binary.NodeType}", binary )
+        };
+    }
+
+    private static object ShiftOperation( BinaryOperation operation )
+    {
+        var (binary, leftValue, rightValue) = operation;
+
         if ( rightValue is not int shiftAmount )
             throw new InterpreterException( $"Shift amount must be an integer: {rightValue.GetType()}", binary );
 
@@ -194,37 +250,6 @@ internal sealed class BinaryEvaluator
         };
     }
 
-
-    private static T EvaluateArithmeticBinary<T>( BinaryExpression binary, T leftValue, T rightValue )
-        where T : INumber<T>
-    {
-        return binary.NodeType switch
-        {
-            ExpressionType.Add or ExpressionType.AddAssign => leftValue + rightValue,
-            ExpressionType.Subtract or ExpressionType.SubtractAssign => leftValue - rightValue,
-            ExpressionType.Multiply or ExpressionType.MultiplyAssign => leftValue * rightValue,
-            ExpressionType.Divide or ExpressionType.DivideAssign => leftValue / rightValue,
-            ExpressionType.Modulo or ExpressionType.ModuloAssign => leftValue % rightValue,
-            ExpressionType.Power => T.CreateChecked( Math.Pow( double.CreateChecked( leftValue ), double.CreateChecked( rightValue ) ) ),
-            _ => throw new InterpreterException( $"Unsupported arithmetic operation: {binary.NodeType}", binary )
-        };
-    }
-
-    private static bool EvaluateLogicalBinary<T>( BinaryExpression binary, T leftValue, T rightValue )
-        where T : IComparable<T>
-    {
-        return binary.NodeType switch
-        {
-            ExpressionType.LessThan => leftValue.CompareTo( rightValue ) < 0,
-            ExpressionType.GreaterThan => leftValue.CompareTo( rightValue ) > 0,
-            ExpressionType.LessThanOrEqual => leftValue.CompareTo( rightValue ) <= 0,
-            ExpressionType.GreaterThanOrEqual => leftValue.CompareTo( rightValue ) >= 0,
-            ExpressionType.Equal => leftValue.Equals( rightValue ),
-            ExpressionType.NotEqual => !leftValue.Equals( rightValue ),
-            _ => throw new InterpreterException( $"Unsupported logical operation: {binary.NodeType}", binary )
-        };
-    }
-
     private static Type GetWidenedType( Type leftType, Type rightType )
     {
         if ( leftType == rightType )
@@ -237,5 +262,44 @@ internal sealed class BinaryEvaluator
             return leftType;
 
         throw new InvalidOperationException( $"No valid widening conversion between {leftType} and {rightType}." );
+    }
+
+    private readonly ref struct BinaryOperation
+    {
+        public BinaryExpression Binary { get; }
+        public object LeftValue { get; }
+        public object RightValue { get; }
+        public object LeftInstance { get; }
+        public object[] IndexArguments { get; }
+
+        public BinaryOperation( BinaryExpression binary, object leftValue, object rightValue, object leftInstance = default, object[] indexArguments = default )
+        {
+            Binary = binary;
+            LeftValue = leftValue;
+            RightValue = rightValue;
+            LeftInstance = leftInstance;
+            IndexArguments = indexArguments;
+        }
+
+        public void Deconstruct( out object leftValue, out object rightValue )
+        {
+            leftValue = LeftValue;
+            rightValue = RightValue;
+        }
+
+        public void Deconstruct( out BinaryExpression binary, out object leftValue, out object rightValue )
+        {
+            binary = Binary;
+            leftValue = LeftValue;
+            rightValue = RightValue;
+        }
+
+        public void Deconstruct( out BinaryExpression binary, out object rightValue, out object leftInstance, out object[] indexArguments )
+        {
+            binary = Binary;
+            rightValue = RightValue;
+            leftInstance = LeftInstance;
+            indexArguments = IndexArguments;
+        }
     }
 }

@@ -283,14 +283,14 @@ public partial class XsParser
             "using",
             Terms.NamespaceIdentifier().ElseInvalidIdentifier()
                 .AndSkip( Terms.Char( ';' ) )
-                .Then( ( ctx, parts ) =>
+                .Then<Expression>( ( ctx, parts ) =>
                 {
                     var ns = parts.ToString();
 
                     if ( ctx is XsContext xsContext )
                         xsContext.Namespaces.Add( ns );
 
-                    return new DirectiveExpression( $"using {ns}" ) as Expression;
+                    return new DirectiveExpression( $"using {ns}" );
                 } )
         );
     }

@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Hyperbee.XS;
+namespace Hyperbee.XS.Core;
 
 public class DirectiveExpression : Expression
 {

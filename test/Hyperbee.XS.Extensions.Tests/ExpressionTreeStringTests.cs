@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Hyperbee.Xs.Extensions;
+using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;

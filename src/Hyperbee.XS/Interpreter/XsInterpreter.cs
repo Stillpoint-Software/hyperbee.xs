@@ -26,24 +26,24 @@ public class InterpretScope : ParseScope
 internal readonly struct ControlFrame
 {
     public ControlFrameType Type { get; }
-    public GotoExpression GotoExpr { get; }
+    //public GotoExpression GotoExpr { get; }
     public LambdaExpression LambdaExpr { get; }
-    public LabelTarget TargetLabel { get; }
+    //public LabelTarget TargetLabel { get; }
     public object State { get; }
 
-    private ControlFrame( ControlFrameType type, GotoExpression gotoExpr, object state = null )
-    {
-        Type = type;
-        GotoExpr = gotoExpr;
-        State = state;
-    }
+    //private ControlFrame( ControlFrameType type, GotoExpression gotoExpr, object state = null )
+    //{
+    //    Type = type;
+    //    GotoExpr = gotoExpr;
+    //    State = state;
+    //}
 
-    private ControlFrame( ControlFrameType type, LabelTarget targetLabel, object state = null )
-    {
-        Type = type;
-        TargetLabel = targetLabel;
-        State = state;
-    }
+    //private ControlFrame( ControlFrameType type, LabelTarget targetLabel, object state = null )
+    //{
+    //    Type = type;
+    //    TargetLabel = targetLabel;
+    //    State = state;
+    //}
 
     private ControlFrame( ControlFrameType type, LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> capturedScope )
     {
@@ -52,11 +52,11 @@ internal readonly struct ControlFrame
         State = capturedScope;
     }
 
-    public static ControlFrame CreateGoto( GotoExpression gotoExpr, object value = null ) =>
-        new(ControlFrameType.Goto, gotoExpr, value);
+    //public static ControlFrame CreateGoto( GotoExpression gotoExpr, object value = null ) =>
+    //    new(ControlFrameType.Goto, gotoExpr, value);
 
-    public static ControlFrame CreateReturn( LabelTarget target, object value = null ) =>
-        new(ControlFrameType.Return, target, value);
+    //public static ControlFrame CreateReturn( LabelTarget target, object value = null ) =>
+    //    new(ControlFrameType.Return, target, value);
 
     public static ControlFrame CreateClosure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> scope ) =>
         new(ControlFrameType.Closure, lambdaExpr, scope);
@@ -658,13 +658,40 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     protected override Expression VisitBinary( BinaryExpression node )
     {
-        Visit( node.Left );
-        var leftValue = _resultStack.Pop();
+        if ( node.NodeType is ExpressionType.Assign
+            or ExpressionType.AddAssign
+            or ExpressionType.SubtractAssign
+            or ExpressionType.MultiplyAssign
+            or ExpressionType.DivideAssign
+            or ExpressionType.ModuloAssign
+            or ExpressionType.LeftShiftAssign
+            or ExpressionType.RightShiftAssign )
+        {
+            switch ( node.Left )
+            {
+                case MemberExpression memberExpr:
+                    Visit( memberExpr.Expression ); // Visit and push instance
+                    break;
 
-        Visit( node.Right );
-        var rightValue = _resultStack.Pop();
+                case IndexExpression indexExpr:
+                    Visit( indexExpr.Object ); // Visit and push instance
+                    
+                    foreach ( var arg in indexExpr.Arguments )
+                    {
+                        Visit( arg ); // Visit and push index arguments
+                    }
 
-        var result = _evaluator.Binary( node, leftValue, rightValue );
+                    break;
+            }
+        }
+        else
+        {
+            Visit( node.Left ); // Visit and push leftValue
+        }
+
+        Visit( node.Right ); // Visit and push rightValue
+        
+        var result = _evaluator.Binary( node );
         _resultStack.Push( result );
 
         return node;
@@ -683,10 +710,9 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     protected override Expression VisitUnary( UnaryExpression node )
     {
-        Visit( node.Operand );
-        var operand = _resultStack.Pop();
+        Visit( node.Operand ); // Visit and push operand
 
-        var result = _evaluator.Unary( node, operand );
+        var result = _evaluator.Unary( node );
         _resultStack.Push( result );
 
         return node;
@@ -719,9 +745,6 @@ public sealed class XsInterpreter : ExpressionVisitor
 
     protected override Expression VisitIndex( IndexExpression node ) 
     {
-        Visit( node.Object );
-        var instance = _resultStack.Pop();
-
         var arguments = new object[node.Arguments.Count];
         for ( var i = 0; i < node.Arguments.Count; i++ )
         {
@@ -729,12 +752,14 @@ public sealed class XsInterpreter : ExpressionVisitor
             arguments[i] = _resultStack.Pop();
         }
 
+        Visit( node.Object );
+        var instance = _resultStack.Pop();
+
         var result = node.Indexer!.GetValue( instance, arguments );
         _resultStack.Push( result );
 
         return node;
     }
-
 
     protected override Expression VisitNew( NewExpression node )
     {
