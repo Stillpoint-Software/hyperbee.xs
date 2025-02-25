@@ -117,18 +117,18 @@ public sealed class XsInterpreter : ExpressionVisitor
             .Concat( returnType == typeof( void ) ? [] : [returnType] )
             .ToArray();
 
-        var curryMethodSource = returnType == typeof( void ) ? CurryAction.Methods : CurryFunc.Methods;
+        var methodSource = returnType == typeof( void ) ? ActionBinder.Methods : FuncBinder.Methods;
 
-        var curryMethod = curryMethodSource
-            .FirstOrDefault( m => m.Name == "Curry" && m.GetGenericArguments().Length == genericTypes.Length )
+        var delegateBinder = methodSource
+            .FirstOrDefault( m => m.GetGenericArguments().Length == genericTypes.Length )
             ?.MakeGenericMethod( genericTypes );
 
-        if ( curryMethod is null )
-            throw new InvalidOperationException( $"No suitable Curry method found for delegate type {typeof( TDelegate )}" );
+        if ( delegateBinder is null )
+            throw new InvalidOperationException( $"No suitable bind method found for delegate type {typeof( TDelegate )}" );
 
         PrepareNavigationMap( expression );
 
-        return (TDelegate) curryMethod.Invoke( null, [handlerDelegate, expression] )!;
+        return (TDelegate) delegateBinder.Invoke( null, [handlerDelegate, expression] )!;
 
         void PrepareNavigationMap( Expression root )
         {
