@@ -18,6 +18,8 @@ public sealed class XsInterpreter : ExpressionVisitor
     private Navigation _currentNavigation;
     private InterpreterMode _mode;
 
+    private Dictionary<Expression, Expression> _extensions = new();
+
     internal InterpretScope Scope => _scope;
     internal Stack<object> ResultStack => _resultStack;
 
@@ -64,7 +66,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
             Visit( lambda.Body );
 
-            ValidateNavigationMode();
+            ThrowIfNavigating();
 
             return (T) _resultStack.Pop();
         }
@@ -74,7 +76,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
     }
 
-    internal void EvaluateVoid( LambdaExpression lambda, params object[] values )
+    internal void EvaluateAction( LambdaExpression lambda, params object[] values )
     {
         _scope.EnterScope( FrameType.Method );
 
@@ -85,7 +87,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
             Visit( lambda.Body );
 
-            ValidateNavigationMode();
+            ThrowIfNavigating();
         }
         finally
         {
@@ -93,7 +95,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
     }
 
-    private void ValidateNavigationMode()
+    private void ThrowIfNavigating()
     {
         if ( _mode != InterpreterMode.Navigating )
             return;
@@ -390,46 +392,6 @@ Navigate:
         }
     }
 
-    // Loop
-
-    protected override Expression VisitLoop( LoopExpression node )
-    {
-        _scope.EnterScope( FrameType.Block );
-
-        try
-        {
-            while ( true )
-            {
-                Visit( node.Body );
-
-                if ( _mode != InterpreterMode.Navigating )
-                {
-                    continue;
-                }
-
-                if ( _currentNavigation.TargetLabel == node.BreakLabel )
-                {
-                    _mode = InterpreterMode.Evaluating;
-                    break;
-                }
-
-                if ( _currentNavigation.TargetLabel == node.ContinueLabel )
-                {
-                    _mode = InterpreterMode.Evaluating;
-                    continue;
-                }
-
-                return node;
-            }
-        }
-        finally
-        {
-            _scope.ExitScope();
-        }
-
-        return node;
-    }
-
     // Try/Catch
 
     private enum TryCatchState
@@ -574,6 +536,46 @@ Navigate:
                     return node;
             }
         }
+    }
+
+    // Loop
+
+    protected override Expression VisitLoop( LoopExpression node )
+    {
+        _scope.EnterScope( FrameType.Block );
+
+        try
+        {
+            while ( true )
+            {
+                Visit( node.Body );
+
+                if ( _mode != InterpreterMode.Navigating )
+                {
+                    continue;
+                }
+
+                if ( _currentNavigation.TargetLabel == node.BreakLabel )
+                {
+                    _mode = InterpreterMode.Evaluating;
+                    break;
+                }
+
+                if ( _currentNavigation.TargetLabel == node.ContinueLabel )
+                {
+                    _mode = InterpreterMode.Evaluating;
+                    continue;
+                }
+
+                return node;
+            }
+        }
+        finally
+        {
+            _scope.ExitScope();
+        }
+
+        return node;
     }
 
     // Lambda
@@ -721,22 +723,6 @@ Navigate:
         }
     }
 
-    protected override Expression VisitMember( MemberExpression node )
-    {
-        Visit( node.Expression );
-        var instance = _resultStack.Pop();
-
-        var result = node.Member switch
-        {
-            PropertyInfo prop => prop.GetValue( instance ),
-            FieldInfo field => field.GetValue( instance ),
-            _ => throw new InterpreterException( $"Unsupported member access: {node.Member.Name}", node )
-        };
-
-        _resultStack.Push( result );
-        return node;
-    }
-
     protected override Expression VisitBinary( BinaryExpression node )
     {
         if ( node.NodeType is ExpressionType.Assign
@@ -830,13 +816,15 @@ Navigate:
         return node;
     }
 
-    protected override Expression VisitParameter( ParameterExpression node )
+    protected override Expression VisitExtension( Expression node )
     {
-        if ( !_scope.Values.TryGetValue( node, out var value ) )
-            throw new InterpreterException( $"Parameter '{node.Name}' not found.", node );
+        if ( _extensions.TryGetValue( node, out var reduced ) )
+            return reduced;
 
-        _resultStack.Push( value );
-        return node;
+        reduced = base.VisitExtension( node );
+        _extensions[node] = reduced;
+
+        return reduced; 
     }
 
     protected override Expression VisitIndex( IndexExpression node )
@@ -854,6 +842,44 @@ Navigate:
         var result = node.Indexer!.GetValue( instance, arguments );
         _resultStack.Push( result );
 
+        return node;
+    }
+
+    protected override Expression VisitListInit( ListInitExpression node )
+    {
+        Visit( node.NewExpression );
+        var instance = _resultStack.Pop();
+
+        foreach ( var initializer in node.Initializers )
+        {
+            var arguments = new object[initializer.Arguments.Count];
+
+            for ( var index = 0; index < initializer.Arguments.Count; index++ )
+            {
+                Visit( initializer.Arguments[index] );
+                arguments[index] = _resultStack.Pop();
+            }
+
+            initializer.AddMethod.Invoke( instance, arguments );
+        }
+
+        _resultStack.Push( instance );
+        return node;
+    }
+
+    protected override Expression VisitMember( MemberExpression node )
+    {
+        Visit( node.Expression );
+        var instance = _resultStack.Pop();
+
+        var result = node.Member switch
+        {
+            PropertyInfo prop => prop.GetValue( instance ),
+            FieldInfo field => field.GetValue( instance ),
+            _ => throw new InterpreterException( $"Unsupported member access: {node.Member.Name}", node )
+        };
+
+        _resultStack.Push( result );
         return node;
     }
 
@@ -967,25 +993,12 @@ Navigate:
         return node;
     }
 
-    protected override Expression VisitListInit( ListInitExpression node )
+    protected override Expression VisitParameter( ParameterExpression node )
     {
-        Visit( node.NewExpression );
-        var instance = _resultStack.Pop();
+        if ( !_scope.Values.TryGetValue( node, out var value ) )
+            throw new InterpreterException( $"Parameter '{node.Name}' not found.", node );
 
-        foreach ( var initializer in node.Initializers )
-        {
-            var arguments = new object[initializer.Arguments.Count];
-
-            for ( var index = 0; index < initializer.Arguments.Count; index++ )
-            {
-                Visit( initializer.Arguments[index] );
-                arguments[index] = _resultStack.Pop();
-            }
-
-            initializer.AddMethod.Invoke( instance, arguments );
-        }
-
-        _resultStack.Push( instance );
+        _resultStack.Push( value );
         return node;
     }
 

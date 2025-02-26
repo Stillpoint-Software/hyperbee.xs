@@ -25,8 +25,8 @@ public class XsParserExtensionsTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var compiled = lambda.Compile();
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         Assert.AreEqual( 42, result );
     }

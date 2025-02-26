@@ -10,7 +10,7 @@ internal static class DelegateCache
 
     static DelegateCache()
     {
-        EvalMethods[typeof(void)] = typeof(XsInterpreter).GetMethod( nameof(XsInterpreter.EvaluateVoid), BindingFlags.NonPublic | BindingFlags.Instance );
+        EvalMethods[typeof(void)] = typeof(XsInterpreter).GetMethod( nameof(XsInterpreter.EvaluateAction), BindingFlags.NonPublic | BindingFlags.Instance );
     }
 
     public static void Get<TDelegate>( LambdaExpression expression, XsInterpreter interpreter, out MethodInfo delegateBinder, out Delegate delegateHandler )
