@@ -4,7 +4,8 @@ namespace Hyperbee.XS.Interpreter;
 
 public sealed class NavigationVisitor : ExpressionVisitor
 {
-    private readonly Stack<Expression> _pathStack = new();
+    private readonly List<Expression> _currentPath = new( 8 );
+
     private readonly Dictionary<LabelTarget, List<Expression>> _labelPaths = new();
     private readonly Dictionary<GotoExpression, List<Expression>> _gotoPaths = new();
     private readonly Dictionary<GotoExpression, Navigation> _navigation = new();
@@ -26,32 +27,39 @@ public sealed class NavigationVisitor : ExpressionVisitor
         if ( node == null )
             return null;
 
-        _pathStack.Push( node );
+        _currentPath.Add( node );
         var result = base.Visit( node );
-        _pathStack.Pop();
+        _currentPath.RemoveAt( _currentPath.Count - 1 );
 
         return result;
     }
 
     protected override Expression VisitLabel( LabelExpression node )
     {
-        _labelPaths[node.Target] = [.. _pathStack.Reverse()];
+        _labelPaths[node.Target] = [.. _currentPath];
         return base.VisitLabel( node );
     }
 
     protected override Expression VisitGoto( GotoExpression node )
     {
-        _gotoPaths[node] = [.. _pathStack.Reverse()];
+        _gotoPaths[node] = [.. _currentPath];
         return base.VisitGoto( node );
     }
 
     protected override Expression VisitLoop( LoopExpression node )
     {
+        if ( node.BreakLabel == null && node.ContinueLabel == null )
+        {
+            return base.VisitLoop( node );
+        }
+
+        var currentPath = _currentPath.ToList(); 
+
         if ( node.BreakLabel != null )
-            _labelPaths[node.BreakLabel] = [.. _pathStack.Reverse()];
+            _labelPaths[node.BreakLabel] = currentPath;
 
         if ( node.ContinueLabel != null )
-            _labelPaths[node.ContinueLabel] = [.. _pathStack.Reverse()];
+            _labelPaths[node.ContinueLabel] = currentPath;
 
         return base.VisitLoop( node );
     }

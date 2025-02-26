@@ -173,6 +173,7 @@ internal sealed class BinaryEvaluator
         {
             Type when widenedType == typeof( int ) => ArithmeticOperation( binary, (int) leftValue!, (int) rightValue! ),
             Type when widenedType == typeof( long ) => ArithmeticOperation( binary, (long) leftValue!, (long) rightValue! ),
+            Type when widenedType == typeof( short ) => ArithmeticOperation( binary, (short) leftValue!, (short) rightValue! ),
             Type when widenedType == typeof( float ) => ArithmeticOperation( binary, (float) leftValue!, (float) rightValue! ),
             Type when widenedType == typeof( double ) => ArithmeticOperation( binary, (double) leftValue!, (double) rightValue! ),
             Type when widenedType == typeof( decimal ) => ArithmeticOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),
@@ -205,6 +206,7 @@ internal sealed class BinaryEvaluator
         {
             Type when widenedType == typeof( int ) => LogicalOperation( binary, (int) leftValue!, (int) rightValue! ),
             Type when widenedType == typeof( long ) => LogicalOperation( binary, (long) leftValue!, (long) rightValue! ),
+            Type when widenedType == typeof(short) => LogicalOperation( binary, (short) leftValue!, (short) rightValue! ),
             Type when widenedType == typeof( float ) => LogicalOperation( binary, (float) leftValue!, (float) rightValue! ),
             Type when widenedType == typeof( double ) => LogicalOperation( binary, (double) leftValue!, (double) rightValue! ),
             Type when widenedType == typeof( decimal ) => LogicalOperation( binary, (decimal) leftValue!, (decimal) rightValue! ),

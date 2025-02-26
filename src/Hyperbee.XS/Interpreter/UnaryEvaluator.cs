@@ -69,6 +69,7 @@ internal sealed class UnaryEvaluator
         {
             int intValue => NumericOperation( unary, intValue ),
             long longValue => NumericOperation( unary, longValue ),
+            short shortValue => NumericOperation( unary, shortValue ),
             float floatValue => NumericOperation( unary, floatValue ),
             double doubleValue => NumericOperation( unary, doubleValue ),
             decimal decimalValue => NumericOperation( unary, decimalValue ),
