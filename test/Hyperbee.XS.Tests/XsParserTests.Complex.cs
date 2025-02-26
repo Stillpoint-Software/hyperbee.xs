@@ -11,9 +11,9 @@ public class XsParserComplexTests
     [TestMethod]
     public void Compile_ShouldAllowDoubleAssignment()
     {
-        var script = "var x = var y = 42; x;";
+        const string xs = "var x = var y = 42; x;";
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -26,7 +26,7 @@ public class XsParserComplexTests
     [TestMethod]
     public void Compile_ShouldDemonstrateAllLanguageFeatures()
     {
-        var script =
+        const string xs =
         """
         var results = new List<int>(5);
 
@@ -99,12 +99,12 @@ public class XsParserComplexTests
             ]
         };
 
-        var expression = Xs.Parse( script, debugger );
+        var expression = Xs.Parse( xs, debugger );
 
         var code = expression.ToExpressionString();
 
         Console.WriteLine( "Script:" );
-        Console.WriteLine( script );
+        Console.WriteLine( xs );
 
         Console.WriteLine( "\nCode:" );
         Console.WriteLine( code );

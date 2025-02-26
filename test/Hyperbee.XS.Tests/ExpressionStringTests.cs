@@ -21,7 +21,8 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_NestedLambdas()
     {
-        var script = """
+        const string xs = 
+            """
             var x = 2;
             var y = 3
             var calc = (int a, int b) => {
@@ -30,10 +31,10 @@ public class ExpressionStringTests
             calc( x, y )();
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -45,7 +46,8 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Loops()
     {
-        var script = """
+        const string xs = 
+            """
             var l = 0;
             loop
             {
@@ -58,10 +60,10 @@ public class ExpressionStringTests
             l;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -73,7 +75,8 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Switch()
     {
-        var script = """
+        const string xs = 
+            """
             var x = 2;
             var result = 0;
             switch (x)
@@ -92,10 +95,10 @@ public class ExpressionStringTests
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -107,7 +110,8 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_TryCatch()
     {
-        var script = """
+        const string xs = 
+            """
             var result = 0;
             try
             {
@@ -120,10 +124,10 @@ public class ExpressionStringTests
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -135,7 +139,8 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Conditional()
     {
-        var script = """
+        const string xs = 
+            """
             var x = 5;
             var result = if( x == 5 )
             {   
@@ -148,10 +153,10 @@ public class ExpressionStringTests
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -163,7 +168,8 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Goto()
     {
-        var script = """
+        const string xs = 
+            """
             var result = 0;
             goto Label;
             result = 1;
@@ -172,10 +178,10 @@ public class ExpressionStringTests
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -187,16 +193,17 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Return()
     {
-        var script = """
+        const string xs = 
+            """
             var result = 0;
             return 42;
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -208,16 +215,17 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_InstanceAndSetProperty()
     {
-        var script = """
+        const string xs = 
+            """
             var instance = new TestClass(0);
             instance.PropertyValue = 10;
             instance.PropertyValue;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -230,15 +238,16 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_ArrayInitialization()
     {
-        var script = """
+        const string xs = 
+            """
             var a = new int[] { 1, 2, 3, 4, 5 };
             a[2];
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -250,15 +259,16 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_ListInitialization()
     {
-        var script = """
+        const string xs = 
+            """
             var l = new List<int>() { 1, 2, 3, 4, 5 };
             l[2];
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -270,15 +280,16 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_CallMethod()
     {
-        var script = """
+        const string xs = 
+            """
             var instance = new TestClass(5);
             instance.MethodValue();
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -290,15 +301,16 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_GetIndexer()
     {
-        var script = """
+        const string xs = 
+            """
             var instance = new TestClass(0);
             instance[5];
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -310,16 +322,17 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_SetIndexer()
     {
-        var script = """
+        const string xs = 
+            """
             var instance = new TestClass(0);
             instance[5] = 10;
             instance[5];
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -331,14 +344,15 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_CallStaticMethod()
     {
-        var script = """
+        const string xs = 
+            """
             TestClass.StaticAddNumbers(3, 4);
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -350,16 +364,17 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_IsTrueAndIsFalse()
     {
-        var script = """
+        const string xs = 
+            """
             var x = ?true;
             var y = !?false;
             x && y;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<bool>>( expression );
         var compiled = lambda.Compile();
@@ -371,16 +386,17 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_TypeAs()
     {
-        var script = """
+        const string xs = 
+            """
             var obj = "test";
             var result = obj as? string;
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<string>>( expression );
         var compiled = lambda.Compile();
@@ -392,16 +408,17 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Convert()
     {
-        var script = """
+        const string xs = 
+            """
             var obj = "test";
             var result = obj as string;
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<string>>( expression );
         var compiled = lambda.Compile();
@@ -413,16 +430,17 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_TypeIs()
     {
-        var script = """
+        const string xs = 
+            """
             var obj = "test";
             var result = (obj is string);
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<bool>>( expression );
         var compiled = lambda.Compile();
@@ -434,17 +452,18 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_CoalesceAssign()
     {
-        var script = """
+        const string xs = 
+            """
             var x = "hello";
             var result = default(string);
             result ??= x;
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<string>>( expression );
         var compiled = lambda.Compile();
@@ -456,17 +475,18 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_PowerAssign()
     {
-        var script = """
+        const string xs = 
+            """
             var x = 5;
             var result = 2;
             result **= x;
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -478,17 +498,18 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_MathOperations()
     {
-        var script = """
+        const string xs = 
+            """
             var x = 5;
             var y = 10;
             var result = x + y * 2 - (x / y);
             result;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -500,7 +521,8 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_AssignmentOperations()
     {
-        var script = """
+        const string xs = 
+            """
             var x = 5;
             x += 10;
             x -= 3;
@@ -509,10 +531,10 @@ public class ExpressionStringTests
             x;
             """;
 
-        var expression = Xs.Parse( script );
+        var expression = Xs.Parse( xs );
         var code = expression.ToExpressionString();
 
-        WriteResult( script, code );
+        WriteResult( xs, code );
 
         var lambda = Expression.Lambda<Func<int>>( expression );
         var compiled = lambda.Compile();
@@ -521,24 +543,24 @@ public class ExpressionStringTests
         await AssertScriptValue( code, result );
     }
 
-    public async Task AssertScriptValue<T>( string code, T result )
+    public static async Task AssertScriptValue<T>( string code, T result )
     {
         var typeName = typeof( T ).Name;
 
-        var scriptResult = await CSharpScript.EvaluateAsync<T>(
+        var xsResult = await CSharpScript.EvaluateAsync<T>(
             code +
             $"var lambda = Expression.Lambda<Func<{typeName}>>( expression );" +
             "var compiled = lambda.Compile();" +
             "return compiled();", ScriptOptions );
 
-        Assert.AreEqual( result, scriptResult );
+        Assert.AreEqual( result, xsResult );
     }
 
-    private void WriteResult( string script, string code )
+    private static void WriteResult( string xs, string code )
     {
 #if DEBUG
         Console.WriteLine( "Script:" );
-        Console.WriteLine( script );
+        Console.WriteLine( xs );
 
         Console.WriteLine( "\nCode:" );
         Console.WriteLine( code );
