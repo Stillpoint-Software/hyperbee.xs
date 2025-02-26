@@ -18,7 +18,7 @@ public sealed class XsInterpreter : ExpressionVisitor
     private Navigation _currentNavigation;
     private InterpreterMode _mode;
 
-    private Dictionary<Expression, Expression> _extensions = new();
+    private readonly Dictionary<Expression, Expression> _extensions = new();
 
     internal InterpretScope Scope => _scope;
     internal Stack<object> ResultStack => _resultStack;
