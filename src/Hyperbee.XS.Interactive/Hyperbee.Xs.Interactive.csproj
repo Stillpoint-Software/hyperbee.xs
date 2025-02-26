@@ -1,26 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
-    <OutputType>Exe</OutputType>
-    <PackAsTool>true</PackAsTool>
-    <ToolCommandName>xs</ToolCommandName>
-    <!--<PackageOutputPath>./nupkg</PackageOutputPath> -->
 
     <Authors>Stillpoint Software, Inc.</Authors>
-    <PackageId>Hyperbee.XS.Cli</PackageId>
+    <PackageId>Hyperbee.XS.Interactive</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>expressions;script;cli;tool;xs</PackageTags>
+    <PackageTags>expressions;script;dotnet;interactive;notebook;polygot;</PackageTags>
 
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://stillpoint-software.github.io/hyperbee.xs/</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Stillpoint Software, Inc.</Copyright>
-    <Title>Hyperbee Expression Script [XS] Cli</Title>
-    <Description>Expression Script [XS] Cli.</Description>
+    <Title>Hyperbee Expression Script [XS] .NET Interactive Kernels</Title>
+    <Description>.NET Interactive tools for Expression Script [XS].</Description>
     <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.XS</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/Hyperbee.XS/releases/latest</PackageReleaseNotes>
@@ -29,13 +25,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FastExpressionCompiler" Version="5.0.2" />
-    <PackageReference Include="Spectre.Console" Version="0.49.1" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.49.1" />
+    <PackageReference Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.25110.2" />
     <PackageReference Include="System.Reflection.Metadata" Version="9.0.2" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.2" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="bin\Debug\net8.0\/net9.0/Hyperbee.Xs.Interactive.dll" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="$(OutputPath)/net9.0/Hyperbee.Xs.Interactive.dll" Pack="true" PackagePath="interactive-extensions/dotnet" />
+  </ItemGroup>
+  
   <ItemGroup>
     <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
     <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="/" />

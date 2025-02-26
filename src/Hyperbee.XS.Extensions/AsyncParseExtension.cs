@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Hyperbee.Collections;
 using Hyperbee.Expressions;
 using Hyperbee.XS;

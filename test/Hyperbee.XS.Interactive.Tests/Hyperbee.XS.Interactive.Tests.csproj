@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
@@ -12,11 +12,16 @@
   <ItemGroup>
     <PackageReference Include="Hyperbee.Expressions" Version="1.1.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.13.0" />
+    <PackageReference Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.25110.2" />
+    <PackageReference Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.25110.2" />
+    <PackageReference Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.25110.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.8.2" />
     <PackageReference Include="MSTest.TestFramework" Version="3.8.2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Hyperbee.XS.Extensions\Hyperbee.Xs.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\Hyperbee.XS.Interactive\Hyperbee.Xs.Interactive.csproj" />
     <ProjectReference Include="..\..\src\Hyperbee.XS\Hyperbee.XS.csproj" />
   </ItemGroup>
 
@@ -28,6 +33,12 @@
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.DotNet.Interactive.PackageManagement">
+      <Version>1.0.0-beta.25110.2</Version>
     </PackageReference>
   </ItemGroup>
 

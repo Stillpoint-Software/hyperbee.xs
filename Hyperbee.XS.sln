@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
+		sample.dib = sample.dib
 		solution-helper.psm1 = solution-helper.psm1
 	EndProjectSection
 EndProject
@@ -38,6 +39,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.XS.Extensions.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.Xs.Cli", "src\Hyperbee.XS.Cli\Hyperbee.Xs.Cli.csproj", "{552C7A2C-9F4D-4D4A-9C2C-CABC71559A79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.Xs.Interactive", "src\Hyperbee.XS.Interactive\Hyperbee.Xs.Interactive.csproj", "{71B6A746-FF3F-435E-8EAE-65039C0F34E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.XS.Interactive.Tests", "test\Hyperbee.XS.Interactive.Tests\Hyperbee.XS.Interactive.Tests.csproj", "{92F65113-015D-8683-5CD4-57D748DB3B5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +73,14 @@ Global
 		{552C7A2C-9F4D-4D4A-9C2C-CABC71559A79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{552C7A2C-9F4D-4D4A-9C2C-CABC71559A79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{552C7A2C-9F4D-4D4A-9C2C-CABC71559A79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71B6A746-FF3F-435E-8EAE-65039C0F34E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71B6A746-FF3F-435E-8EAE-65039C0F34E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71B6A746-FF3F-435E-8EAE-65039C0F34E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71B6A746-FF3F-435E-8EAE-65039C0F34E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92F65113-015D-8683-5CD4-57D748DB3B5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92F65113-015D-8683-5CD4-57D748DB3B5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92F65113-015D-8683-5CD4-57D748DB3B5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92F65113-015D-8683-5CD4-57D748DB3B5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,6 +92,7 @@ Global
 		{16749A0C-F550-49BA-9E13-3789924019AB} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
 		{636A48FD-43EA-472E-B2F6-1ED5109537DE} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
 		{4ECD9E30-D79F-4333-88BE-495F515EC873} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
+		{92F65113-015D-8683-5CD4-57D748DB3B5D} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {32874F5B-B467-4F28-A8E2-82C2536FB228}

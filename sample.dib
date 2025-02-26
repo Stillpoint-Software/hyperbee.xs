@@ -1,0 +1,82 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"},{"aliases":[],"name":"razor"},{"aliases":[],"name":"xs"},{"aliases":[],"name":"xs-show"}]}}
+
+#!pwsh
+
+$version = "1.2.2"
+dotnet pack -c Release
+
+copy src\Hyperbee.XS\bin\Release\Hyperbee.XS.$version.nupkg C:\Development\.nuget
+copy src\Hyperbee.XS.Extensions\bin\Release\Hyperbee.XS.Extensions.$version.nupkg C:\Development\.nuget
+copy src\Hyperbee.XS.Interactive\bin\Release\Hyperbee.XS.Interactive.$version.nupkg C:\Development\.nuget
+
+#!csharp
+
+#i nuget:C:/Development/.nuget
+#r "nuget:Hyperbee.XS"
+#r "nuget:Hyperbee.XS.Extensions"
+#r "nuget:Hyperbee.XS.Interactive"
+
+#!xs
+
+#!xs
+
+package Humanizer.Core;
+using Humanizer;
+using System.Collections.Generic;
+
+var x = 1+5;
+var y = 10;
+var b = new Dictionary<string, int>();
+
+b["x"] = x;
+b["y"] = 42;
+
+x;
+
+#!xs
+
+var y = "hi";
+y;
+
+#!xs
+
+display( ( x + 123 ).ToWords() );
+display( b, "application/json" );
+x;
+
+#!xs-show
+
+#!xs-show
+
+if( true ) 1+5; else 0;
+
+#!csharp
+
+var simple = "hello";
+display(simple);
+
+class Person {
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+var complex = new Person { Name = "John", Age = 30 };
+display(complex);
+
+#!xs
+
+#!xs
+
+#!share --from csharp --name "simple" --as "zSimple"
+#!share --from csharp --name "complex" --as "zComplex"
+
+display(zSimple);
+zComplex.Name;
+
+#!csharp
+
+#!xs
+
+#!whos
