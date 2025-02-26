@@ -17,7 +17,6 @@ public sealed class XsInterpreter : ExpressionVisitor
     private Dictionary<GotoExpression, Navigation> _navigation;
     private Navigation _currentNavigation;
     private InterpreterMode _mode;
-    private Exception _currentException;
 
     internal InterpretScope Scope => _scope;
     internal Stack<object> ResultStack => _resultStack;
@@ -487,6 +486,7 @@ Navigate:
         var catchIndex = 0;
 
         Expression expr = null;
+        ParameterExpression exceptionVariable = null;
 
 Navigate:
 
@@ -534,25 +534,14 @@ Navigate:
                     }
 
                     var handler = node.Handlers[catchIndex];
-                    var exception = _currentNavigation.Exception;
+                    var exceptionType = _currentNavigation.Exception?.GetType();
 
-                    if ( handler.Test.IsAssignableFrom( exception.GetType() ) )
+                    if ( handler.Test.IsAssignableFrom( exceptionType ) )
                     {
-                        // create block scope for exception
-                        _scope.EnterScope( FrameType.Block );
-
-                        _scope.Values[handler.Variable] = exception;
+                        exceptionVariable = handler.Variable;
                         expr = handler.Body;
                         state = TryCatchState.HandleCatch;
                         continuation = TryCatchState.Finally;
-
-                        // found matching catch, clear navigation
-                        _mode = InterpreterMode.Evaluating;
-                        _currentNavigation.Reset();
-                        _currentNavigation = null;
-
-                        // track current exception for possible rethrow
-                        _currentException = exception;
                     }
                     else
                     {
@@ -562,35 +551,26 @@ Navigate:
                     break;
 
                 case TryCatchState.HandleCatch:
-                    Visit( expr! );
 
-                    // exit catch scope
-                    _scope.ExitScope();
+                    // found matching catch, clear navigation
+                    _mode = InterpreterMode.Evaluating;
+
+                    try
+                    { 
+                        _scope.EnterScope( FrameType.Block );
+                        _scope.Values[exceptionVariable] = _currentNavigation.Exception;
+
+                        Visit( expr! );
+                    }
+                    finally
+                    {
+                        _scope.ExitScope();
+                    }
 
                     if ( _mode == InterpreterMode.Navigating )
                     {
-                        if ( _currentNavigation.CommonAncestor == node )
+                        if ( _currentNavigation?.CommonAncestor == node )
                             goto Navigate;
-
-                        // Rethrow exception
-                        if ( _currentNavigation.Exception == _currentException )
-                        {
-                            state = TryCatchState.Finally;
-                            break;
-                        }
-
-                        // new exception, find matching catch
-                        if ( _currentNavigation.Exception != null )
-                        {
-                            if ( continuation == TryCatchState.Finally )
-                            {
-                                state = TryCatchState.Finally;
-                                break;
-                            }
-
-                            state = TryCatchState.Catch;
-                            break;
-                        }
                     }
 
                     state = continuation;
@@ -852,10 +832,22 @@ Navigate:
 
         if ( node.NodeType == ExpressionType.Throw )
         {
-            var instance = _resultStack.Pop();
+            Exception exception = null;
+
+            if ( node.Operand != null ) 
+            { 
+                var instance = _resultStack.Pop();
+
+                exception = instance as Exception;
+            }
+
+            if ( _currentNavigation != null && exception == null )
+            {
+                exception = _currentNavigation.Exception;
+            }
 
             _mode = InterpreterMode.Navigating;
-            _currentNavigation = new Navigation( exception: (instance as Exception) ?? _currentException );
+            _currentNavigation = new Navigation( exception: exception );
 
             return node;
         }
