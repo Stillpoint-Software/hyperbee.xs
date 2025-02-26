@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Hyperbee.Collections.Extensions;
 using Hyperbee.Xs.Extensions;
 using Hyperbee.Xs.Interactive.Extensions;
 using Hyperbee.XS.Core;
@@ -11,19 +12,18 @@ using Microsoft.DotNet.Interactive.Events;
 
 #if NET9_0_OR_GREATER
 using Microsoft.DotNet.Interactive.PackageManagement;
-using NuGet.Protocol.Plugins;
 #endif
 
 namespace Hyperbee.XS.Interactive;
 
 public class XsBaseKernel : Kernel
 {
-    protected TypeResolver TypeResolver { get; }
+    internal TypeResolver TypeResolver { get; }
 
     protected XsConfig Config;
     protected ParseScope Scope = new();
     protected Dictionary<string, object> State = [];
-    protected Lazy<XsParser> Parser => new( () => new XsParser( Config ) );
+    internal Lazy<XsParser> Parser => new( () => new XsParser( Config ) );
 
     public XsBaseKernel( string name ) : base( name )
     {
@@ -64,20 +64,7 @@ public class XsBaseKernel : Kernel
         } );
 #endif
 
-        KernelCommandEnvelope.RegisterCommand<ExtensionCommand>();
-        AddDirective<ExtensionCommand>( new KernelActionDirective( "#!with" )
-        {
-            Description = "",
-            Parameters =
-                [
-                    new("--extension")
-                    {
-                        AllowImplicitName = true,
-                        Required = false
-                    }
-                ],
-            KernelCommandType = typeof( ExtensionCommand ),
-        }, HandleExtension );
+        this.UseExtensions();
 
         Scope.EnterScope( FrameType.Method );
 
@@ -89,67 +76,4 @@ public class XsBaseKernel : Kernel
             Config = null;
         } );
     }
-
-    private Task HandleExtension( ExtensionCommand command, KernelInvocationContext ctx )
-    {
-        Parser.Value.AddExtensions( [.. GetExtensions( command.Extension, TypeResolver, command, ctx )] );
-        return Task.CompletedTask;
-    }
-
-    public static IEnumerable<dynamic> GetExtensions( string value, TypeResolver typeResolver, KernelCommand command, KernelInvocationContext context )
-    {
-        if ( string.IsNullOrWhiteSpace( value ) )
-            yield break;
-
-        // Split the string by semicolon IParseExtension in current loaded assemblies
-        foreach ( var part in value.Split( ';' ) )
-        {
-            var extension = GetExtension( part, typeResolver, command, context );
-            if ( extension != null )
-            {
-                yield return extension;
-            } 
-        }
-
-        static IParseExtension GetExtension( string value, TypeResolver typeResolver, KernelCommand command, KernelInvocationContext context )
-        {
-            if ( string.IsNullOrWhiteSpace( value ) ) 
-            {
-                context.Fail( command, message: "Missing extension name" );
-                return default;
-            }
-
-            try
-            {
-                var type = typeResolver.ResolveType( value );
-                if ( type == null )
-                {
-                    context.Fail( command, message: $"Could not resolve type for extension {value}" );
-                    return default;
-                }
-
-                var instance = Activator.CreateInstance( type );
-                if ( instance == null )
-                {
-                    context.Fail( command, message: $"Could not create instance of extension {value}" );
-                    return default;
-                }
-
-                if ( instance is not IParseExtension extension )
-                {
-                    context.Fail( command, message: $"Extension {value} does not implement {nameof( IParseExtension )}" );
-                    return default;
-                }
-
-                $"Loaded extension {value}".Display();
-                return extension;
-            }
-            catch ( Exception ex )
-            {
-                context.Fail( command, message: ex.Message );
-            }
-            return default;
-        }
-    }
 }
-

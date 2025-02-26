@@ -86,14 +86,14 @@ public partial class ReferenceManager
         return this;
     }
 
-    public Assembly LoadFromAssemblyPath(string assemblyPath)
+    public Assembly LoadFromAssemblyPath( string assemblyPath )
     {
         // Get the assembly name from the path
-        var assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
+        var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
 
         // Check if the assembly with the same name and version is already loaded
         var referenceAssembly = ReferenceAssemblies //_assemblyLoadContext.
-            .FirstOrDefault(a => a.GetName().Name == assemblyName.Name && a.GetName().Version == assemblyName.Version);
+            .FirstOrDefault( a => a.GetName().Name == assemblyName.Name && a.GetName().Version == assemblyName.Version );
 
         if ( referenceAssembly != null )
         {
@@ -101,7 +101,7 @@ public partial class ReferenceManager
             return referenceAssembly;
         }
 
-        return _assemblyLoadContext.LoadFromAssemblyPath(assemblyPath);
+        return _assemblyLoadContext.LoadFromAssemblyPath( assemblyPath );
     }
 
     public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = default, string source = null, ILogger logger = default, CancellationToken cancellation = default )
@@ -132,8 +132,8 @@ public partial class ReferenceManager
 
             return assemblies;
         }
-        else 
-        { 
+        else
+        {
             var packagePath = await GetPackageAsync(
                 packageId,
                 version,
@@ -222,7 +222,7 @@ public partial class ReferenceManager
                 .MaxBy( m => m.Identity.Version )
             : versions.FirstOrDefault( m => m.Identity.Version == NuGetVersion.Parse( version ) );
 
-        if ( packageMetadata == null ) 
+        if ( packageMetadata == null )
             return [];
 
         var identities = new List<PackageIdentity> { packageMetadata.Identity };

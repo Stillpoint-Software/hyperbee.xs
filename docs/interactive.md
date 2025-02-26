@@ -42,11 +42,11 @@ To install `Hyperbee.XS.Interactive` for a notebook using the `#r`:
 
 ### Magic Commands
 
-| Command    | Description                               |
-|------------|-------------------------------------------|
-| `#!share`  | Share a variable with the current context |
-| `#!whos`   | List all variables in the current context |
-| `#!with`   | Enables adding custom extensions          |
+| Command     | Description                               |
+|-------------|-------------------------------------------|
+| `#!share`   | Share a variable with the current context |
+| `#!whos`    | List all variables in the current context |
+| `#!import`  | Enables adding custom extensions          |
 
 ### Build-in Extensions
 
@@ -80,12 +80,17 @@ x.ToWords();
 using System.Collections.Generic;
 var dictionary = new Dictionary<string, int>();
 
-dictionary["x"] = x;
+dictionary["x"] = 6;
 dictionary["y"] = 42;
 
 display( dictionary, "application/json" );
 display( 5.ToString() );
 ```
+> Cell Output:
+> ```
+> { "x": 6, "y": 42 }
+> "5"
+> ```
 
 #### Showing Expression Trees
 ```
@@ -134,7 +139,14 @@ display(xSimple);
 xComplex.Name;
 ```
 
-#### Using Custom Extensions
+> Cell Output:
+> ```
+> "hello"
+> "John"
+> ```
+
+
+#### Using Custom Extensions From NuGet
 
 Add the custom extension's NuGet to the XS kernel:
 ```
@@ -151,3 +163,42 @@ repeat(5) {
     display("Hello");
 }
 ```
+
+#### Using Custom Extensions Notebook
+
+Create an implementation of the `IParseExtension` in a .NET Kernel:
+
+```csharp
+public class AnswerToEverythingParseExtension : IParseExtension
+{
+    public ExtensionType Type => ExtensionType.Expression;
+    public string Key => "answer";
+
+    public Parser<Expression> CreateParser( ExtensionBinder binder )
+    {
+        return Always()
+            .AndSkip( Terms.Char( ';' ) )
+            .Then<Expression>( static ( _, _ ) => Constant( 42 ) )
+            .Named( "hitchhiker" );
+    }
+}
+
+var answer = new AnswerToEverythingParseExtension();
+```
+
+Enable the extension using the `#!import` magic command:
+```
+#!xs
+#!import --from csharp --name answer
+```
+
+Use the custom extension in the XS kernel:
+```
+#!xs
+answer;
+```
+
+> Cell Output:
+> ```
+> 42
+> ```
