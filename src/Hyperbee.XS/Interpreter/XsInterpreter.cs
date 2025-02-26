@@ -701,11 +701,11 @@ Navigate:
             return node;
         }
 
-        _scope.EnterScope( FrameType.Method );
-
         try
         {
-            foreach ( var (_, capturedScope) in capturedValues )
+            _scope.EnterScope( FrameType.Method );
+
+            foreach ( var capturedScope in capturedValues.Values )
             {
                 foreach ( var (param, value) in capturedScope )
                     _scope.Values[param] = value;
@@ -795,14 +795,7 @@ Navigate:
 
         if ( node.NodeType == ExpressionType.Throw )
         {
-            Exception exception = null;
-
-            if ( node.Operand != null )
-            {
-                var instance = _resultStack.Pop();
-
-                exception = instance as Exception;
-            }
+            var exception = _resultStack.Pop() as Exception;
 
             if ( _currentNavigation != null && exception == null )
             {
