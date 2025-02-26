@@ -38,63 +38,10 @@ public sealed class XsInterpreter : ExpressionVisitor
     public TDelegate Interpreter<TDelegate>( LambdaExpression expression )
         where TDelegate : Delegate
     {
-        var invokeMethod = typeof( TDelegate ).GetMethod( "Invoke" );
-
-        if ( invokeMethod is null )
-            throw new InvalidOperationException( "Invalid delegate type." );
-
-        var returnType = invokeMethod.ReturnType;
-
-        Delegate handlerDelegate;
-
-        if ( returnType == typeof( void ) )
-        {
-            var evalVoidMethod = typeof( XsInterpreter )
-                .GetMethod( nameof( EvaluateVoid ), BindingFlags.NonPublic | BindingFlags.Instance );
-
-            if ( evalVoidMethod is null )
-                throw new InvalidOperationException( "Could not find EvaluateVoid method." );
-
-            handlerDelegate = Delegate.CreateDelegate(
-                typeof( Action<,> ).MakeGenericType( typeof( LambdaExpression ), typeof( object[] ) ),
-                this,
-                evalVoidMethod
-            );
-        }
-        else
-        {
-            var evalMethod = typeof( XsInterpreter )
-                .GetMethod( nameof( Evaluate ), BindingFlags.NonPublic | BindingFlags.Instance )
-                ?.MakeGenericMethod( returnType );
-
-            if ( evalMethod is null )
-                throw new InvalidOperationException( "Could not find Evaluate method." );
-
-            handlerDelegate = Delegate.CreateDelegate(
-                typeof( Func<,,> ).MakeGenericType( typeof( LambdaExpression ), typeof( object[] ), returnType ),
-                this,
-                evalMethod
-            );
-        }
-
-        var genericTypes = invokeMethod
-            .GetParameters().Select( p => p.ParameterType )
-            .Prepend( typeof( LambdaExpression ) )
-            .Concat( returnType == typeof( void ) ? [] : [returnType] )
-            .ToArray();
-
-        var methodSource = returnType == typeof( void ) ? ActionBinder.Methods : FuncBinder.Methods;
-
-        var delegateBinder = methodSource
-            .FirstOrDefault( m => m.GetGenericArguments().Length == genericTypes.Length )
-            ?.MakeGenericMethod( genericTypes );
-
-        if ( delegateBinder is null )
-            throw new InvalidOperationException( $"No suitable bind method found for delegate type {typeof( TDelegate )}" );
-
         PrepareNavigationMap( expression );
 
-        return (TDelegate) delegateBinder.Invoke( null, [handlerDelegate, expression] )!;
+        DelegateCache.Get<TDelegate>( expression, this, out var delegateBinder, out var delegateHandler );
+        return (TDelegate) delegateBinder.Invoke( null, [delegateHandler, expression] )!;
 
         void PrepareNavigationMap( Expression root )
         {
@@ -106,7 +53,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
     }
 
-    private T Evaluate<T>( LambdaExpression lambda, params object[] values )
+    internal T Evaluate<T>( LambdaExpression lambda, params object[] values )
     {
         _scope.EnterScope( FrameType.Method );
 
@@ -127,7 +74,7 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
     }
 
-    private void EvaluateVoid( LambdaExpression lambda, params object[] values )
+    internal void EvaluateVoid( LambdaExpression lambda, params object[] values )
     {
         _scope.EnterScope( FrameType.Method );
 
@@ -146,18 +93,16 @@ public sealed class XsInterpreter : ExpressionVisitor
         }
     }
 
-
     private void ValidateNavigationMode()
     {
-        if ( _mode == InterpreterMode.Navigating )
-        {
-            if ( _currentNavigation.Exception != null )
-                throw new InvalidOperationException( "Interpreter failed because of an unhandle exception.", _currentNavigation.Exception );
+        if ( _mode != InterpreterMode.Navigating )
+            return;
 
-            throw new InvalidOperationException( "Interpreter failed to navigate to next expression." );
-        }
+        if ( _currentNavigation.Exception != null )
+            throw new InvalidOperationException( "Interpreter failed because of an unhandled exception.", _currentNavigation.Exception );
+
+        throw new InvalidOperationException( "Interpreter failed to navigate to next expression." );
     }
-
 
     // Goto
 
