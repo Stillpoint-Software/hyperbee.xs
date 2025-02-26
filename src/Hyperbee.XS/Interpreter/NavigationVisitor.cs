@@ -102,17 +102,15 @@ public sealed class Navigation
     public Expression CommonAncestor { get; }
     public List<Expression> Steps { get; }
     public LabelTarget TargetLabel { get; }
-    public bool IsReturn { get; }
     public Exception Exception { get; }
 
     private int _currentStepIndex;
 
-    public Navigation( Expression commonAncestor = null, List<Expression> steps = null, LabelTarget targetLabel = null, bool isReturn = false, Exception exception = null )
+    public Navigation( Expression commonAncestor = null, List<Expression> steps = null, LabelTarget targetLabel = null, Exception exception = null )
     {
         CommonAncestor = commonAncestor;
         Steps = steps ?? [];
         TargetLabel = targetLabel;
-        IsReturn = isReturn;
         Exception = exception;
         _currentStepIndex = 0;
     }

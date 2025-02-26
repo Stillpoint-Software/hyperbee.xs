@@ -473,22 +473,24 @@ Navigate:
             {
                 Visit( node.Body );
 
-                if ( _mode == InterpreterMode.Navigating )
+                if ( _mode != InterpreterMode.Navigating )
                 {
-                    if ( _currentNavigation.TargetLabel == node.BreakLabel )
-                    {
-                        _mode = InterpreterMode.Evaluating;
-                        break;
-                    }
-
-                    if ( _currentNavigation.TargetLabel == node.ContinueLabel )
-                    {
-                        _mode = InterpreterMode.Evaluating;
-                        continue;
-                    }
-
-                    return node;
+                    continue;
                 }
+
+                if ( _currentNavigation.TargetLabel == node.BreakLabel )
+                {
+                    _mode = InterpreterMode.Evaluating;
+                    break;
+                }
+
+                if ( _currentNavigation.TargetLabel == node.ContinueLabel )
+                {
+                    _mode = InterpreterMode.Evaluating;
+                    continue;
+                }
+
+                return node;
             }
         }
         finally
