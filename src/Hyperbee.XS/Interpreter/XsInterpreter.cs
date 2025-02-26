@@ -1,42 +1,9 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Hyperbee.Collections;
 using Hyperbee.XS.Core;
 
 namespace Hyperbee.XS.Interpreter;
-
-public class InterpretScope : ParseScope
-{
-    public LinkedDictionary<ParameterExpression, object> Values { get; } = new();
-
-    public override void EnterScope( FrameType frameType, LabelTarget breakLabel = null, LabelTarget continueLabel = null )
-    {
-        base.EnterScope( frameType, breakLabel, continueLabel );
-        Values.Push();
-    }
-
-    public override void ExitScope()
-    {
-        Values.Pop();
-        base.ExitScope();
-    }
-}
-
-internal readonly struct Closure
-{
-    public LambdaExpression LambdaExpr { get; }
-    public Dictionary<ParameterExpression, object> CapturedScope { get; }
-
-    private Closure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> capturedScope )
-    {
-        LambdaExpr = lambdaExpr;
-        CapturedScope = capturedScope;
-    }
-
-    public static Closure CreateClosure( LambdaExpression lambdaExpr, Dictionary<ParameterExpression, object> scope ) =>
-        new( lambdaExpr, scope );
-}
 
 public sealed class XsInterpreter : ExpressionVisitor
 {
@@ -694,7 +661,7 @@ Navigate:
             capturedScope[variable] = value;
         }
 
-        _resultStack.Push( Closure.CreateClosure( node, capturedScope ) );
+        _resultStack.Push( new Closure( node, capturedScope ) );
         return node;
     }
 
@@ -1074,6 +1041,8 @@ Navigate:
         return node;
     }
 
+    private record Closure( LambdaExpression LambdaExpr, Dictionary<ParameterExpression, object> CapturedScope );
+    
     private sealed class FreeVariableVisitor : ExpressionVisitor
     {
         private readonly HashSet<ParameterExpression> _declaredVariables = [];
