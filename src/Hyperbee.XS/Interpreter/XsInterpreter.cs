@@ -116,6 +116,9 @@ public sealed class XsInterpreter : ExpressionVisitor
                 _scope.Values[lambda.Parameters[i]] = values[i];
 
             Visit( lambda.Body );
+
+            ValidateNavigationMode();
+
             return (T) _resultStack.Pop();
         }
         finally
@@ -134,12 +137,27 @@ public sealed class XsInterpreter : ExpressionVisitor
                 _scope.Values[lambda.Parameters[i]] = values[i];
 
             Visit( lambda.Body );
+
+            ValidateNavigationMode();
         }
         finally
         {
             _scope.ExitScope();
         }
     }
+
+
+    private void ValidateNavigationMode()
+    {
+        if ( _mode == InterpreterMode.Navigating )
+        {
+            if ( _currentNavigation.Exception != null )
+                throw new InvalidOperationException( "Interpreter failed because of an unhandle exception.", _currentNavigation.Exception );
+
+            throw new InvalidOperationException( "Interpreter failed to execute, was unable to find next expression." );
+        }
+    }
+
 
     // Goto
 
@@ -191,7 +209,7 @@ public sealed class XsInterpreter : ExpressionVisitor
 
         try
         {
-            Navigate:
+Navigate:
 
             if ( _mode == InterpreterMode.Navigating )
             {
@@ -556,7 +574,7 @@ Navigate:
                     _mode = InterpreterMode.Evaluating;
 
                     try
-                    { 
+                    {
                         _scope.EnterScope( FrameType.Block );
                         _scope.Values[exceptionVariable] = _currentNavigation.Exception;
 
@@ -834,8 +852,8 @@ Navigate:
         {
             Exception exception = null;
 
-            if ( node.Operand != null ) 
-            { 
+            if ( node.Operand != null )
+            {
                 var instance = _resultStack.Pop();
 
                 exception = instance as Exception;
@@ -1034,7 +1052,7 @@ Navigate:
     }
 
     private record Closure( LambdaExpression LambdaExpr, Dictionary<ParameterExpression, object> CapturedScope );
-    
+
     private sealed class FreeVariableVisitor : ExpressionVisitor
     {
         private readonly HashSet<ParameterExpression> _declaredVariables = [];

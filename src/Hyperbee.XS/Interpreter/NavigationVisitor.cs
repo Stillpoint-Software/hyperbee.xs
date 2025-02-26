@@ -53,7 +53,7 @@ public sealed class NavigationVisitor : ExpressionVisitor
             return base.VisitLoop( node );
         }
 
-        var currentPath = _currentPath.ToList(); 
+        var currentPath = _currentPath.ToList();
 
         if ( node.BreakLabel != null )
             _labelPaths[node.BreakLabel] = currentPath;

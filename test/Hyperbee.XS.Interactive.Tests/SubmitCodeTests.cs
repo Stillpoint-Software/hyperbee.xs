@@ -1,13 +1,7 @@
-﻿using System.Collections.Immutable;
-using System.Linq.Expressions;
-using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.Core.Writer;
-
-using Microsoft.DotNet.Interactive;
+﻿using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.ValueSharing;
 
 namespace Hyperbee.XS.Interactive.Tests;
 
@@ -70,7 +64,7 @@ public class PackageParseExtensionTests
     {
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
-        await _kernel.SubmitCodeAsync( 
+        await _kernel.SubmitCodeAsync(
             """
             #!xs
 
@@ -104,7 +98,7 @@ public class PackageParseExtensionTests
     {
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
-        await _kernel.SubmitCodeAsync( 
+        await _kernel.SubmitCodeAsync(
             """
             #!xs
 
@@ -142,7 +136,7 @@ public class PackageParseExtensionTests
     {
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
-        await _kernel.SubmitCodeAsync( 
+        await _kernel.SubmitCodeAsync(
             """
             #!csharp
 

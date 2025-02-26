@@ -214,5 +214,70 @@ public class XsParserTryCatchTests
 
         Assert.AreEqual( 42, result );
     }
+
+    [TestMethod]
+    public void Compile_ShouldThrowNewException()
+    {
+        var expression = Xs.Parse(
+            """
+            var x = 0;
+            try
+            {
+                try
+                {
+                    throw new InvalidOperationException();
+                }
+                catch(InvalidOperationException e)
+                {
+                    x = 32;
+                    throw new ArgumentException();
+                }
+            }
+            catch(ArgumentException)
+            {
+                x += 10;
+            }
+            x;
+            """
+        );
+
+        var lambda = Lambda<Func<int>>( expression );
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
+
+        Assert.AreEqual( 42, result );
+    }
+
+
+    [TestMethod]
+    public void Compile_ShouldThrowWithOutTry()
+    {
+        var expression = Xs.Parse(
+            """
+            var x = 0;
+            
+            throw new ArgumentException("Argument Error");
+
+            x = 42;
+            x;
+            """
+        );
+
+        var lambda = Lambda<Func<int>>( expression );
+
+        var function = lambda.CompileEx( preferInterpret: true );
+
+        try
+        {
+            var result = function();
+            Assert.Fail( "Expected exception" );
+        }
+        catch ( InvalidOperationException ioex )
+        {
+            Assert.AreEqual( "Argument Error", ioex.InnerException.Message );
+        }
+    }
+
 }
 
