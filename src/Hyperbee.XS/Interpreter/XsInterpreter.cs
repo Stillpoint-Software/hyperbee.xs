@@ -154,7 +154,7 @@ public sealed class XsInterpreter : ExpressionVisitor
             if ( _currentNavigation.Exception != null )
                 throw new InvalidOperationException( "Interpreter failed because of an unhandle exception.", _currentNavigation.Exception );
 
-            throw new InvalidOperationException( "Interpreter failed to execute, was unable to find next expression." );
+            throw new InvalidOperationException( "Interpreter failed to navigate to next expression." );
         }
     }
 
