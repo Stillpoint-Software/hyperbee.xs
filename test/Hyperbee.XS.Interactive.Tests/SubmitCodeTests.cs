@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
+﻿//#define RUN_NUGET_TESTS
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
 
 #if NET9_0_OR_GREATER
+using System.Diagnostics;
 using Microsoft.DotNet.Interactive.PackageManagement;
 #endif
 
@@ -212,9 +213,9 @@ public class PackageParseExtensionTests
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
         var script =
-            $$"""
-            {{XsKernel}}
-            {{Reference}} "nuget:Humanizer.Core"
+            $"""
+            {XsKernel}
+            {Reference} "nuget:Humanizer.Core"
 
             using Humanizer;
 
@@ -327,9 +328,9 @@ public class PackageParseExtensionTests
         events.Clear();
 
         await _kernel.SubmitCodeAsync(
-            $$"""
-            {{XsKernel}}
-            {{Import}} --from csharp --name "repeat"
+            $"""
+            {XsKernel}
+            {Import} --from csharp --name "repeat"
             """
         );
         AssertSuccess( events );
@@ -355,6 +356,7 @@ public class PackageParseExtensionTests
         Assert.AreEqual( "5", value );
     }
 
+#if RUN_NUGET_TESTS
     [TestMethod]
     public async Task SubmitCode_WithCommand_ShouldAddExtensionFromPackage()
     {
@@ -363,20 +365,20 @@ public class PackageParseExtensionTests
         var (path, version) = await SetupNuGet();
 
         await _kernel.SubmitCodeAsync(
-            $$"""
-            {{XsKernel}}
+            $"""
+            {XsKernel}
 
-            source "{{path}}";
-            package Hyperbee.XS.Extensions:"{{version}}";
+            source "{path}";
+            package Hyperbee.XS.Extensions:"{version}";
             """
         );
         AssertSuccess( events );
         events.Clear();
 
         await _kernel.SubmitCodeAsync(
-            $$"""         
-            {{XsKernel}}
-            {{Import}} --extension ForParseExtension
+            $"""         
+            {XsKernel}
+            {Import} --extension ForParseExtension
             """
         );
         AssertSuccess( events );
@@ -396,6 +398,7 @@ public class PackageParseExtensionTests
 
         Assert.AreEqual( 6, events.OfType<DisplayedValueProduced>().Count() );
     }
+#endif
 
 #endif
 
@@ -417,7 +420,8 @@ public class PackageParseExtensionTests
             Assert.IsTrue( events.OfType<CommandSucceeded>().Any() );
     }
 
-    private async Task<(string path, string version)> SetupNuGet()
+#if NET9_0_OR_GREATER
+    private static async Task<(string path, string version)> SetupNuGet()
     {
         var major = DateTime.UtcNow.Year.ToString();
         var minor = DateTime.UtcNow.Date.ToString( "MM" );
@@ -473,4 +477,5 @@ public class PackageParseExtensionTests
             return dir;
         }
     }
+#endif
 }

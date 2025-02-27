@@ -3,7 +3,6 @@ using Hyperbee.Xs.Interactive.Extensions;
 using Hyperbee.XS.Core;
 using Microsoft.DotNet.Interactive;
 
-
 #if NET9_0_OR_GREATER
 using Microsoft.DotNet.Interactive.PackageManagement;
 #endif

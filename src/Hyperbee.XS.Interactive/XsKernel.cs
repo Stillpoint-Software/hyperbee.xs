@@ -1,5 +1,4 @@
 ﻿using Hyperbee.Collections;
-using Hyperbee.Collections.Extensions;
 using Hyperbee.XS.Core;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
@@ -20,9 +19,7 @@ public class XsKernel : XsBaseKernel,
     public XsKernel() : base( "xs" )
     {
         KernelInfo.LanguageName = "XS";
-        KernelInfo.Description = """
-                                 Compile and run Expression Script
-                                 """;
+        KernelInfo.Description = "Compile and run Expression Script";
     }
 
     Task IKernelCommandHandler<SubmitCode>.HandleAsync( SubmitCode command, KernelInvocationContext context )
@@ -62,18 +59,18 @@ public class XsKernel : XsBaseKernel,
         try
         {
             var valueInfos = State
-            .Select( kvp =>
-            {
-                var formattedValues = FormattedValue.CreateSingleFromObject(
-                    kvp.Value,
-                    command.MimeType );
+                .Select( kvp =>
+                {
+                    var formattedValues = FormattedValue.CreateSingleFromObject(
+                        kvp.Value,
+                        command.MimeType );
 
-                return new KernelValueInfo(
-                    kvp.Key,
-                    formattedValues,
-                    kvp.Value.GetType() );
-            } )
-            .ToArray() ?? [];
+                    return new KernelValueInfo(
+                        kvp.Key,
+                        formattedValues,
+                        kvp.Value.GetType() );
+                } )
+                .ToArray();
 
             context.Publish( new ValueInfosProduced( valueInfos, command ) );
         }

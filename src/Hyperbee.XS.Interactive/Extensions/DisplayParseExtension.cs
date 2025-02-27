@@ -27,7 +27,7 @@ public class DisplayParseExtension : IParseExtension, IExpressionWriter, IXsWrit
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
-        var (expression, statement) = binder;
+        var (expression, _) = binder;
 
         return Between(
                     Terms.Char( '(' ),
@@ -35,7 +35,7 @@ public class DisplayParseExtension : IParseExtension, IExpressionWriter, IXsWrit
                     Terms.Char( ')' )
                 )
             .AndSkip( Terms.Char( ';' ) )
-            .Then<Expression>( ( ctx, expressions ) =>
+            .Then<Expression>( ( _, expressions ) =>
             {
                 var parts = expressions?.ToArray();
 
