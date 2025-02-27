@@ -1,13 +1,7 @@
-﻿using System.Text.Json.Serialization;
-using Hyperbee.Collections.Extensions;
-using Hyperbee.Xs.Extensions;
+﻿using Hyperbee.Xs.Extensions;
 using Hyperbee.Xs.Interactive.Extensions;
 using Hyperbee.XS.Core;
 using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Connection;
-using Microsoft.DotNet.Interactive.Directives;
-using Microsoft.DotNet.Interactive.Events;
 
 
 #if NET9_0_OR_GREATER
