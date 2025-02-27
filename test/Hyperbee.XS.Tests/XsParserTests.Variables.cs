@@ -237,6 +237,21 @@ public class XsParserVariableTests
     }
 
     [TestMethod]
+    public void Compile_ShouldAllowDoubleAssignment()
+    {
+        const string xs = "var x = var y = 42; x;";
+
+        var expression = Xs.Parse( xs );
+
+        var lambda = Lambda<Func<int>>( expression );
+
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
+
+        Assert.AreEqual( 42, result );
+    }
+
+    [TestMethod]
     [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithDefaultInvalid()
     {

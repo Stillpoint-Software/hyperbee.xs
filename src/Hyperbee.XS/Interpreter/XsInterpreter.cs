@@ -8,8 +8,6 @@ namespace Hyperbee.XS.Interpreter;
 public sealed class XsInterpreter : ExpressionVisitor
 {
     private readonly InterpretScope _scope;
-    private readonly XsDebugger _debugger;
-
     private readonly Evaluator _evaluator;
 
     private readonly Stack<object> _resultStack = new();
@@ -29,11 +27,9 @@ public sealed class XsInterpreter : ExpressionVisitor
         Navigating
     }
 
-    public XsInterpreter( XsDebugger debugger = null )
+    public XsInterpreter()
     {
         _scope = new InterpretScope();
-        _debugger = debugger;
-
         _evaluator = new Evaluator( this );
     }
 

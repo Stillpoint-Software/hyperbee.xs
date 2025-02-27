@@ -9,21 +9,6 @@ public class XsParserComplexTests
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     [TestMethod]
-    public void Compile_ShouldAllowDoubleAssignment()
-    {
-        const string xs = "var x = var y = 42; x;";
-
-        var expression = Xs.Parse( xs );
-
-        var lambda = Expression.Lambda<Func<int>>( expression );
-        var compiled = lambda.Compile();
-        var result = compiled();
-
-        Assert.AreEqual( 42, result );
-    }
-
-
-    [TestMethod]
     public void Compile_ShouldDemonstrateAllLanguageFeatures()
     {
         const string xs =
@@ -101,18 +86,18 @@ public class XsParserComplexTests
 
         var expression = Xs.Parse( xs, debugger );
 
-        var code = expression.ToExpressionString();
+        var expressionString = expression.ToExpressionString();
 
-        Console.WriteLine( "Script:" );
+        Console.WriteLine( "XS:" );
         Console.WriteLine( xs );
 
-        Console.WriteLine( "\nCode:" );
-        Console.WriteLine( code );
+        Console.WriteLine( "\nExpression:" );
+        Console.WriteLine( expressionString );
 
         var lambda = Expression.Lambda<Func<List<int>>>( expression );
 
-        var compiled = lambda.Compile( preferInterpretation: true );
-        var result = compiled();
+        var function = lambda.CompileEx( preferInterpret: true );
+        var result = function();
 
         // Assertions for each feature
         Assert.AreEqual( 5, result.Count ); // total number of features
