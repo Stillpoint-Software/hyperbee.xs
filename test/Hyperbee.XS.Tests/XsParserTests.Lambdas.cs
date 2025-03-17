@@ -9,8 +9,11 @@ public class XsParserLambdaTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithResult( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -20,14 +23,17 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 1, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithArgumentAndResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithArgumentAndResult( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -37,14 +43,17 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 10, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithReturnStatement()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithReturnStatement( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -54,14 +63,17 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 13, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithReferenceArgument()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithReferenceArgument( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -72,14 +84,17 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithMethodChaining()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithMethodChaining( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -89,14 +104,17 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "42", result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithLambdaArgument()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithLambdaArgument( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -108,14 +126,17 @@ public class XsParserLambdaTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithLambdaInvokeChaining()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithLambdaInvokeChaining( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -130,46 +151,18 @@ public class XsParserLambdaTests
 
         var expressionString = lambda.ToExpressionString();
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithLambdaInvokeChaining2()
-    {
-        var myLambda = Parameter( typeof( Func<int, Func<int, int>> ), "myLambda" );
-        var outerParam = Parameter( typeof( int ), "outerParam" );
-        var innerParam = Parameter( typeof( int ), "innerParam" );
-
-        // myLambda(20)(21);
-        var lambda = Lambda<Func<int>>(
-            Block(
-                [myLambda],
-                // myLambda = outerParam => innerParam => outerParam + innerParam + 1;
-                Assign(
-                    myLambda,
-                    Lambda( Lambda( Add( Add( outerParam, innerParam ), Constant( 1 ) ), innerParam ), outerParam )
-                ),
-                Invoke(
-                    Invoke( myLambda, Constant( 20 ) ),
-                    Constant( 21 )
-                )
-            )
-        );
-
-        var compiledLambda = lambda.Interpreter();
-
-        var result = compiledLambda();
-
-        Assert.AreEqual( 42, result );
-    }
-
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidLambdaSyntax()
+    public void Compile_ShouldFail_WithInvalidLambdaSyntax( CompilerType compiler )
     {
         try
         {
@@ -186,9 +179,12 @@ public class XsParserLambdaTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidLambdaBody()
+    public void Compile_ShouldFail_WithInvalidLambdaBody( CompilerType compiler )
     {
         try
         {
@@ -205,9 +201,12 @@ public class XsParserLambdaTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidLambdaParameter()
+    public void Compile_ShouldFail_WithInvalidLambdaParameter( CompilerType compiler )
     {
         try
         {

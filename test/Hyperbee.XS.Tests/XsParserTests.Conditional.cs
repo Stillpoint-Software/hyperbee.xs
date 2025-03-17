@@ -7,8 +7,11 @@ public class XsParserConditionalTests
 {
     public static XsParser Xs { get; } = new();
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithoutBraces()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithoutBraces( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -22,14 +25,17 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 1, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithConditional()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithConditional( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -45,14 +51,17 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "hello", result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithConditionalAndNoElse()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithConditionalAndNoElse( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -66,14 +75,17 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "hello", result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithConditionalVariable()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithConditionalVariable( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -90,14 +102,17 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "hello", result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithConditionalAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithConditionalAssignment( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -114,15 +129,18 @@ public class XsParserConditionalTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "hello", result );
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithMissingSemicolon()
+    public void Compile_ShouldFail_WithMissingSemicolon( CompilerType compiler )
     {
         try
         {
@@ -142,9 +160,12 @@ public class XsParserConditionalTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithUnmatchedBraces()
+    public void Compile_ShouldFail_WithUnmatchedBraces( CompilerType compiler )
     {
         try
         {
@@ -166,9 +187,12 @@ public class XsParserConditionalTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidCondition()
+    public void Compile_ShouldFail_WithInvalidCondition( CompilerType compiler )
     {
         try
         {
@@ -189,9 +213,12 @@ public class XsParserConditionalTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidElse()
+    public void Compile_ShouldFail_WithInvalidElse( CompilerType compiler )
     {
         try
         {

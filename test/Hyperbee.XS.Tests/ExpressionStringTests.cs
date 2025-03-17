@@ -21,7 +21,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_NestedLambdas()
     {
-        const string xs = 
+        const string xs =
             """
             var x = 2;
             var y = 3
@@ -46,7 +46,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Loops()
     {
-        const string xs = 
+        const string xs =
             """
             var l = 0;
             loop
@@ -75,7 +75,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Switch()
     {
-        const string xs = 
+        const string xs =
             """
             var x = 2;
             var result = 0;
@@ -110,7 +110,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_TryCatch()
     {
-        const string xs = 
+        const string xs =
             """
             var result = 0;
             try
@@ -139,7 +139,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Conditional()
     {
-        const string xs = 
+        const string xs =
             """
             var x = 5;
             var result = if( x == 5 )
@@ -168,7 +168,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Goto()
     {
-        const string xs = 
+        const string xs =
             """
             var result = 0;
             goto Label;
@@ -193,7 +193,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Return()
     {
-        const string xs = 
+        const string xs =
             """
             var result = 0;
             return 42;
@@ -215,7 +215,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_InstanceAndSetProperty()
     {
-        const string xs = 
+        const string xs =
             """
             var instance = new TestClass(0);
             instance.PropertyValue = 10;
@@ -238,7 +238,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_ArrayInitialization()
     {
-        const string xs = 
+        const string xs =
             """
             var a = new int[] { 1, 2, 3, 4, 5 };
             a[2];
@@ -259,7 +259,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_ListInitialization()
     {
-        const string xs = 
+        const string xs =
             """
             var l = new List<int>() { 1, 2, 3, 4, 5 };
             l[2];
@@ -280,7 +280,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_CallMethod()
     {
-        const string xs = 
+        const string xs =
             """
             var instance = new TestClass(5);
             instance.MethodValue();
@@ -301,7 +301,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_GetIndexer()
     {
-        const string xs = 
+        const string xs =
             """
             var instance = new TestClass(0);
             instance[5];
@@ -322,7 +322,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_SetIndexer()
     {
-        const string xs = 
+        const string xs =
             """
             var instance = new TestClass(0);
             instance[5] = 10;
@@ -344,7 +344,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_CallStaticMethod()
     {
-        const string xs = 
+        const string xs =
             """
             TestClass.StaticAddNumbers(3, 4);
             """;
@@ -364,7 +364,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_IsTrueAndIsFalse()
     {
-        const string xs = 
+        const string xs =
             """
             var x = ?true;
             var y = !?false;
@@ -386,7 +386,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_TypeAs()
     {
-        const string xs = 
+        const string xs =
             """
             var obj = "test";
             var result = obj as? string;
@@ -408,7 +408,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_Convert()
     {
-        const string xs = 
+        const string xs =
             """
             var obj = "test";
             var result = obj as string;
@@ -430,7 +430,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_TypeIs()
     {
-        const string xs = 
+        const string xs =
             """
             var obj = "test";
             var result = (obj is string);
@@ -452,7 +452,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_CoalesceAssign()
     {
-        const string xs = 
+        const string xs =
             """
             var x = "hello";
             var result = default(string);
@@ -475,7 +475,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_PowerAssign()
     {
-        const string xs = 
+        const string xs =
             """
             var x = 5;
             var result = 2;
@@ -498,7 +498,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_MathOperations()
     {
-        const string xs = 
+        const string xs =
             """
             var x = 5;
             var y = 10;
@@ -521,7 +521,7 @@ public class ExpressionStringTests
     [TestMethod]
     public async Task ToExpressionString_ShouldCreate_AssignmentOperations()
     {
-        const string xs = 
+        const string xs =
             """
             var x = 5;
             x += 10;

@@ -7,8 +7,11 @@ public class XsParserNewTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithNewExpression()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithNewExpression( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -18,15 +21,18 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<TestClass>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.IsNotNull( result );
         Assert.AreEqual( 42, result.PropertyValue );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithNewAndProperty()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithNewAndProperty( CompilerType compiler )
     {
         try
         {
@@ -38,7 +44,7 @@ public class XsParserNewTests
 
             var lambda = Lambda<Func<int>>( expression );
 
-            var function = lambda.CompileEx( preferInterpret: true );
+            var function = lambda.Compile( compiler );
             var result = function();
 
             Assert.AreEqual( 42, result );
@@ -49,8 +55,11 @@ public class XsParserNewTests
         }
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithNewArray()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithNewArray( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -59,14 +68,17 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<int[]>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 5, result.Length );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithNewMultiDimensionalArray()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithNewMultiDimensionalArray( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -75,14 +87,17 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<int[,]>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 10, result.Length );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithNewArrayInit()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithNewArrayInit( CompilerType compiler )
     {
         var parser = new XsParser();
 
@@ -93,14 +108,17 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<int[]>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 2, result.Length );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithNewListInit()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithNewListInit( CompilerType compiler )
     {
         var parser = new XsParser();
 
@@ -111,14 +129,17 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<List<int>>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 2, result.Count );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithNewJaggedArray()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithNewJaggedArray( CompilerType compiler )
     {
         var parser = new XsParser();
 
@@ -133,7 +154,7 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<int[][]>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 3, result.Length );
@@ -146,8 +167,11 @@ public class XsParserNewTests
 
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithGeneric()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithGeneric( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -156,14 +180,17 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<List<int>>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.IsInstanceOfType<List<int>>( result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithDefaultValue()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithDefaultValue( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -173,14 +200,17 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 0, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithDefaultReference()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithDefaultReference( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -190,15 +220,18 @@ public class XsParserNewTests
 
         var lambda = Lambda<Func<TestClass>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.IsNull( result );
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithDefaultInvalid()
+    public void Compile_ShouldFail_WithDefaultInvalid( CompilerType compiler )
     {
         try
         {
@@ -216,9 +249,12 @@ public class XsParserNewTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidImport()
+    public void Compile_ShouldFail_WithInvalidImport( CompilerType compiler )
     {
         try
         {
@@ -235,9 +271,12 @@ public class XsParserNewTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidImportMissingIdentifier()
+    public void Compile_ShouldFail_WithInvalidImportMissingIdentifier( CompilerType compiler )
     {
         try
         {

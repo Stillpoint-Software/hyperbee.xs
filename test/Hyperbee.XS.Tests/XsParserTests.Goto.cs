@@ -7,8 +7,11 @@ public class XsParserGotoTests
 {
     public static XsParser Xs { get; } = new();
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithGotoStatements()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithGotoStatements( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -24,14 +27,17 @@ public class XsParserGotoTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 11, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithGotoCatch()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithGotoCatch( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -51,14 +57,17 @@ public class XsParserGotoTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithGotoFinally()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithGotoFinally( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -83,7 +92,7 @@ public class XsParserGotoTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );

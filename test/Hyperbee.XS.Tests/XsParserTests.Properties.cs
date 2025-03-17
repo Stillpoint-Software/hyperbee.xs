@@ -7,8 +7,11 @@ public class XsParserPropertyTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithPropertyResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithPropertyResult( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -18,14 +21,17 @@ public class XsParserPropertyTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithPropertyChainingResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithPropertyChainingResult( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -35,14 +41,17 @@ public class XsParserPropertyTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithPropertyMethodCallChainingResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithPropertyMethodCallChainingResult( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -52,7 +61,7 @@ public class XsParserPropertyTests
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "42", result );

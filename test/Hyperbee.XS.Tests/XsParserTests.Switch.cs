@@ -7,8 +7,11 @@ public class XsParserSwitchTests
 {
     public static XsParser Xs { get; } = new();
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithSwitchCaseOnly()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithSwitchCaseOnly( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -30,14 +33,17 @@ public class XsParserSwitchTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithSwitchDefaultOnly()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithSwitchDefaultOnly( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -56,14 +62,17 @@ public class XsParserSwitchTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithSwitchCasesAndDefault()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithSwitchCasesAndDefault( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -88,14 +97,17 @@ public class XsParserSwitchTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 20, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithSwitchFallthroughToDefault()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithSwitchFallthroughToDefault( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -123,14 +135,17 @@ public class XsParserSwitchTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 50, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithSwitchMultipleCaseLabels()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithSwitchMultipleCaseLabels( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -153,14 +168,17 @@ public class XsParserSwitchTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 100, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithSwitchNestedSwitchStatements()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithSwitchNestedSwitchStatements( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -192,7 +210,7 @@ public class XsParserSwitchTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 50, result );

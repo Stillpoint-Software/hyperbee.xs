@@ -7,190 +7,238 @@ public class XsParserLiteralTests
 {
     public static XsParser Xs { get; } = new();
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithStringLiteralDefault()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithStringLiteralDefault( CompilerType compiler )
     {
         var expression = Xs.Parse( "\"Some String\";" );
 
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "Some String", result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithCharLiteralDefault()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithCharLiteralDefault( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 'c';" );
         var lambda = Lambda<Func<char>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 'c', result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithIntegerLiteralDefault()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithIntegerLiteralDefault( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 12345;" );
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 12345, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithIntegerLiteral()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithIntegerLiteral( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 12345N;" );
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 12345, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLongLiteral()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLongLiteral( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 12345L;" );
         var lambda = Lambda<Func<long>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 12345L, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithFloatLiteral()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithFloatLiteral( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 123.45F;" );
         var lambda = Lambda<Func<float>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 123.45F, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithDoubleLiteral()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithDoubleLiteral( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 123.45D;" );
         var lambda = Lambda<Func<double>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 123.45D, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithDoubleLiteralResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithDoubleLiteralResult( CompilerType compiler )
     {
         var expression = Xs.Parse( "123.45D;" );
         var lambda = Lambda<Func<double>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 123.45D, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLiteralMethodCallChaining()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLiteralMethodCallChaining( CompilerType compiler )
     {
         var expression = Xs.Parse( "123.45D.ToString();" );
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "123.45", result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLiteralGroupingMethodCallChaining()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLiteralGroupingMethodCallChaining( CompilerType compiler )
     {
         var expression = Xs.Parse( "(123.45D + 7D).ToString();" );
         var lambda = Lambda<Func<string>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( "130.45", result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLongAsForcedInt()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLongAsForcedInt( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 12345L as int;" );
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 12345, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLongAsLong()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLongAsLong( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 12345L as? long;" );
         var lambda = Lambda<Func<long?>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 12345, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLongAsInt()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLongAsInt( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 12345L as? int;" );
         var lambda = Lambda<Func<int?>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( null, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLongAsIntFallback()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLongAsIntFallback( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 12345L as? int ?? 10;" );
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 10, result );
     }
 
-    [TestMethod]
-    public void Parse_ShouldSucceed_WithLongIsLong()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithLongIsLong( CompilerType compiler )
     {
         var expression = Xs.Parse( "12345L is long;" );
         var lambda = Lambda<Func<bool>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.IsTrue( result );
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithUnclosedString()
+    public void Compile_ShouldFail_WithUnclosedString( CompilerType compiler )
     {
         try
         {
@@ -207,9 +255,12 @@ public class XsParserLiteralTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithUnclosedParenthesis()
+    public void Compile_ShouldFail_WithUnclosedParenthesis( CompilerType compiler )
     {
         try
         {
@@ -226,9 +277,12 @@ public class XsParserLiteralTests
         }
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithInvalidCharacter()
+    public void Compile_ShouldFail_WithInvalidCharacter( CompilerType compiler )
     {
         try
         {

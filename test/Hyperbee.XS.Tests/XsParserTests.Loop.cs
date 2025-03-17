@@ -7,8 +7,11 @@ public class XsParserLoopTests
 {
     public static XsParser Xs { get; } = new();
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithLoop()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithLoop( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -26,7 +29,7 @@ public class XsParserLoopTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 10, result );

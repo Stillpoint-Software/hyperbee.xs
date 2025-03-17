@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using FastExpressionCompiler;
 using Hyperbee.Expressions.Interpreter;
 using Hyperbee.XS.Core;
 
@@ -19,16 +20,35 @@ public static class TestInitializer
     }
 }
 
+public enum CompilerType
+{
+    Fast,
+    System,
+    Interpret
+}
+
 public static class TestExtensions
 {
-    public static Delegate CompileEx( this LambdaExpression expression, bool preferInterpret = false )
+    public static Delegate Compile( this LambdaExpression expression, CompilerType compilerType = CompilerType.System )
     {
-        return preferInterpret ? (Delegate) expression.Interpreter() : expression.Compile();
+        return compilerType switch
+        {
+            CompilerType.Fast => expression.CompileFast(),
+            CompilerType.System => expression.Compile(),
+            CompilerType.Interpret => (Delegate) expression.Interpreter(),
+            _ => throw new ArgumentOutOfRangeException( nameof( compilerType ), compilerType, null )
+        };
     }
 
-    public static T CompileEx<T>( this Expression<T> expression, bool preferInterpret = false )
+    public static T Compile<T>( this Expression<T> expression, CompilerType compilerType = CompilerType.System )
         where T : Delegate
     {
-        return preferInterpret ? expression.Interpreter() : expression.Compile();
+        return compilerType switch
+        {
+            CompilerType.Fast => expression.CompileFast(),
+            CompilerType.System => expression.Compile(),
+            CompilerType.Interpret => expression.Interpreter(),
+            _ => throw new ArgumentOutOfRangeException( nameof( compilerType ) )
+        };
     }
 }

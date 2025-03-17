@@ -7,72 +7,90 @@ public class XsParserVariableTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariable()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariable( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 10;" );
 
         var lambda = Lambda( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
 
         Assert.IsNotNull( function );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableAndResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableAndResult( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 10; x + 10;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 20, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableAndAssignmentResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableAndAssignmentResult( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 10; x = x + 10; x + 22;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableShiftLeftResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableShiftLeftResult( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 32; x <<= 2; x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 8, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableShiftRightResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableShiftRightResult( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 8; x >>= 2; x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 32, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableComplementResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableComplementResult( CompilerType compiler )
     {
         var expression = Xs.Parse(
             """
@@ -82,105 +100,129 @@ public class XsParserVariableTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 0, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableAndPostResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableAndPostResult( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 10; x++;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 10, result ); // x++ returns the value before increment
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableAndPrefixResult()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableAndPrefixResult( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 10; ++x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 11, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableAddAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableAddAssignment( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 10; x += 32; x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableSubtractAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableSubtractAssignment( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 42; x -= 32; x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 10, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableMultiplyAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableMultiplyAssignment( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 10; x *= 4; x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 40, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableDivideAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableDivideAssignment( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 40; x /= 4; x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 10, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithVariableExponentAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithVariableExponentAssignment( CompilerType compiler )
     {
         var expression = Xs.Parse( "var x = 2; x **= 3; x;" );
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 8, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithPropertyAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithPropertyAssignment( CompilerType compiler )
     {
 
         var expression = Xs.Parse(
@@ -192,14 +234,17 @@ public class XsParserVariableTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithPropertyComplexAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithPropertyComplexAssignment( CompilerType compiler )
     {
 
         var expression = Xs.Parse(
@@ -211,14 +256,17 @@ public class XsParserVariableTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldSucceed_WithIndexerAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithIndexerAssignment( CompilerType compiler )
     {
 
         var expression = Xs.Parse(
@@ -230,14 +278,17 @@ public class XsParserVariableTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
-    public void Compile_ShouldAllowDoubleAssignment()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldAllowDoubleAssignment( CompilerType compiler )
     {
         const string xs = "var x = var y = 42; x;";
 
@@ -245,15 +296,18 @@ public class XsParserVariableTests
 
         var lambda = Lambda<Func<int>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         Assert.AreEqual( 42, result );
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
     [ExpectedException( typeof( SyntaxException ) )]
-    public void Compile_ShouldFail_WithDefaultInvalid()
+    public void Compile_ShouldFail_WithDefaultInvalid( CompilerType compiler )
     {
         try
         {

@@ -8,8 +8,11 @@ public class XsParserComplexTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [TestMethod]
-    public void Compile_ShouldDemonstrateAllLanguageFeatures()
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldDemonstrateAllLanguageFeatures( CompilerType compiler )
     {
         const string xs =
         """
@@ -96,7 +99,7 @@ public class XsParserComplexTests
 
         var lambda = Expression.Lambda<Func<List<int>>>( expression );
 
-        var function = lambda.CompileEx( preferInterpret: true );
+        var function = lambda.Compile( compiler );
         var result = function();
 
         // Assertions for each feature
