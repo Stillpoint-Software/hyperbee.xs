@@ -26,9 +26,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.25110.2" />
-    <PackageReference Include="System.Reflection.Metadata" Version="9.0.2" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.2" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.2" />
+    <PackageReference Include="System.Reflection.Metadata" Version="9.0.3" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.3" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
