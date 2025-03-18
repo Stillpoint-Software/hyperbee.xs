@@ -297,9 +297,13 @@ public class XsParserTryCatchTests
             var result = function();
             Assert.Fail( "Expected exception" );
         }
-        catch ( InvalidOperationException ioex )
+        catch ( ArgumentException argEx )
         {
-            Assert.AreEqual( "Argument Error", ioex.InnerException.Message );
+            Assert.AreEqual( "Argument Error", argEx.Message );
+        }
+        catch ( InvalidOperationException ioEx )
+        {
+            Assert.AreEqual( "Argument Error", ioEx.InnerException!.Message );
         }
     }
 

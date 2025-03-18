@@ -1,4 +1,8 @@
-﻿using static System.Linq.Expressions.Expression;
+﻿using System.Linq.Expressions;
+using FastExpressionCompiler;
+
+using Hyperbee.XS.Core.Writer;
+using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
@@ -174,7 +178,7 @@ public class XsParserLiteralTests
     }
 
     [DataTestMethod]
-    [DataRow( CompilerType.Fast )]
+    //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
     public void Parse_ShouldSucceed_WithLongAsLong( CompilerType compiler )
@@ -189,7 +193,7 @@ public class XsParserLiteralTests
     }
 
     [DataTestMethod]
-    [DataRow( CompilerType.Fast )]
+    //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
     public void Parse_ShouldSucceed_WithLongAsInt( CompilerType compiler )
@@ -204,7 +208,7 @@ public class XsParserLiteralTests
     }
 
     [DataTestMethod]
-    [DataRow( CompilerType.Fast )]
+    //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
     public void Parse_ShouldSucceed_WithLongAsIntFallback( CompilerType compiler )
@@ -219,7 +223,7 @@ public class XsParserLiteralTests
     }
 
     [DataTestMethod]
-    [DataRow( CompilerType.Fast )]
+    //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
     public void Parse_ShouldSucceed_WithLongIsLong( CompilerType compiler )
