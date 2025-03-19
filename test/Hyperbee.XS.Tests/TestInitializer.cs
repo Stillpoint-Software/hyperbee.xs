@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using FastExpressionCompiler;
-using Hyperbee.Expressions.Interpreter;
 using Hyperbee.XS.Core;
 
 namespace Hyperbee.XS.Tests;
@@ -35,7 +34,7 @@ public static class TestExtensions
         {
             CompilerType.Fast => expression.CompileFast(),
             CompilerType.System => expression.Compile(),
-            CompilerType.Interpret => (Delegate) expression.Interpreter(),
+            CompilerType.Interpret => expression.Compile( preferInterpretation: true ),
             _ => throw new ArgumentOutOfRangeException( nameof( compilerType ), compilerType, null )
         };
     }
@@ -47,7 +46,7 @@ public static class TestExtensions
         {
             CompilerType.Fast => expression.CompileFast(),
             CompilerType.System => expression.Compile(),
-            CompilerType.Interpret => expression.Interpreter(),
+            CompilerType.Interpret => expression.Compile( preferInterpretation: true ),
             _ => throw new ArgumentOutOfRangeException( nameof( compilerType ) )
         };
     }

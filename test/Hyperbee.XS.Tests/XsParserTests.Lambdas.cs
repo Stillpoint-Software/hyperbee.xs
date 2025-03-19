@@ -1,6 +1,4 @@
-﻿using Hyperbee.Expressions.Interpreter;
-using Hyperbee.XS.Core.Writer;
-using static System.Linq.Expressions.Expression;
+﻿using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
@@ -148,8 +146,6 @@ public class XsParserLambdaTests
             """ );
 
         var lambda = Lambda<Func<int>>( expression );
-
-        var expressionString = lambda.ToExpressionString();
 
         var function = lambda.Compile( compiler );
         var result = function();
