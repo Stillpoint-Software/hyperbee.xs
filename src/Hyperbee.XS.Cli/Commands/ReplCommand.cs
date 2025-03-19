@@ -1,12 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
 using NuGet.Common;
 using Spectre.Console;
 using Spectre.Console.Cli;
-
-using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.Xs.Cli.Commands;
 

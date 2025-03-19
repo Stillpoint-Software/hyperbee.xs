@@ -15,7 +15,6 @@
 	<Target Name="SetPackageVersion" BeforeTargets="GenerateNuspec"
 	        Condition="'$(IsPackable)'=='true'">
 		<PropertyGroup>
-			<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
 			<PackageVersion Condition="'$(VersionSuffix)'==''">$(VersionPrefix)</PackageVersion>
 			<PackageVersion Condition="'$(VersionSuffix)'!=''">$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
 		</PropertyGroup>

@@ -52,5 +52,11 @@
     </PackageReference>
 
   </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.DotNet.Interactive.PackageManagement">
+      <Version>1.0.0-beta.25110.2</Version>
+    </PackageReference>
+  </ItemGroup>
 
 </Project>

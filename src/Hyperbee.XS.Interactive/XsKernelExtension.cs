@@ -12,9 +12,7 @@ public class XsKernelExtension : IKernelExtension, IStaticContentSource
     public async Task OnLoadAsync( Kernel kernel )
     {
         if ( kernel is not CompositeKernel compositeKernel )
-        {
             throw new InvalidOperationException( "The XS kernel could not be loaded." );
-        }
 
         compositeKernel.Add(
             new XsKernel()
@@ -29,6 +27,14 @@ public class XsKernelExtension : IKernelExtension, IStaticContentSource
             <details>
                 <summary>Expression Script (XS) Kernel support with !#xs and !#xs-show commands.</summary>
                 <p>This extension adds a new kernel that can execute Expression Script (XS).</p>
+                <p>Use <code>!#xs</code> to compile and run Expression Script code.</p>
+                <p>Use <code>!#xs-show</code> to show Expression Script as a C# expression tree.</p>
+                <p> Supported Commands:</p>
+                <ul>
+                    <li><code>!#import</code> to import extensions from other kernels or NuGet packages</li>
+                    <li><code>!#share</code> to share values between kernels.</li>
+                    <li><code>!#whos</code> to list all shared values.</li>
+                </ul>
             </details>
             """ );
 

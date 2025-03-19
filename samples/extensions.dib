@@ -1,0 +1,179 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"},{"aliases":[],"name":"razor"},{"aliases":[],"name":"xs"},{"aliases":[],"name":"xs-show"}]}}
+
+#!pwsh
+
+$version = "1.2.11"
+$config = "Debug"
+$nugetPath = "C:\Development\.nuget"
+dotnet pack "..\Hyperbee.XS.sln" -c $config
+
+copy ..\src\Hyperbee.XS\bin\$config\Hyperbee.XS.$version.nupkg $nugetPath
+copy ..\src\Hyperbee.XS.Extensions\bin\$config\Hyperbee.XS.Extensions.$version.nupkg $nugetPath
+copy ..\src\Hyperbee.XS.Interactive\bin\$config\Hyperbee.XS.Interactive.$version.nupkg $nugetPath
+
+#!csharp
+
+#i "nuget:C:\Development\.nuget"
+#r "nuget:Hyperbee.XS"
+#r "nuget:Hyperbee.XS.Extensions"
+#r "nuget:Hyperbee.XS.Interactive"
+
+// Used to parse XS syntax to produce System.Linq.Expressions
+#r "nuget:Parlot"
+
+#!csharp
+
+using System.Collections.ObjectModel;
+using System.Linq.Expressions;
+using Hyperbee.Collections;
+using Hyperbee.Expressions;
+using Hyperbee.XS;
+using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Parsers;
+using Hyperbee.XS.Core.Writer;
+using Parlot.Fluent;
+using static Parlot.Fluent.Parsers;
+
+#!markdown
+
+## Import Simple IParseExtension Example
+
+In this example the parser looks for the keyword "answer" and returns `42` as the result.
+
+#!csharp
+
+public class AnswerToEverythingParseExtension : IParseExtension
+{
+    public ExtensionType Type => ExtensionType.Expression;
+    public string Key => "answer";
+
+    public Parser<Expression> CreateParser( ExtensionBinder binder )
+    {
+        return Always()
+            .AndSkip( Terms.Char( ';' ) )
+            .Then<Expression>( static ( _, _ ) => Expression.Constant( 42 ) )
+            .Named( "hitchhiker" );
+    }
+}
+
+var hitchhiker = new AnswerToEverythingParseExtension();
+
+#!xs
+
+#!import --from csharp --name "hitchhiker"
+
+#!xs
+
+answer;
+
+#!markdown
+
+## Import Complex Expression Example
+
+In this example we make a custom expression that can be reduce to the common building blocks and then create a parser that translates XS to that expression.
+
+#!csharp
+
+public class RepeatExpression : Expression
+{
+    public override ExpressionType NodeType => ExpressionType.Extension;
+    public override Type Type => typeof(void);
+    public override bool CanReduce => true;
+
+    public Expression Count { get; }
+    public Expression Body { get; }
+
+    public RepeatExpression(Expression count, Expression body)
+    {
+        Count = count;
+        Body = body;
+    }
+
+    public override Expression Reduce()
+    {
+        var loopVariable = Expression.Parameter(typeof(int), "i");
+        var breakLabel = Expression.Label();
+
+        return Expression.Block(
+            new[] { loopVariable },
+            Expression.Assign(loopVariable, Expression.Constant(0)),
+            Expression.Loop(
+                Expression.IfThenElse(
+                    Expression.LessThan(loopVariable, Count),
+                    Expression.Block(Body, Expression.PostIncrementAssign(loopVariable)),
+                    Expression.Break(breakLabel)
+                ),
+                breakLabel
+            )
+        );
+    }
+}
+
+#!csharp
+
+public class RepeatParseExtension : IParseExtension
+{
+    public ExtensionType Type => ExtensionType.Expression;
+    public string Key => "repeat";
+
+    public Parser<Expression> CreateParser( ExtensionBinder binder )
+    {
+        var (expression, statement) = binder;
+
+        return Between(
+            Terms.Char('('),
+            expression,
+            Terms.Char(')')
+        )
+        .And( 
+             Between(
+                Terms.Char('{'),
+                statement,
+                Terms.Char('}')
+            )
+        )
+        .Then<Expression>( static parts =>
+        {
+            var (countExpression, body) = parts;
+            return new RepeatExpression(countExpression, body);
+        });
+    }
+}
+
+#!csharp
+
+var repeat = new RepeatParseExtension();
+
+#!xs
+
+#!import --from csharp --name "repeat"
+
+#!markdown
+
+Once the `RepeatParseExtension` is imported XS will automatically understand the new syntax and generate the correct `System.Linq.Expressions` for it.
+
+#!xs
+
+var x = 0;
+repeat (5) {
+    x++;
+}
+
+x;
+
+#!markdown
+
+## Import from an external assembly
+
+In this example we import a parser from an external NuGet, and use the `--extension` flag to specify the class that implement `IParserExtension`.
+
+#!csharp
+
+// First load the NuGet package
+#r "nuget:My.Custom.Extensions"
+
+#!xs
+
+#!import --extension "MyCustomParserExtensionClass"

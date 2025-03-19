@@ -4,21 +4,28 @@
 
 #!pwsh
 
-$version = "1.2.2"
-dotnet pack -c Release
+$version = "1.2.11"
+$config = "Debug"
+$nugetPath = "C:\Development\.nuget"
+dotnet pack "..\Hyperbee.XS.sln" -c $config
 
-copy src\Hyperbee.XS\bin\Release\Hyperbee.XS.$version.nupkg C:\Development\.nuget
-copy src\Hyperbee.XS.Extensions\bin\Release\Hyperbee.XS.Extensions.$version.nupkg C:\Development\.nuget
-copy src\Hyperbee.XS.Interactive\bin\Release\Hyperbee.XS.Interactive.$version.nupkg C:\Development\.nuget
+copy ..\src\Hyperbee.XS\bin\$config\Hyperbee.XS.$version.nupkg $nugetPath
+copy ..\src\Hyperbee.XS.Extensions\bin\$config\Hyperbee.XS.Extensions.$version.nupkg $nugetPath
+copy ..\src\Hyperbee.XS.Interactive\bin\$config\Hyperbee.XS.Interactive.$version.nupkg $nugetPath
 
 #!csharp
 
-#i nuget:C:/Development/.nuget
+#i "nuget:C:\Development\.nuget"
 #r "nuget:Hyperbee.XS"
 #r "nuget:Hyperbee.XS.Extensions"
 #r "nuget:Hyperbee.XS.Interactive"
 
 #!xs
+
+for ( var i = 0; i < 5; i++ )
+{
+    display(i);
+}
 
 #!xs
 
@@ -48,8 +55,6 @@ x;
 
 #!xs-show
 
-#!xs-show
-
 if( true ) 1+5; else 0;
 
 #!csharp
@@ -67,15 +72,11 @@ display(complex);
 
 #!xs
 
-#!xs
-
 #!share --from csharp --name "simple" --as "zSimple"
 #!share --from csharp --name "complex" --as "zComplex"
 
 display(zSimple);
 zComplex.Name;
-
-#!csharp
 
 #!xs
 

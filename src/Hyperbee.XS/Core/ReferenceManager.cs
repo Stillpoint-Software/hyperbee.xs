@@ -15,10 +15,11 @@ namespace Hyperbee.XS.Core;
 
 public partial class ReferenceManager
 {
-    private const string NuGetSource = "https://api.nuget.org/v3/index.json";
+    public const string DefaultNuGetSource = "https://api.nuget.org/v3/index.json";
 
     private readonly string _globalPackagesFolder;
     private readonly XsAssemblyLoadContext _assemblyLoadContext = new();
+    private readonly List<string> _nugetSources = [DefaultNuGetSource];
 
     private readonly ConcurrentSet<Assembly> _assemblyReferences =
     [
@@ -43,6 +44,24 @@ public partial class ReferenceManager
     public IEnumerable<Assembly> ReferenceAssemblies => _assemblyReferences;
     public IEnumerable<Assembly> Assemblies => _assemblyReferences.Concat( _assemblyLoadContext.Assemblies );
 
+    public void AddSource( string source )
+    {
+        // Assume newly added sources should be used first
+        _nugetSources.Insert( 0, source );
+    }
+
+    public void AddSources( IEnumerable<string> sources )
+    {
+        // Assume newly added sources should be used first
+        _nugetSources.InsertRange( 0, sources );
+    }
+
+    public void AddSources( params string[] sources )
+    {
+        // Assume newly added sources should be used first
+        _nugetSources.InsertRange( 0, sources );
+    }
+
     public ReferenceManager AddReference( Assembly assembly )
     {
         _assemblyReferences.Add( assembly );
@@ -61,37 +80,82 @@ public partial class ReferenceManager
             return this;
 
         _assemblyReferences.AddRange( assemblies );
+
         return this;
     }
 
     public Assembly LoadFromAssemblyPath( string assemblyPath )
     {
+        // Get the assembly name from the path
+        var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
+
+        // Check if the assembly with the same name and version is already loaded
+        var referenceAssembly = ReferenceAssemblies //_assemblyLoadContext.
+            .FirstOrDefault( a => a.GetName().Name == assemblyName.Name && a.GetName().Version == assemblyName.Version );
+
+        if ( referenceAssembly != null )
+        {
+            _assemblyLoadContext.LoadFromAssemblyPath( referenceAssembly.Location );
+            return referenceAssembly;
+        }
+
         return _assemblyLoadContext.LoadFromAssemblyPath( assemblyPath );
     }
 
-    public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = default, ILogger logger = default, CancellationToken cancellation = default )
+    public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = default, string source = null, ILogger logger = default, CancellationToken cancellation = default )
     {
         version ??= "latest";
 
-        var packagePath = await GetPackageAsync(
-            packageId,
-            version,
-            logger ?? NullLogger.Instance,
-            cancellation
-        ).ConfigureAwait( false );
+        if ( source == null )
+        {
+            var assemblies = new List<Assembly>();
+            foreach ( var nugetSource in _nugetSources )
+            {
+                var packagePath = await GetPackageAsync(
+                    packageId,
+                    version,
+                    nugetSource,
+                    logger ?? NullLogger.Instance,
+                    cancellation
+                ).ConfigureAwait( false );
 
-        if ( packagePath == null )
-            throw new InvalidOperationException( $"Failed to fetch package: {packageId}" );
+                if ( packagePath == null )
+                    continue;
 
-        return LoadAssembliesFromPackage( packagePath );
+                assemblies.AddRange( LoadAssembliesFromPackage( packagePath ) );
+            }
+
+            if ( assemblies.Count == 0 )
+                throw new InvalidOperationException( $"Failed to fetch package: {packageId}" );
+
+            return assemblies;
+        }
+        else
+        {
+            var packagePath = await GetPackageAsync(
+                packageId,
+                version,
+                source,
+                logger ?? NullLogger.Instance,
+                cancellation
+            ).ConfigureAwait( false );
+
+            if ( packagePath == null )
+                throw new InvalidOperationException( $"Failed to fetch package: {packageId}" );
+
+            return LoadAssembliesFromPackage( packagePath );
+        }
     }
 
-    private async Task<string> GetPackageAsync( string packageId, string version, ILogger logger, CancellationToken cancellation )
+    private async Task<string> GetPackageAsync( string packageId, string version, string source, ILogger logger, CancellationToken cancellation )
     {
-        var packageResource = await GetPackageResourceAsync( cancellation )
+        var packageRepository = Repository.Factory.GetCoreV3( source );
+
+        var packageResource = await GetPackageResourceAsync( packageRepository, cancellation )
             .ConfigureAwait( false );
 
         var resolvedPackages = await ResolvePackageDependenciesAsync(
+            packageRepository,
             packageId,
             version,
             logger,
@@ -111,7 +175,7 @@ public partial class ReferenceManager
 
             if ( Directory.Exists( packageFolder ) )
             {
-                continue;
+                break;
             }
 
             var packagePath = await DownloadPackageAsync(
@@ -130,18 +194,14 @@ public partial class ReferenceManager
         return packageIdFolder;
     }
 
-    private static async Task<FindPackageByIdResource> GetPackageResourceAsync( CancellationToken cancellation )
+    private static async Task<FindPackageByIdResource> GetPackageResourceAsync( SourceRepository repository, CancellationToken cancellation )
     {
-        var repository = Repository.Factory.GetCoreV3( NuGetSource );
-
         return await repository.GetResourceAsync<FindPackageByIdResource>( cancellation )
             .ConfigureAwait( false );
     }
 
-    private static async Task<List<PackageIdentity>> ResolvePackageDependenciesAsync( string packageId, string version, ILogger logger, CancellationToken cancellation )
+    private static async Task<List<PackageIdentity>> ResolvePackageDependenciesAsync( SourceRepository repository, string packageId, string version, ILogger logger, CancellationToken cancellation )
     {
-        var repository = Repository.Factory.GetCoreV3( NuGetSource );
-
         var metadataResource = await repository.GetResourceAsync<PackageMetadataResource>( cancellation )
             .ConfigureAwait( false );
 
@@ -161,7 +221,7 @@ public partial class ReferenceManager
             : versions.FirstOrDefault( m => m.Identity.Version == NuGetVersion.Parse( version ) );
 
         if ( packageMetadata == null )
-            throw new InvalidOperationException( $"Package metadata not found for {packageId} ({version})" );
+            return [];
 
         var identities = new List<PackageIdentity> { packageMetadata.Identity };
 

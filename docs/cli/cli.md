@@ -2,10 +2,10 @@
 layout: default
 title: Cli
 has_children: true
-nav_order: 6
+nav_order: 7
 ---
 
-# Hyperbee.XS.Cli
+# Cli
 
 This document provides an overview of the XS Cli tooling.
 

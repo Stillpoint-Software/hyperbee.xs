@@ -16,7 +16,7 @@ public class TestInitializer
 
         XsConfig = new XsConfig( typeResolver )
         {
-            Extensions = XsExtensions.Extensions()
+            Extensions = [.. XsExtensions.Extensions()]
         };
     }
 }

@@ -1,47 +1,31 @@
 ﻿using System.Linq.Expressions;
-using Hyperbee.Xs.Extensions.Core;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
-using Hyperbee.XS.Core.Parsers;
 using Hyperbee.XS.Core.Writer;
 using Parlot.Fluent;
 using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions;
 
-public class PackageParseExtension : IParseExtension, IExpressionWriter, IXsWriter
+public class PackageSourceParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Directive;
 
-    public string Key => "package";
+    public string Key => "source";
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
-        return Terms.NamespaceIdentifier()
-            .And(
-                ZeroOrOne(
-                    Terms.Char( ':' ).SkipAnd( Terms.String() )
-                )
-            )
+        return Terms.String()
             .AndSkip( Terms.Char( ';' ) )
-            .Then<Expression>( ( context, parts ) =>
+            .Then<Expression>( ( context, source ) =>
             {
                 if ( context is not XsContext xsContext )
                     throw new InvalidOperationException( $"Context must be of type {nameof( XsContext )}." );
 
-                var packageId = parts.Item1.ToString();
-                var version = parts.Item2.ToString();
+                xsContext.Resolver.ReferenceManager.AddSource( source.ToString() );
 
-                AsyncCurrentThreadHelper.RunSync( async () => await Resolve( packageId, version, xsContext.Resolver ) );
-
-                return XsExpressionExtensions.Directive( $"package {packageId}{(!string.IsNullOrWhiteSpace( version ) ? $":{version}" : string.Empty)}" );
+                return XsExpressionExtensions.Directive( $"source \"{source}\"" );
             } );
-    }
-
-    public static async Task Resolve( string packageId, string version, TypeResolver resolver )
-    {
-        var assemblies = await resolver.ReferenceManager.LoadPackageAsync( packageId, version );
-        resolver.RegisterExtensionMethods( assemblies );
     }
 
     public bool CanWrite( Expression node )

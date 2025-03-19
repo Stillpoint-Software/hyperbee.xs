@@ -6,7 +6,7 @@ using Microsoft.DotNet.Interactive.Events;
 namespace Hyperbee.XS.Interactive.Tests;
 
 [TestClass]
-public class PackageParseExtensionTests
+public class SubmitCodeTests
 {
     private Kernel _kernel;
 
@@ -55,8 +55,31 @@ public class PackageParseExtensionTests
 
         await _kernel.SubmitCodeAsync( script );
 
-        Assert.AreEqual( script, ((SubmitCode) events.OfType<CommandSucceeded>().First().Command).Code );
+        AssertSuccess( events );
         Assert.IsTrue( events.OfType<DisplayedValueProduced>().Any( x => (x.Value as string) == "123" ) );
+    }
+
+    [TestMethod]
+    public async Task SubmitCode_WithCommand_ShouldAddPackage()
+    {
+        using var events = _kernel.KernelEvents.ToSubscribedList();
+
+        var script =
+            """
+            #!xs
+
+            package Humanizer.Core;
+            using Humanizer;
+
+            var x = 1+5;
+            var y = x.ToWords();
+            display(y);
+            """;
+
+        await _kernel.SubmitCodeAsync( script );
+
+        AssertSuccess( events );
+        Assert.IsTrue( events.OfType<DisplayedValueProduced>().Any( x => (x.Value as string) == "six" ) );
     }
 
     [TestMethod]
@@ -162,12 +185,22 @@ public class PackageParseExtensionTests
 
     }
 
-
-    static string[] GetDisplayResult( SubscribedList<KernelEvent> events )
+    private static string[] GetDisplayResult( SubscribedList<KernelEvent> events )
     {
         return [.. events
             .OfType<ValueProduced>()
             .Select( x => $"{x.Name}:{x.FormattedValue.Value}" )
         ];
     }
+
+    private static void AssertSuccess( SubscribedList<KernelEvent> events )
+    {
+        var failures = events.OfType<CommandFailed>().ToArray();
+
+        if ( failures.Length > 0 )
+            Assert.Fail( string.Join( '\n', failures.Select( x => x.Message ) ) );
+        else
+            Assert.IsTrue( events.OfType<CommandSucceeded>().Any() );
+    }
+
 }
