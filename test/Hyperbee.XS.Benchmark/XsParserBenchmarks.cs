@@ -5,6 +5,17 @@ namespace Hyperbee.XS.Benchmark;
 
 public class ScriptBenchmarks
 {
+    private const string Script = """
+                                   var x = 5;
+                                   var result = if (x > 10)
+                                       x *= 2;
+                                   else
+                                       x -= 2;
+
+                                   result;
+                                   """;
+
+
     public XsParser Xs { get; set; }
 
     [GlobalSetup]
@@ -15,20 +26,19 @@ public class ScriptBenchmarks
 
     // Compile
 
+
+    [BenchmarkCategory( "Parse" )]
+    [Benchmark( Description = "XS Parse" )]
+    public void Hyperbee_Script_Parse()
+    {
+        Xs.Parse( Script );
+    }
+
     [BenchmarkCategory( "Execute" )]
     [Benchmark( Description = "XS Execute" )]
     public void Hyperbee_Script_Compile()
     {
-        var expression = Xs.Parse(
-            """
-            var x = 5;
-            var result = if (x > 10)
-                x *= 2;
-            else
-                x -= 2;
-
-            result;
-            """ );
+        var expression = Xs.Parse( Script );
         var lambda = Lambda<Func<int>>( expression );
 
         var compiled = lambda.Compile();
@@ -37,19 +47,10 @@ public class ScriptBenchmarks
     }
 
     [BenchmarkCategory( "Execute" )]
-    [Benchmark( Description = "XS Execute Intrepet" )]
-    public void Hyperbee_Script_CompileIntrepet()
+    [Benchmark( Description = "XS Execute Interpret" )]
+    public void Hyperbee_Script_CompileInterpret()
     {
-        var expression = Xs.Parse(
-            """
-            var x = 5;
-            var result = if (x > 10)
-                x *= 2;
-            else
-                x -= 2;
-
-            result;
-            """ );
+        var expression = Xs.Parse( Script );
         var lambda = Lambda<Func<int>>( expression );
 
         var compiled = lambda.Compile( preferInterpretation: true );
@@ -61,16 +62,7 @@ public class ScriptBenchmarks
     [Benchmark( Description = "XS Execute FEC" )]
     public void Hyperbee_Script_FastCompile()
     {
-        var expression = Xs.Parse(
-            """
-            var x = 5;
-            var result = if (x > 10)
-                x *= 2;
-            else
-                x -= 2;
-
-            result;
-            """ );
+        var expression = Xs.Parse( Script );
         var lambda = Lambda<Func<int>>( expression );
 
         var compiled = lambda.CompileFast();
@@ -78,24 +70,24 @@ public class ScriptBenchmarks
         compiled();
     }
 
-    // Execute
+    //// Execute
 
-    [BenchmarkCategory( "Execute" )]
-    [Benchmark( Description = "Native Execute", Baseline = true )]
-    public void Native_Execute()
-    {
-        NativeTestAsync();
-    }
+    //[BenchmarkCategory( "Execute" )]
+    //[Benchmark( Description = "Native Execute", Baseline = true )]
+    //public void Native_Execute()
+    //{
+    //    NativeTestAsync();
+    //}
 
-    // Helpers
+    //// Helpers
 
-    public static int NativeTestAsync()
-    {
-        var x = 5;
-        var result = (x > 10)
-            ? x *= 2
-            : x -= 2;
+    //public static int NativeTestAsync()
+    //{
+    //    var x = 5;
+    //    var result = (x > 10)
+    //        ? x *= 2
+    //        : x -= 2;
 
-        return result;
-    }
+    //    return result;
+    //}
 }

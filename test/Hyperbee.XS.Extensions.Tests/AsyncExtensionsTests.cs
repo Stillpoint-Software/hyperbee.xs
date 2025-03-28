@@ -132,6 +132,3 @@ public class AsyncParseExtensionTests
         Assert.AreEqual( 42, result );
     }
 }
-
-
-
