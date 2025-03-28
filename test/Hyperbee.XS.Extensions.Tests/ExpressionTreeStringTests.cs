@@ -422,7 +422,7 @@ public class ExpressionTreeStringTests
             ]
          );
 
-        var name = typeof(T).Name;
+        var name = typeof( T ).Name;
 
         var scriptResult = await CSharpScript.EvaluateAsync<T>(
             code +
@@ -445,7 +445,7 @@ public class ExpressionTreeStringTests
                 "Hyperbee.XS.Extensions.Tests"
             ]
         );
-        
+
         var scriptResult = await CSharpScript.EvaluateAsync<IEnumerable<int>>(
             code +
             $"var lambda = Expression.Lambda<Func<IEnumerable<int>>>( expression );" +
