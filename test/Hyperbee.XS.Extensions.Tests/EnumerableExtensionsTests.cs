@@ -38,7 +38,7 @@ public class EnumerableExtensionsTests
             enumerable {
                 yield 1;
                 yield 2;
-                halt;
+                break;
                 yield 3;
             }
             """ );

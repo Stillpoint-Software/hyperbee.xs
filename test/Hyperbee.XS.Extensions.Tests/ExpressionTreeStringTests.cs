@@ -127,7 +127,7 @@ public class ExpressionTreeStringTests
                      enumerable {
                          yield 1;
                          yield 2;
-                         halt;
+                         break;
                          yield 3;
                      }
                      """;
@@ -341,7 +341,7 @@ public class ExpressionTreeStringTests
                      enumerable {
                          yield 1;
                          yield 2;
-                         halt;
+                         break;
                          yield 3;
                      }
                      """;

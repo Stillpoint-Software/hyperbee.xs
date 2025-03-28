@@ -9,13 +9,13 @@ namespace Hyperbee.Xs.Extensions;
 public class YieldBreakParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 {
     public ExtensionType Type => ExtensionType.Terminated;
-    public string Key => "halt";
+    public string Key => "break";
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
         return Terms.Char( ';' )
             .Then<Expression>( static _ => ExpressionExtensions.YieldBreak() )
-            .Named( "halt" );
+            .Named( "break" );
     }
 
     public bool CanWrite( Expression node )
@@ -37,6 +37,6 @@ public class YieldBreakParseExtension : IParseExtension, IExpressionWriter, IXsW
             return;
 
         using var writer = context.GetWriter();
-        writer.Write( "halt" );
+        writer.Write( "break" );
     }
 }
