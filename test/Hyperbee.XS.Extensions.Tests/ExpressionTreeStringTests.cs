@@ -121,6 +121,31 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
+    public async Task ToExpressionTreeString_ShouldCreate_EnumerableBlock()
+    {
+        var script = """
+                     enumerable {
+                         yield 1;
+                         yield 2;
+                         halt;
+                         yield 3;
+                     }
+                     """;
+
+
+        var expression = Xs.Parse( script );
+        var code = expression.ToExpressionString( Config );
+
+        WriteResult( script, code );
+
+        var lambda = Expression.Lambda<Func<IEnumerable<int>>>( expression );
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        await AssertScriptValueEnumerable( code, result );
+    }
+
+    [TestMethod]
     public async Task ToExpressionTreeString_ShouldCreate_StringFormat()
     {
         var script = """
@@ -310,6 +335,32 @@ public class ExpressionTreeStringTests
     }
 
     [TestMethod]
+    public async Task ToXsString_ShouldCreate_EnumerableBlock()
+    {
+        var script = """
+                     enumerable {
+                         yield 1;
+                         yield 2;
+                         halt;
+                         yield 3;
+                     }
+                     """;
+
+        var expression = Xs.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
+
+        WriteResult( script, newScript );
+
+        var newExpression = Xs.Parse( newScript );
+        var lambda = Expression.Lambda<Func<IEnumerable<int>>>( newExpression );
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValueEnumerable( code, result );
+    }
+
+    [TestMethod]
     public async Task ToXsString_ShouldCreate_StringFormat()
     {
         var script = """
@@ -370,7 +421,8 @@ public class ExpressionTreeStringTests
                 "Hyperbee.XS.Extensions.Tests"
             ]
          );
-        var name = typeof( T ).Name;
+
+        var name = typeof(T).Name;
 
         var scriptResult = await CSharpScript.EvaluateAsync<T>(
             code +
@@ -379,6 +431,28 @@ public class ExpressionTreeStringTests
             "return compiled();", scriptOptions );
 
         Assert.AreEqual( result, scriptResult );
+    }
+
+    public static async Task AssertScriptValueEnumerable( string code, IEnumerable<int> result )
+    {
+        var scriptOptions = ScriptOptions.Default.WithReferences(
+            [
+                "System",
+                "System.Linq",
+                "System.Linq.Expressions",
+                "System.Collections",
+                "System.Collections.Generic",
+                "Hyperbee.XS.Extensions.Tests"
+            ]
+        );
+        
+        var scriptResult = await CSharpScript.EvaluateAsync<IEnumerable<int>>(
+            code +
+            $"var lambda = Expression.Lambda<Func<IEnumerable<int>>>( expression );" +
+            "var compiled = lambda.Compile();" +
+            "return compiled();", scriptOptions );
+
+        Assert.IsTrue( result.SequenceEqual( scriptResult ) );
     }
 
     public static async Task AssertScriptValueAsync<T>( string code, T result )

@@ -6,6 +6,7 @@ public class ExpressionWriterContext
 {
     internal readonly HashSet<string> Usings = [
         "System",
+        "System.Collections.Generic",
         "System.Linq.Expressions",
     ];
 

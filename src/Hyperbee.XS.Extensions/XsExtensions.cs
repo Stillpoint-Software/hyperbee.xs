@@ -15,7 +15,10 @@ public static class XsExtensions
             new AsyncParseExtension(),
             new AwaitParseExtension(),
             new DebugParseExtension(),
-            new PackageParseExtension()
+            new PackageParseExtension(),
+            new EnumerableParseExtension(),
+            new YieldBreakParseExtension(),
+            new YieldReturnParseExtension()
         ];
     }
 }

@@ -40,7 +40,7 @@ public class UsingParseExtension : IParseExtension, IExpressionWriter, IXsWriter
                 return (variable, disposable);
             } )
             .And( statement )
-            .Then<Expression>( static ( ctx, parts ) =>
+            .Then<Expression>( static ( _, parts ) =>
             {
                 var ((disposeVariable, disposable), body) = parts;
 

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hyperbee.Expressions" Version="1.1.3" />
+    <PackageReference Include="Hyperbee.Expressions" Version="1.1.4-develop.250328154856" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.13.0" />
     <PackageReference Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.25110.2" />
     <PackageReference Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.25110.2" />
