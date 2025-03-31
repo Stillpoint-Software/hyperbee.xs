@@ -38,6 +38,7 @@
     <None Include="$(MSBuildThisFileDirectory)language\using-directive.md" />
     <None Include="$(MSBuildThisFileDirectory)language\using-statement.md" />
     <None Include="$(MSBuildThisFileDirectory)language\variables.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\yield.md" />
     <None Include="$(MSBuildThisFileDirectory)language\while.md" />
     <None Include="$(MSBuildThisFileDirectory)_config.yml" />
   </ItemGroup>
