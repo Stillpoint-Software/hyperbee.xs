@@ -52,4 +52,28 @@ public class EnumerableExtensionsTests
         Assert.AreEqual( 1, result[0] );
         Assert.AreEqual( 2, result[1] );
     }
+
+    [TestMethod]
+    public void Compile_ShouldSucceed_WithComplexEnumerable()
+    {
+        var expression = Xs.Parse(
+            """
+            enumerable {
+                for( var i = 0; i < 3; i++ )
+                {
+                    yield i;
+                }
+            }
+            """ );
+
+        var lambda = Lambda<Func<IEnumerable<int>>>( expression );
+
+        var compiled = lambda.Compile();
+        var result = compiled().ToArray();
+
+        Assert.AreEqual( 3, result.Length );
+        Assert.AreEqual( 0, result[0] );
+        Assert.AreEqual( 1, result[1] );
+        Assert.AreEqual( 2, result[2] );
+    }
 }

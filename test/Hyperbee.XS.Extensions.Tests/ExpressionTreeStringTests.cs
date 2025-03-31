@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Writer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -132,7 +131,6 @@ public class ExpressionTreeStringTests
                      }
                      """;
 
-
         var expression = Xs.Parse( script );
         var code = expression.ToExpressionString( Config );
 
@@ -170,8 +168,6 @@ public class ExpressionTreeStringTests
     [TestMethod]
     public async Task ToExpressionTreeString_ShouldCreate_AsyncAwait()
     {
-        var t = await Task.FromResult( 42 );
-
         var script = """
             async {
                 var asyncBlock = async {
@@ -197,8 +193,6 @@ public class ExpressionTreeStringTests
     [TestMethod]
     public async Task ToXsString_ShouldCreate_AsyncAwait()
     {
-        var t = await Task.FromResult( 42 );
-
         var script = """
             async {
                 var asyncBlock = async {
