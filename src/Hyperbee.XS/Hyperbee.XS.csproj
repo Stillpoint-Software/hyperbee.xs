@@ -42,7 +42,7 @@
     <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="/" />
     <None Include="..\..\NOTICES" Pack="true" Visible="false" PackagePath="/" />
     <PackageReference Include="Hyperbee.Collections" Version="2.4.0" />
-    <PackageReference Include="Hyperbee.Expressions" Version="1.1.4-develop.250331172856" />
+    <PackageReference Include="Hyperbee.Expressions" Version="1.1.4" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
     <PackageReference Include="NuGet.Configuration" Version="6.13.2" />
     <PackageReference Include="NuGet.DependencyResolver.Core" Version="6.13.2" />
