@@ -11,7 +11,6 @@ public class YieldReturnParseExtension : IParseExtension, IExpressionWriter, IXs
     public ExtensionType Type => ExtensionType.Expression;
     public string Key => "yield";
 
-
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
         var (expression, _) = binder;
