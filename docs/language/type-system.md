@@ -2,7 +2,7 @@
 layout: default
 title: Type System
 parent: Language
-nav_order: 17
+nav_order: 19
 ---
 
 # Type System

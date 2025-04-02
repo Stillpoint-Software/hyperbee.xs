@@ -1,4 +1,5 @@
-﻿using Hyperbee.Collections;
+﻿using System.Globalization;
+using Hyperbee.Collections;
 using Hyperbee.XS.Core;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
@@ -44,7 +45,7 @@ public class XsKernel : XsBaseKernel,
     {
         if ( State.TryGetValue( command.Name, out var value ) )
         {
-            context.PublishValueProduced( command, value );
+            PublishValueProduced( context, command, value );
         }
         else
         {
@@ -52,6 +53,31 @@ public class XsKernel : XsBaseKernel,
         }
 
         return Task.CompletedTask;
+
+        static void PublishValueProduced(
+            KernelInvocationContext context,
+            RequestValue requestValue,
+            object value )
+        {
+            var valueType = value?.GetType();
+
+            var requestedMimeType = requestValue.MimeType;
+
+            var formatter = Formatter.GetPreferredFormatterFor( valueType, requestedMimeType );
+
+            using var writer = new StringWriter( CultureInfo.InvariantCulture );
+            formatter.Format( value, writer );
+
+            var formatted = new FormattedValue(
+                requestedMimeType,
+                writer.ToString() );
+
+            context.Publish( new ValueProduced(
+                value,
+                requestValue.Name,
+                formatted,
+                requestValue ) );
+        }
     }
 
     Task IKernelCommandHandler<RequestValueInfos>.HandleAsync( RequestValueInfos command, KernelInvocationContext context )

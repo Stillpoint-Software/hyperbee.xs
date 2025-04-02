@@ -1,8 +1,10 @@
 ﻿using System.Linq.Expressions;
+using Hyperbee.Expressions;
 using Hyperbee.Xs.Extensions;
 using Hyperbee.XS.Core.Writer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+
 namespace Hyperbee.XS.Extensions.Tests;
 
 [TestClass]
@@ -188,6 +190,44 @@ public class ExpressionTreeStringTests
         var result = await compiled();
 
         await AssertScriptValueAsync( code, result );
+    }
+
+    [TestMethod]
+    public async Task ToExpressionTreeString_ShouldCreate_Inject()
+    {
+        var script = """
+                     inject<Hyperbee.XS.Extensions.Tests.ITestService>("TestKey").DoSomething();
+                     """;
+
+        var expression = Xs.Parse( script );
+        var code = expression.ToExpressionString( Config );
+
+        WriteResult( script, code );
+
+        var lambda = Expression.Lambda<Func<string>>( expression );
+        var compiled = lambda.Compile( ServiceProvider.GetServiceProvider() );
+        var result = compiled();
+
+        await AssertScriptValueService( code, result );
+    }
+
+    [TestMethod]
+    public async Task ToExpressionTreeString_ShouldCreate_Config()
+    {
+        var script = """
+                     config<string>("Hello");
+                     """;
+
+        var expression = Xs.Parse( script );
+        var code = expression.ToExpressionString( Config );
+
+        WriteResult( script, code );
+
+        var lambda = Expression.Lambda<Func<string>>( expression );
+        var compiled = lambda.Compile( ServiceProvider.GetServiceProvider() );
+        var result = compiled();
+
+        await AssertScriptValueService( code, result );
     }
 
     [TestMethod]
@@ -403,6 +443,51 @@ public class ExpressionTreeStringTests
         Assert.AreEqual( "one hundred and twenty-three", result );
     }
 
+    [TestMethod]
+    public async Task ToXsString_ShouldCreate_Inject()
+    {
+        var script = """
+                     var service = inject<Hyperbee.XS.Extensions.Tests.ITestService>("TestKey");
+                     service.DoSomething();
+                     """;
+
+        var expression = Xs.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
+
+        WriteResult( script, newScript );
+
+        var newExpression = Xs.Parse( newScript );
+        var lambda = Expression.Lambda<Func<string>>( newExpression );
+        var serviceProvider = ServiceProvider.GetServiceProvider();
+        var compiled = lambda.Compile( serviceProvider );
+        var result = compiled();
+
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValueService( code, result );
+    }
+
+    [TestMethod]
+    public async Task ToXsString_ShouldCreate_Config()
+    {
+        var script = """
+                     config<string>("Hello");
+                     """;
+
+        var expression = Xs.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
+
+        WriteResult( script, newScript );
+
+        var newExpression = Xs.Parse( newScript );
+        var lambda = Expression.Lambda<Func<string>>( newExpression );
+        var serviceProvider = ServiceProvider.GetServiceProvider();
+        var compiled = lambda.Compile( serviceProvider );
+        var result = compiled();
+
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValueService( code, result );
+    }
+
     public static async Task AssertScriptValue<T>( string code, T result )
     {
         var scriptOptions = ScriptOptions.Default.WithReferences(
@@ -425,6 +510,53 @@ public class ExpressionTreeStringTests
             "return compiled();", scriptOptions );
 
         Assert.AreEqual( result, scriptResult );
+    }
+    public static async Task AssertScriptValueService<T>( string code, T result )
+    {
+        var scriptOptions = ScriptOptions.Default.WithReferences(
+            [
+                "System",
+                "System.Linq",
+                "System.Linq.Expressions",
+                "System.Collections",
+                "System.Collections.Generic",
+                "Hyperbee.Expressions",
+                "Hyperbee.XS.Core",
+                "Hyperbee.XS.Extensions.Tests"
+            ]
+        );
+
+        var name = typeof( T ).Name;
+
+        var scriptResult = await CSharpScript.EvaluateAsync<T>(
+            code +
+            $"var lambda = Expression.Lambda<Func<{name}>>( expression );" +
+            $"var compiled = Hyperbee.Expressions.ExpressionExtensions.Compile<{name}>(lambda, Hyperbee.XS.Extensions.Tests.ServiceProvider.GetServiceProvider());" +
+            "return compiled();", scriptOptions );
+
+        Assert.AreEqual( result, scriptResult );
+    }
+
+    public static async Task AssertScriptValueEnumerable( string code, IEnumerable<int> result )
+    {
+        var scriptOptions = ScriptOptions.Default.WithReferences(
+            [
+                "System",
+                "System.Linq",
+                "System.Linq.Expressions",
+                "System.Collections",
+                "System.Collections.Generic",
+                "Hyperbee.XS.Extensions.Tests"
+            ]
+        );
+
+        var scriptResult = await CSharpScript.EvaluateAsync<IEnumerable<int>>(
+            code +
+            $"var lambda = Expression.Lambda<Func<IEnumerable<int>>>( expression );" +
+            "var compiled = lambda.Compile();" +
+            "return compiled();", scriptOptions );
+
+        Assert.IsTrue( result.SequenceEqual( scriptResult ) );
     }
 
     public static async Task AssertScriptValueEnumerable( string code, IEnumerable<int> result )

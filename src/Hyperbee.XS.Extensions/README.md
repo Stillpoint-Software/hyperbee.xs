@@ -9,11 +9,14 @@ building domain-specific languages (DSLs), rules engines, or dynamic runtime log
 XS.Extensions is a collection of useful extensions for the XS language, including:
 
 - Async/Await
+- Enumerable/Yield/Break
 - While
 - For
 - For Each
 - Usings
 - String Interpolation
+- Injection (access to IServiceProvider)
+- Configuration (access to IConfiguration)
 - Debugging
 - Nuget Package Management
 

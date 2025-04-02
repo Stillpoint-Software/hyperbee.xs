@@ -2,7 +2,7 @@
 layout: default
 title: Foreach
 parent: Language
-nav_order: 6
+nav_order: 7
 ---
 
 # Foreach Loop

@@ -20,6 +20,8 @@
     <None Include="$(MSBuildThisFileDirectory)language\casting.md" />
     <None Include="$(MSBuildThisFileDirectory)language\conditionals.md" />
     <None Include="$(MSBuildThisFileDirectory)extensions.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\config.md" />
+    <None Include="$(MSBuildThisFileDirectory)language\inject.md" />
     <None Include="$(MSBuildThisFileDirectory)language\for.md" />
     <None Include="$(MSBuildThisFileDirectory)language\foreach.md" />
     <None Include="$(MSBuildThisFileDirectory)language\generics.md" />
@@ -41,8 +43,5 @@
     <None Include="$(MSBuildThisFileDirectory)language\yield.md" />
     <None Include="$(MSBuildThisFileDirectory)language\while.md" />
     <None Include="$(MSBuildThisFileDirectory)_config.yml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)language\" />
   </ItemGroup>
 </Project>
