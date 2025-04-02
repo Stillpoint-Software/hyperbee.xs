@@ -139,6 +139,7 @@ It supports:
 
 - Control Flow: Try-catch, conditionals (`if`, `switch`), and looping constructs (`for`, `while`, `foreach`, `loop`).
 - Async/Await: `async` and `await` constructs.
+- Enumeration: `yield` and `break` constructs.
 - Exception Handling: `try-catch` blocks and exception handling.
 - Variables and Scoping: Local variables, block scoping, and variable assignment.
 - Expressions and Methods: Lambdas, inline functions, and method calls.
@@ -161,6 +162,7 @@ Example Extensions:
 - `for`, `foreach`, and `while`.
 - `using` blocks.
 - String interpolation.
+- `enumerable` and `yield` support.
 - Null coalescing (`??`).
 
 #### **Debugging**:
@@ -288,7 +290,8 @@ lightweight design, and advanced extensibility, XS helps developers build robust
 
 Special thanks to:
 
-- [Parlot](https://github.com/sebastienros/parlot) for the fast .NET parser combinator. :heart:
+- [Parlot](https://github.com/sebastienros/parlot) for the fast .NET parser combinator.
+- [Fast Expression Compiler](https://github.com/dadhi/FastExpressionCompiler) for improved performance.
 - [Just The Docs](https://github.com/just-the-docs/just-the-docs) for the documentation theme.
 
 ## Contributing

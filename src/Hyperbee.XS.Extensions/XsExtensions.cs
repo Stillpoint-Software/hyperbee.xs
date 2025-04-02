@@ -18,7 +18,9 @@ public static class XsExtensions
             new PackageParseExtension(),
             new EnumerableParseExtension(),
             new YieldBreakParseExtension(),
-            new YieldReturnParseExtension()
+            new YieldReturnParseExtension(),
+            new InjectParseExtension(),
+            new ConfigurationParseExtension()
         ];
     }
 }

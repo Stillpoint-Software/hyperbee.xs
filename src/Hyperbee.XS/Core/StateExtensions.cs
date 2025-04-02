@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Hyperbee.Collections;
 
 namespace Hyperbee.XS.Core;
 
@@ -23,7 +22,7 @@ public static class StateExtensions
 
         var result = Expression
             .Lambda( delegateType, expression )
-            .Compile()
+            .Compile( preferInterpretation: true )  // TODO: Allow ServiceProvider to be passed in.
             .DynamicInvoke();
 
         scope.PopWithState();
@@ -43,7 +42,7 @@ public static class StateExtensions
         var stateConst = Expression.Constant( state );
         var indexerProperty = typeof( Dictionary<string, object> ).GetProperty( "Item" )!;
 
-        foreach ( var (name, parameter) in scope.Variables.EnumerateItems( LinkedNode.Single ) )
+        foreach ( var (name, parameter) in scope.Variables.EnumerateItems() )
         {
             var local = Expression.Variable( parameter.Type, name );
             localVariables[name] = local;

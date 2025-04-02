@@ -2,7 +2,7 @@
 layout: default
 title: Yield
 parent: Language
-nav_order: 22
+nav_order: 24
 ---
 
 # Yield
