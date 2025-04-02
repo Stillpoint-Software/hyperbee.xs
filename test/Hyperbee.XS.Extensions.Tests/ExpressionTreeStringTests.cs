@@ -559,6 +559,28 @@ public class ExpressionTreeStringTests
         Assert.IsTrue( result.SequenceEqual( scriptResult ) );
     }
 
+    public static async Task AssertScriptValueEnumerable( string code, IEnumerable<int> result )
+    {
+        var scriptOptions = ScriptOptions.Default.WithReferences(
+            [
+                "System",
+                "System.Linq",
+                "System.Linq.Expressions",
+                "System.Collections",
+                "System.Collections.Generic",
+                "Hyperbee.XS.Extensions.Tests"
+            ]
+        );
+
+        var scriptResult = await CSharpScript.EvaluateAsync<IEnumerable<int>>(
+            code +
+            $"var lambda = Expression.Lambda<Func<IEnumerable<int>>>( expression );" +
+            "var compiled = lambda.Compile();" +
+            "return compiled();", scriptOptions );
+
+        Assert.IsTrue( result.SequenceEqual( scriptResult ) );
+    }
+
     public static async Task AssertScriptValueAsync<T>( string code, T result )
     {
         var scriptOptions = ScriptOptions.Default.WithReferences(
