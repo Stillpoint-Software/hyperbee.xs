@@ -13,10 +13,10 @@ public class ExpressionTreeStringTests
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
     public ExpressionVisitorConfig Config = new( "Expression.", "\t", "expression",
-            XsExtensions.Extensions().OfType<IExpressionWriter>().ToArray() );
+            [.. XsExtensions.Extensions().OfType<IExpressionWriter>()] );
 
     public XsVisitorConfig XsConfig = new( "\t",
-            XsExtensions.Extensions().OfType<IXsWriter>().ToArray() );
+            [.. XsExtensions.Extensions().OfType<IXsWriter>()] );
 
     [TestMethod]
     public async Task ToExpressionTreeString_ShouldCreate_ForLoop()
@@ -535,28 +535,6 @@ public class ExpressionTreeStringTests
             "return compiled();", scriptOptions );
 
         Assert.AreEqual( result, scriptResult );
-    }
-
-    public static async Task AssertScriptValueEnumerable( string code, IEnumerable<int> result )
-    {
-        var scriptOptions = ScriptOptions.Default.WithReferences(
-            [
-                "System",
-                "System.Linq",
-                "System.Linq.Expressions",
-                "System.Collections",
-                "System.Collections.Generic",
-                "Hyperbee.XS.Extensions.Tests"
-            ]
-        );
-
-        var scriptResult = await CSharpScript.EvaluateAsync<IEnumerable<int>>(
-            code +
-            $"var lambda = Expression.Lambda<Func<IEnumerable<int>>>( expression );" +
-            "var compiled = lambda.Compile();" +
-            "return compiled();", scriptOptions );
-
-        Assert.IsTrue( result.SequenceEqual( scriptResult ) );
     }
 
     public static async Task AssertScriptValueEnumerable( string code, IEnumerable<int> result )
