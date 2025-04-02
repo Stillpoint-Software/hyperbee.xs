@@ -1,4 +1,4 @@
-using Hyperbee.XS.Core;
+﻿using Hyperbee.XS.Core;
 
 namespace Hyperbee.Xs.Extensions;
 
