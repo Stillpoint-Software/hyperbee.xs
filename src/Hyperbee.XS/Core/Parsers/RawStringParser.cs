@@ -1,5 +1,5 @@
-﻿using Parlot.Fluent;
-using Parlot;
+﻿using Parlot;
+using Parlot.Fluent;
 
 namespace Hyperbee.XS.Core.Parsers;
 
@@ -13,9 +13,9 @@ public class RawStringParser : Parser<TextSpan>
         EndContent
     }
 
-    public override bool Parse(ParseContext context, ref ParseResult<TextSpan> result)
+    public override bool Parse( ParseContext context, ref ParseResult<TextSpan> result )
     {
-        context.EnterParser(this);
+        context.EnterParser( this );
 
         var scanner = context.Scanner;
         var cursor = scanner.Cursor;
@@ -28,18 +28,18 @@ public class RawStringParser : Parser<TextSpan>
         var quoteCount = 0;
         var requiredQuoteCount = 0;
 
-        while (true)
+        while ( true )
         {
             var current = cursor.Current;
 
-            switch (state)
+            switch ( state )
             {
                 case ParserState.Initial:
-                    if (current == '"')
+                    if ( current == '"' )
                     {
                         quoteCount++;
                     }
-                    else if (quoteCount >= 3)
+                    else if ( quoteCount >= 3 )
                     {
                         state = ParserState.BeginContent;
                         requiredQuoteCount = quoteCount;
@@ -47,8 +47,8 @@ public class RawStringParser : Parser<TextSpan>
                     }
                     else
                     {
-                        scanner.Cursor.ResetPosition(start);
-                        context.ExitParser(this);
+                        scanner.Cursor.ResetPosition( start );
+                        context.ExitParser( this );
                         return false;
                     }
                     break;
@@ -59,10 +59,10 @@ public class RawStringParser : Parser<TextSpan>
                     break;
 
                 case ParserState.Content:
-                    if (current == '"')
+                    if ( current == '"' )
                     {
                         quoteCount++;
-                        if (quoteCount == requiredQuoteCount)
+                        if ( quoteCount == requiredQuoteCount )
                         {
                             state = ParserState.EndContent;
                         }
@@ -77,17 +77,17 @@ public class RawStringParser : Parser<TextSpan>
                     var end = scanner.Cursor.Position.Offset;
 
                     var decoded = Character.DecodeString(
-                        new TextSpan(scanner.Buffer, begin.Offset, end - begin.Offset - requiredQuoteCount)
+                        new TextSpan( scanner.Buffer, begin.Offset, end - begin.Offset - requiredQuoteCount )
                     );
 
-                    result.Set(start.Offset, end, decoded);
-                    context.ExitParser(this);
+                    result.Set( start.Offset, end, decoded );
+                    context.ExitParser( this );
                     cursor.Advance();
 
                     return true;
 
                 default:
-                    throw new ParseException( $"Invalid state for {nameof(RawStringParser)} found.", start );
+                    throw new ParseException( $"Invalid state for {nameof( RawStringParser )} found.", start );
             }
 
             cursor.Advance();
@@ -95,8 +95,8 @@ public class RawStringParser : Parser<TextSpan>
             if ( !cursor.Eof )
                 continue;
 
-            scanner.Cursor.ResetPosition(start);
-            context.ExitParser(this);
+            scanner.Cursor.ResetPosition( start );
+            context.ExitParser( this );
             return false;
         }
     }
