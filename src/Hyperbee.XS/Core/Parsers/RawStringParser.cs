@@ -82,7 +82,6 @@ public class RawStringParser : Parser<TextSpan>
 
                     result.Set( start.Offset, end, decoded );
                     context.ExitParser( this );
-                    cursor.Advance();
 
                     return true;
 

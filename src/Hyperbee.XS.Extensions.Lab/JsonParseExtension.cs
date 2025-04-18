@@ -1,0 +1,101 @@
+﻿using System.Linq.Expressions;
+using System.Text.Json;
+using Hyperbee.Expressions;
+using Hyperbee.Expressions.Lab;
+using Hyperbee.XS.Core;
+using Hyperbee.XS.Core.Parsers;
+using Hyperbee.XS.Core.Writer;
+using Parlot.Fluent;
+
+using static System.Linq.Expressions.Expression;
+using static Parlot.Fluent.Parsers;
+using ExpressionExtensions = Hyperbee.Expressions.Lab.ExpressionExtensions;
+
+namespace Hyperbee.Xs.Extensions.Lab;
+
+public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
+{
+    public ExtensionType Type => ExtensionType.Expression;
+    public string Key => "json";
+
+    public Parser<Expression> CreateParser( ExtensionBinder binder )
+    {
+        var (expression, _) = binder;
+        // var element = json """{ "first": 1, "second": 2 }"""
+        // var person = json<Person> """{ "name": "John", "age": 30 }"""
+
+        var stringLiteral = Terms.String( StringLiteralQuotes.Double )
+            .Then<Expression>( static value => Constant( value.ToString() ) );
+
+        var selectLiteral = Terms.String()
+            .Then<Expression>( static value => Constant( value.ToString() ) );
+
+        var rawStringLiteral = new RawStringParser()
+            .Then<Expression>( static value => Constant( value.ToString() ) );
+
+        return
+            ZeroOrOne(
+                    Between(
+                        Terms.Char( '<' ),
+                        XsParsers.TypeRuntime(),
+                        Terms.Char( '>' )
+                    )
+                )
+                .AndSkip( new WhiteSpaceLiteral( true ) )
+                .And(
+                    OneOf(
+                        rawStringLiteral,
+                        stringLiteral,
+                        expression
+                    )
+                )
+                .Then<Expression>( static parts =>
+                {
+                    var (type, value) = parts;
+
+                    return ExpressionExtensions.Json( value, type );
+                } )
+                .And(
+                    ZeroOrOne(
+                        Terms.Text( "->" ).SkipAnd( selectLiteral )
+                    )
+                ).Then( static (ctx,parts) =>
+                    {
+                        var (json, select) = parts;
+
+                        return select == null 
+                            ? json 
+                            : ExpressionExtensions.JsonPath( json, select );
+                    }
+                )
+                .Named( "json" );
+    }
+
+    public bool CanWrite( Expression node )
+    {
+        return node is JsonExpression;
+    }
+
+    public void WriteExpression( Expression node, ExpressionWriterContext context )
+    {
+        if ( node is not JsonExpression jsonExpression )
+            return;
+
+        using var writer = context.EnterExpression( "Hyperbee.Expressions.ExpressionExtensions.Lab.Json", true, false );
+
+        writer.WriteExpression( jsonExpression.InputExpression );
+        writer.Write( ",\n" );
+        writer.Write( jsonExpression.Type, indent: true );
+    }
+
+    public void WriteExpression( Expression node, XsWriterContext context )
+    {
+        if ( node is not JsonExpression jsonExtension )
+            return;
+
+        using var writer = context.GetWriter();
+
+        writer.Write( "json " );
+        writer.WriteExpression( jsonExtension.InputExpression );
+    }
+}

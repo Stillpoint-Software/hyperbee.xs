@@ -10,7 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hyperbee.Expressions" Version="1.1.5" />
+    <PackageReference Include="Hyperbee.Expressions" Version="1.2.0-develop.250417163546" />
+    <PackageReference Include="Hyperbee.Expressions.Lab" Version="1.2.0-develop.250417163546" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.13.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
@@ -19,6 +20,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Hyperbee.XS.Extensions.Lab\Hyperbee.Xs.Extensions.Lab.csproj" />
     <ProjectReference Include="..\..\src\Hyperbee.XS.Extensions\Hyperbee.Xs.Extensions.csproj" />
     <ProjectReference Include="..\..\src\Hyperbee.XS\Hyperbee.XS.csproj" />
   </ItemGroup>
