@@ -41,8 +41,8 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
                 .Then<Expression>( static parts =>
                 {
                     var (type, value) = parts;
-                    if ( value.Type == typeof(HttpResponseMessage) )
-                        return Await( ExpressionExtensions.ReadJson( value, type ?? typeof(JsonElement) ) );
+                    if ( value.Type == typeof( HttpResponseMessage ) )
+                        return Await( ExpressionExtensions.ReadJson( value, type ?? typeof( JsonElement ) ) );
 
                     return ExpressionExtensions.Json( value, type );
                 } )
@@ -50,12 +50,12 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
                     ZeroOrOne(
                         Terms.Text( "::" ).SkipAnd( selectLiteral )
                     )
-                ).Then( static (ctx,parts) =>
+                ).Then( static ( ctx, parts ) =>
                     {
                         var (json, select) = parts;
 
-                        return select == null 
-                            ? json 
+                        return select == null
+                            ? json
                             : ExpressionExtensions.JsonPath( json, select );
                     }
                 )
