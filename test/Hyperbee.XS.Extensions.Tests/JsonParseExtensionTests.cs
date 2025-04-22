@@ -22,14 +22,12 @@ public class JsonParseExtensionTests
     {
         var expression = Xs.Parse(
             """"
-            var x = json """
+            json """
             { 
                 "First": "Joe", 
                 "Last": "Jones" 
             }
             """;
-            
-            x;
             """" );
 
         var lambda = Lambda<Func<JsonElement>>( expression );
@@ -84,9 +82,7 @@ public class JsonParseExtensionTests
             writer.Flush();
             stream.Position = 0L;
 
-            var x = json<Person> stream as Stream;
-
-            x.Last;
+            (json<Person> stream as Stream).Last;
             """" );
 
         var lambda = Lambda<Func<string>>( expression );
@@ -102,14 +98,12 @@ public class JsonParseExtensionTests
     {
         var expression = Xs.Parse(
             """"
-            var x = json<Person> """
+            ( json<Person> """
             { 
                 "First": "Joe", 
                 "Last": "Jones" 
             }
-            """;
-
-            x.Last;
+            """ ).Last;
             """" );
 
         var lambda = Lambda<Func<string>>( expression );
@@ -130,7 +124,7 @@ public class JsonParseExtensionTests
                 "First": "Joe", 
                 "Last": "Jones" 
             }
-            """->'$.Last';
+            """::'$.Last';
 
             x.First().GetString();
             """" );

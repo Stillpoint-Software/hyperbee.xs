@@ -8,6 +8,7 @@ using Hyperbee.XS.Core.Writer;
 using Parlot.Fluent;
 
 using static System.Linq.Expressions.Expression;
+using static Hyperbee.Expressions.ExpressionExtensions;
 using static Parlot.Fluent.Parsers;
 using ExpressionExtensions = Hyperbee.Expressions.Lab.ExpressionExtensions;
 
@@ -24,13 +25,7 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
         // var element = json """{ "first": 1, "second": 2 }"""
         // var person = json<Person> """{ "name": "John", "age": 30 }"""
 
-        var stringLiteral = Terms.String( StringLiteralQuotes.Double )
-            .Then<Expression>( static value => Constant( value.ToString() ) );
-
         var selectLiteral = Terms.String()
-            .Then<Expression>( static value => Constant( value.ToString() ) );
-
-        var rawStringLiteral = new RawStringParser()
             .Then<Expression>( static value => Constant( value.ToString() ) );
 
         return
@@ -42,22 +37,18 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
                     )
                 )
                 .AndSkip( new WhiteSpaceLiteral( true ) )
-                .And(
-                    OneOf(
-                        rawStringLiteral,
-                        stringLiteral,
-                        expression
-                    )
-                )
+                .And( expression )
                 .Then<Expression>( static parts =>
                 {
                     var (type, value) = parts;
+                    if ( value.Type == typeof(HttpResponseMessage) )
+                        return Await( ExpressionExtensions.ReadJson( value, type ?? typeof(JsonElement) ) );
 
                     return ExpressionExtensions.Json( value, type );
                 } )
                 .And(
                     ZeroOrOne(
-                        Terms.Text( "->" ).SkipAnd( selectLiteral )
+                        Terms.Text( "::" ).SkipAnd( selectLiteral )
                     )
                 ).Then( static (ctx,parts) =>
                     {
