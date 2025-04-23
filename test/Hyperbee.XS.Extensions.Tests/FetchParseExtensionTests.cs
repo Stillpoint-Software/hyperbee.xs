@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
-using Hyperbee.Json.Extensions;
 using Hyperbee.Xs.Extensions.Lab;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -51,7 +50,7 @@ public class FetchParseExtensionTests
             """
             async {
                 var response = await fetch( "Test", "/api" );
-                json response::'$.mockKey';
+                json response::/$.mockKey/;
             }
             """ );
 

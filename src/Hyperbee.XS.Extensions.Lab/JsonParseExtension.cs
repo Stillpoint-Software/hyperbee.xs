@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using System.Text.Json;
-using Hyperbee.Expressions;
 using Hyperbee.Expressions.Lab;
 using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Parsers;
@@ -8,9 +7,9 @@ using Hyperbee.XS.Core.Writer;
 using Parlot.Fluent;
 
 using static System.Linq.Expressions.Expression;
+using static Hyperbee.Expressions.Lab.ExpressionExtensions;
 using static Hyperbee.Expressions.ExpressionExtensions;
 using static Parlot.Fluent.Parsers;
-using ExpressionExtensions = Hyperbee.Expressions.Lab.ExpressionExtensions;
 
 namespace Hyperbee.Xs.Extensions.Lab;
 
@@ -25,7 +24,7 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
         // var element = json """{ "first": 1, "second": 2 }"""
         // var person = json<Person> """{ "name": "John", "age": 30 }"""
 
-        var selectLiteral = Terms.String()
+        var jsonPathSelect = SkipWhiteSpace( new StringLiteral( '/' ) )
             .Then<Expression>( static value => Constant( value.ToString() ) );
 
         return
@@ -42,13 +41,13 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
                 {
                     var (type, value) = parts;
                     if ( value.Type == typeof( HttpResponseMessage ) )
-                        return Await( ExpressionExtensions.ReadJson( value, type ?? typeof( JsonElement ) ) );
+                        return Await( ReadJson( value, type ?? typeof( JsonElement ) ) );
 
-                    return ExpressionExtensions.Json( value, type );
+                    return Expressions.Lab.ExpressionExtensions.Json( value, type );
                 } )
                 .And(
                     ZeroOrOne(
-                        Terms.Text( "::" ).SkipAnd( selectLiteral )
+                        Terms.Text( "::" ).SkipAnd( jsonPathSelect )
                     )
                 ).Then( static ( ctx, parts ) =>
                     {
@@ -56,7 +55,7 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 
                         return select == null
                             ? json
-                            : ExpressionExtensions.JsonPath( json, select );
+                            : JsonPath( json, select );
                     }
                 )
                 .Named( "json" );
@@ -90,3 +89,4 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
         writer.WriteExpression( jsonExtension.InputExpression );
     }
 }
+

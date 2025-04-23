@@ -124,7 +124,7 @@ public class JsonParseExtensionTests
                 "First": "Joe", 
                 "Last": "Jones" 
             }
-            """::'$.Last';
+            """::/$.Last/;
 
             x.First().GetString();
             """" );
@@ -135,6 +135,22 @@ public class JsonParseExtensionTests
         var result = function();
 
         Assert.AreEqual( "Jones", result );
+    }
+
+    [TestMethod]
+    public void Parse_ShouldSucceed_WithRegex()
+    {
+        var expression = Xs.Parse(
+            """
+            regex "Find world in string"::/world/[0].Value;
+            """ );
+
+        var lambda = Lambda<Func<string>>( expression );
+
+        var function = lambda.Compile();
+        var result = function();
+
+        Assert.AreEqual( "world", result );
     }
 
 }
