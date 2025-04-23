@@ -2,8 +2,8 @@
 using System.Text.Json;
 using Hyperbee.Expressions;
 using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.Core.Writer;
 using Hyperbee.Xs.Extensions.Lab;
+using Hyperbee.XS.Core.Writer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
@@ -14,9 +14,9 @@ public class ExpressionTreeStringTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    public ExpressionVisitorConfig Config = new( 
-        "Expression.", 
-        "\t", 
+    public ExpressionVisitorConfig Config = new(
+        "Expression.",
+        "\t",
         "expression",
         ["Hyperbee.Expressions.Lab"],
         [.. XsExtensions.Extensions().OfType<IExpressionWriter>(), new FetchParseExtension(), new JsonParseExtension(), new RegexParseExtension()] );

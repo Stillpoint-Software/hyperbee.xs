@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Hyperbee.Xs.Extensions;
-using Hyperbee.XS.Core;
 using Hyperbee.Xs.Extensions.Lab;
+using Hyperbee.XS.Core;
 
 namespace Hyperbee.XS.Extensions.Tests;
 
