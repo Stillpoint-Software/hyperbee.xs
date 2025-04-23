@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using NuGet.Packaging;
 
 namespace Hyperbee.XS.Core.Writer;
 
@@ -31,6 +32,9 @@ public class ExpressionWriterContext
     internal ExpressionWriterContext( ExpressionVisitorConfig config = null )
     {
         Config = config ?? new();
+        if ( config?.Usings != null )
+            Usings.AddRange( config.Usings );
+
         Visitor = new ExpressionVisitor( this );
     }
 

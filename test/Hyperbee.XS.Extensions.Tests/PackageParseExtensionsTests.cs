@@ -7,7 +7,7 @@ namespace Hyperbee.XS.Extensions.Tests;
 [TestClass]
 public class PackageParseExtensionTests
 {
-    public ExpressionVisitorConfig Config = new( "Expression.", "\t", "expression",
+    public ExpressionVisitorConfig Config = new( "Expression.", "\t", "expression", null,
             XsExtensions.Extensions().OfType<IExpressionWriter>().ToArray() );
 
     public XsVisitorConfig XsConfig = new( "\t",

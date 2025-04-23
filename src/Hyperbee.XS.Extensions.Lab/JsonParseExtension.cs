@@ -70,11 +70,11 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
         if ( node is not JsonExpression jsonExpression )
             return;
 
-        using var writer = context.EnterExpression( "Hyperbee.Expressions.ExpressionExtensions.Lab.Json", true, false );
+        using var writer = context.EnterExpression( "Hyperbee.Expressions.Lab.ExpressionExtensions.Json", true, false );
 
         writer.WriteExpression( jsonExpression.InputExpression );
         writer.Write( ",\n" );
-        writer.Write( jsonExpression.Type, indent: true );
+        writer.WriteType( jsonExpression.Type );
     }
 
     public void WriteExpression( Expression node, XsWriterContext context )

@@ -195,7 +195,9 @@ internal class XsVisitor( XsWriterContext context ) : global::System.Linq.Expres
                 break;
 
             case string:
-                writer.Write( $"\"{value}\"" );
+                writer.Write( $""""
+                               """{value}""" 
+                               """" );
                 break;
 
             case bool boolValue:
