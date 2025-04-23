@@ -5,10 +5,9 @@ using Hyperbee.XS.Core;
 using Hyperbee.XS.Core.Parsers;
 using Hyperbee.XS.Core.Writer;
 using Parlot.Fluent;
-
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.Lab.ExpressionExtensions;
 using static Hyperbee.Expressions.ExpressionExtensions;
+using static Hyperbee.Expressions.Lab.ExpressionExtensions;
 using static Parlot.Fluent.Parsers;
 
 namespace Hyperbee.Xs.Extensions.Lab;

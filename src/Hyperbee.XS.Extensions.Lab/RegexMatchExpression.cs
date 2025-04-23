@@ -10,8 +10,8 @@ public class RegexMatchExpression : Expression
 
     public RegexMatchExpression( Expression inputExpression, Expression pattern )
     {
-        InputExpression = inputExpression ?? throw new ArgumentNullException( nameof(inputExpression) );
-        Pattern = pattern ?? throw new ArgumentNullException( nameof(pattern) );
+        InputExpression = inputExpression ?? throw new ArgumentNullException( nameof( inputExpression ) );
+        Pattern = pattern ?? throw new ArgumentNullException( nameof( pattern ) );
     }
 
     public override ExpressionType NodeType => ExpressionType.Extension;
@@ -33,11 +33,11 @@ public class RegexMatchExpression : Expression
 
     public override Expression Reduce()
     {
-        var regexMatchesMethod = typeof(Regex)
-            .GetMethod(nameof(Regex.Matches), [typeof(string)] )!;
+        var regexMatchesMethod = typeof( Regex )
+            .GetMethod( nameof( Regex.Matches ), [typeof( string )] )!;
 
         // Use a constructor expression to create the Regex instance
-        var regexConstructor = typeof(Regex).GetConstructor( [typeof(string)] )!;
+        var regexConstructor = typeof( Regex ).GetConstructor( [typeof( string )] )!;
 
         return Call(
             New( regexConstructor, Pattern ),
