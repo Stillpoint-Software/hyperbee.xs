@@ -2,11 +2,19 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using Hyperbee.Collections;
 
 namespace Hyperbee.XS.Core;
 
-public sealed class TypeResolver
+public interface ITypeResolver
+{
+    Type ResolveType( string typeName );
+    MethodInfo ResolveMethod( Type type, string methodName, IReadOnlyList<Type> typeArgs, IReadOnlyList<Expression> args );
+    MemberInfo ResolveMember( Type type, string memberName );
+}
+
+public class TypeResolver : ITypeResolver
 {
     public ReferenceManager ReferenceManager { get; }
 
@@ -53,7 +61,7 @@ public sealed class TypeResolver
         ReferenceManager = referenceManager;
     }
 
-    public Type ResolveType( string typeName )
+    public virtual Type ResolveType( string typeName )
     {
         return _typeCache.GetOrAdd( typeName, _ =>
         {
@@ -93,7 +101,7 @@ public sealed class TypeResolver
         }
     }
 
-    public MethodInfo ResolveMethod( Type type, string methodName, IReadOnlyList<Type> typeArgs, IReadOnlyList<Expression> args )
+    public virtual MethodInfo ResolveMethod( Type type, string methodName, IReadOnlyList<Type> typeArgs, IReadOnlyList<Expression> args )
     {
         var candidateMethods = GetCandidateMethods( methodName, type );
         var callerTypes = GetCallerTypes( type, args );
@@ -151,6 +159,12 @@ public sealed class TypeResolver
             throw new AmbiguousMatchException( $"Ambiguous match for method '{methodName}'." );
 
         return bestMatch;
+    }
+
+    public virtual MemberInfo ResolveMember( Type type, string memberName )
+    {
+        const BindingFlags BindingAttr = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+        return type.GetMember( memberName, BindingAttr ).FirstOrDefault();
     }
 
     public void RegisterExtensionMethods( IEnumerable<Assembly> assemblies )

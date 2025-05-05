@@ -79,11 +79,11 @@ public partial class XsParser
                 var type = TypeOf( targetExpression );
                 var name = memberName.ToString()!;
 
+                var (_, resolver) = ctx;
                 // method
 
                 if ( args != null )
                 {
-                    var (_, resolver) = ctx;
                     var method = resolver.ResolveMethod( type, name, typeArgs, args );
 
                     if ( method == null )
@@ -98,8 +98,7 @@ public partial class XsParser
 
                 // property or field
 
-                const BindingFlags BindingAttr = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-                var member = type.GetMember( name, BindingAttr ).FirstOrDefault();
+                var member = resolver.ResolveMember( type, name );
 
                 if ( member == null )
                     throw new InvalidOperationException( $"Member '{name}' not found on type '{type}'." );
