@@ -35,8 +35,8 @@ public partial class XsParser
         var stringLiteral = Terms.String( StringLiteralQuotes.Double )
             .Then<Expression>( static value => Constant( value.ToString() ) );
 
-        var rawStringLiteral = new RawStringParser().
-            Then<Expression>( static value => Constant( value.ToString() ) );
+        var rawStringLiteral = new RawStringParser()
+            .Then<Expression>( static value => Constant( value.ToString() ) );
 
         var nullLiteral = Terms.Text( "null" )
             .Then<Expression>( static _ => Constant( null ) );

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Hyperbee.Xs.Extensions;
+using Hyperbee.Xs.Extensions.Lab;
 using Hyperbee.XS.Core;
 
 namespace Hyperbee.XS.Extensions.Tests;
@@ -16,7 +17,7 @@ public class TestInitializer
 
         XsConfig = new XsConfig( typeResolver )
         {
-            Extensions = [.. XsExtensions.Extensions()]
+            Extensions = [.. XsExtensions.Extensions(), new FetchParseExtension(), new JsonParseExtension(), new RegexParseExtension()]
         };
     }
 }
