@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
+using System.Text.Json;
 using Hyperbee.Expressions;
 using Hyperbee.Xs.Extensions;
+using Hyperbee.Xs.Extensions.Lab;
 using Hyperbee.XS.Core.Writer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -12,11 +14,15 @@ public class ExpressionTreeStringTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    public ExpressionVisitorConfig Config = new( "Expression.", "\t", "expression",
-            [.. XsExtensions.Extensions().OfType<IExpressionWriter>()] );
+    public ExpressionVisitorConfig Config = new(
+        "Expression.",
+        "\t",
+        "expression",
+        ["Hyperbee.Expressions.Lab"],
+        [.. XsExtensions.Extensions().OfType<IExpressionWriter>(), new FetchParseExtension(), new JsonParseExtension(), new RegexParseExtension()] );
 
     public XsVisitorConfig XsConfig = new( "\t",
-            [.. XsExtensions.Extensions().OfType<IXsWriter>()] );
+            [.. XsExtensions.Extensions().OfType<IXsWriter>(), new FetchParseExtension(), new JsonParseExtension(), new RegexParseExtension()] );
 
     [TestMethod]
     public async Task ToExpressionTreeString_ShouldCreate_ForLoop()
@@ -228,6 +234,26 @@ public class ExpressionTreeStringTests
         var result = compiled();
 
         await AssertScriptValueService( code, result );
+    }
+
+    [TestMethod]
+    public async Task ToExpressionTreeString_ShouldCreate_Json()
+    {
+        var script = """"  
+                     var person = json """{ "name": "John", "age": 30 }""";  
+                     person.GetProperty( "name" ).GetString();  
+                     """";
+
+        var expression = Xs.Parse( script );
+        var code = expression.ToExpressionString( Config );
+
+        WriteResult( script, code );
+
+        var lambda = Expression.Lambda<Func<string>>( expression );
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        await AssertScriptValue( code, result );
     }
 
     [TestMethod]
@@ -488,6 +514,28 @@ public class ExpressionTreeStringTests
         await AssertScriptValueService( code, result );
     }
 
+    [TestMethod]
+    public async Task ToXsString_ShouldCreate_Json()
+    {
+        var script = """"  
+                     var person = json """{ "name": "John", "age": 30 }""";  
+                     person.GetProperty( "name" ).GetString();  
+                     """";
+
+        var expression = Xs.Parse( script );
+        var newScript = expression.ToXS( XsConfig );
+
+        WriteResult( script, newScript );
+
+        var newExpression = Xs.Parse( newScript );
+        var lambda = Expression.Lambda<Func<string>>( newExpression );
+        var compiled = lambda.Compile();
+        var result = compiled();
+
+        var code = expression.ToExpressionString( Config );
+        await AssertScriptValue( code, result );
+    }
+
     public static async Task AssertScriptValue<T>( string code, T result )
     {
         var scriptOptions = ScriptOptions.Default.WithReferences(
@@ -593,4 +641,5 @@ public class ExpressionTreeStringTests
         Console.WriteLine( code );
 #endif
     }
+
 }

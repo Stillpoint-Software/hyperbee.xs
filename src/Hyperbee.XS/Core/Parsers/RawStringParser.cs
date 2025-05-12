@@ -44,6 +44,7 @@ public class RawStringParser : Parser<TextSpan>
                         state = ParserState.BeginContent;
                         requiredQuoteCount = quoteCount;
                         begin = scanner.Cursor.Position;
+                        continue;
                     }
                     else
                     {
@@ -82,7 +83,6 @@ public class RawStringParser : Parser<TextSpan>
 
                     result.Set( start.Offset, end, decoded );
                     context.ExitParser( this );
-                    cursor.Advance();
 
                     return true;
 

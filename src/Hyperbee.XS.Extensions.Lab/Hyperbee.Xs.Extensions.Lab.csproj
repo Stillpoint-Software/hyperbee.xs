@@ -5,35 +5,35 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
-    <OutputType>Exe</OutputType>
-    <PackAsTool>true</PackAsTool>
-    <ToolCommandName>xs</ToolCommandName>
-    <!--<PackageOutputPath>./nupkg</PackageOutputPath> -->
-
+    
     <Authors>Stillpoint Software, Inc.</Authors>
-    <PackageId>Hyperbee.XS.Cli</PackageId>
+    <PackageId>Hyperbee.XS.Extensions.Lab</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>expressions;script;cli;tool;xs</PackageTags>
+    <PackageTags>expressions;script</PackageTags>
 
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://stillpoint-software.github.io/hyperbee.xs/</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Stillpoint Software, Inc.</Copyright>
-    <Title>Hyperbee Expression Script [XS] Cli</Title>
-    <Description>Expression Script [XS] Cli.</Description>
+    <Title>Hyperbee Expression Script [XS] Language Extensions (lab)</Title>
+    <Description>Sample Expression Script [XS] language extensions.</Description>
     <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.XS</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/Hyperbee.XS/releases/latest</PackageReleaseNotes>
     <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FastExpressionCompiler" Version="5.2.0" />
-    <PackageReference Include="Spectre.Console" Version="0.50.0" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="9.0.4" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.4" />
+    <None Update="$(MSBuildProjectName).csproj.DotSettings" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>$(AssemblyName).Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>$(AssemblyName).Benchmark</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
   <ItemGroup>
@@ -41,13 +41,16 @@
     <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="/" />
     <None Include="..\..\NOTICES" Pack="true" Visible="false" PackagePath="/" />
     <None Include="README.md" Pack="true" PackagePath="\" />
-    <ProjectReference Include="..\Hyperbee.XS.Extensions\Hyperbee.Xs.Extensions.csproj" />
+    <PackageReference Include="Hyperbee.Collections" Version="2.4.0" />
+    <PackageReference Include="Hyperbee.Expressions" Version="1.2.0" />
+    <PackageReference Include="Hyperbee.Expressions.Lab" Version="1.2.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
+    <PackageReference Include="Parlot" Version="1.3.6" />
     <ProjectReference Include="..\Hyperbee.XS\Hyperbee.XS.csproj" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-
   </ItemGroup>
 
 </Project>

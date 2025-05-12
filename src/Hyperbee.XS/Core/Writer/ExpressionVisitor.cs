@@ -78,7 +78,9 @@ internal class ExpressionVisitor( ExpressionWriterContext context ) : global::Sy
         switch ( value )
         {
             case string:
-                writer.Write( $"\"{value}\"" );
+                writer.Write( $""""
+                               """{value}""" 
+                               """" );
                 break;
 
             case bool boolValue:
