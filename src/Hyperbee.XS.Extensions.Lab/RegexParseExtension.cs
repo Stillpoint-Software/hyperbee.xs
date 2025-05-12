@@ -15,7 +15,7 @@ public class RegexParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
-        var (expression, _) = binder;
+        var expression = binder.ExpressionParser;
 
         // Define the regex select parser
         var regexPattern = SkipWhiteSpace( new StringLiteral( '/' ) )
@@ -23,9 +23,8 @@ public class RegexParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 
         return
             expression
-                .And(
-                    Terms.Text( "::" ).SkipAnd( regexPattern )
-                ).Then<Expression>( static parts =>
+                .And( Terms.Text( "::" ).SkipAnd( regexPattern ) )
+                .Then<Expression>( static parts =>
                 {
                     var (regex, pattern) = parts;
 

@@ -2,6 +2,7 @@
 using System.Reflection;
 using FastExpressionCompiler;
 using Hyperbee.XS.Core;
+using TestContext = Microsoft.VisualStudio.TestTools.UnitTesting.TestContext;
 
 namespace Hyperbee.XS.Tests;
 

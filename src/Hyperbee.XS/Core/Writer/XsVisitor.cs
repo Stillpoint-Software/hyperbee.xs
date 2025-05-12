@@ -196,7 +196,7 @@ internal class XsVisitor( XsWriterContext context ) : global::System.Linq.Expres
 
             case string:
                 writer.Write( $""""
-                               """{value}""" 
+                               """{value}"""
                                """" );
                 break;
 

@@ -17,7 +17,7 @@ public class FetchParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
-        var (expression, _) = binder;
+        Parser<Expression> expression = binder.ExpressionParser;
         // var response = fetch("name", "URL" );
 
         return If(

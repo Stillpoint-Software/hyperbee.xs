@@ -19,7 +19,7 @@ public class JsonParseExtension : IParseExtension, IExpressionWriter, IXsWriter
 
     public Parser<Expression> CreateParser( ExtensionBinder binder )
     {
-        var (expression, _) = binder;
+        var expression = binder.ExpressionParser;
         // var element = json """{ "first": 1, "second": 2 }"""
         // var person = json<Person> """{ "name": "John", "age": 30 }"""
 

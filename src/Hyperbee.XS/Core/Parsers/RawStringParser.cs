@@ -44,6 +44,7 @@ public class RawStringParser : Parser<TextSpan>
                         state = ParserState.BeginContent;
                         requiredQuoteCount = quoteCount;
                         begin = scanner.Cursor.Position;
+                        continue;
                     }
                     else
                     {

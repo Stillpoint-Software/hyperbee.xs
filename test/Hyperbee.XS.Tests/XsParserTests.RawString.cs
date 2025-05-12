@@ -1,5 +1,4 @@
-﻿using Hyperbee.XS.Core.Parsers;
-using static System.Linq.Expressions.Expression;
+﻿using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.XS.Tests;
 
@@ -28,6 +27,25 @@ public class XsParserRawStringTests
         Assert.AreEqual( "Raw string with \"With Quotes\".", result );
     }
 
+    [DataTestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Parse_ShouldSucceed_WithSingleRawString( CompilerType compiler )
+    {
+        var expression = Xs.Parse(
+            """"
+            var x = """!""";
+            x;
+            """" );
+
+        var lambda = Lambda<Func<string>>( expression );
+
+        var function = lambda.Compile( compiler );
+        var result = function();
+
+        Assert.AreEqual( "!", result );
+    }
 
     [DataTestMethod]
     [DataRow( CompilerType.Fast )]
