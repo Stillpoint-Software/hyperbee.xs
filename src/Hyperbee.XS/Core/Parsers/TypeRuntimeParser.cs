@@ -51,6 +51,14 @@ internal class TypeRuntimeParser : Parser<Type>
             scanner.SkipWhiteSpaceOrNewLine();
         }
 
+        if ( scanner.Cursor.Current == ':' )
+        {
+            // Invalid for types to end with a colon (Identifier is being used as a label)
+            cursor.ResetPosition( start );
+            context.ExitParser( this );
+            return false;
+        }
+
         // get any generic argument types
 
         var genericArgs = new List<Type>();

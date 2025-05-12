@@ -221,7 +221,7 @@ public class ExpressionTreeStringTests
     public async Task ToExpressionTreeString_ShouldCreate_Config()
     {
         var script = """
-                     config::Hello;
+                     config::hello;
                      """;
 
         var expression = Xs.Parse( script );
@@ -579,7 +579,7 @@ public class ExpressionTreeStringTests
         var scriptResult = await CSharpScript.EvaluateAsync<T>(
             code +
             $"var lambda = Expression.Lambda<Func<{name}>>( expression );" +
-            $"var compiled = Hyperbee.Expressions.ExpressionExtensions.Compile<{name}>(lambda, Hyperbee.XS.Extensions.Tests.ServiceProvider.GetServiceProvider());" +
+            $"var compiled = Hyperbee.Expressions.ExpressionExtensions.Compile<Func<{name}>>(lambda, Hyperbee.XS.Extensions.Tests.ServiceProvider.GetServiceProvider());" +
             "return compiled();", scriptOptions );
 
         Assert.AreEqual( result, scriptResult );

@@ -42,14 +42,14 @@
     <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="/" />
     <None Include="..\..\NOTICES" Pack="true" Visible="false" PackagePath="/" />
     <PackageReference Include="Hyperbee.Collections" Version="2.4.0" />
-    <PackageReference Include="Hyperbee.Expressions" Version="1.2.0-develop.250417163546" />
+    <PackageReference Include="Hyperbee.Expressions" Version="1.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
     <PackageReference Include="NuGet.Configuration" Version="6.13.2" />
     <PackageReference Include="NuGet.DependencyResolver.Core" Version="6.13.2" />
     <PackageReference Include="NuGet.Packaging" Version="6.13.2" />
     <PackageReference Include="NuGet.ProjectModel" Version="6.13.2" />
     <PackageReference Include="NuGet.Protocol" Version="6.13.2" />
-    <PackageReference Include="Parlot" Version="1.3.5" />
+    <PackageReference Include="Parlot" Version="1.3.6" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

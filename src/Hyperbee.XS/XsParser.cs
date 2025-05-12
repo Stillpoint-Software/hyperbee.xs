@@ -367,18 +367,6 @@ public partial class XsParser
     }
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private static Type TypeOf( Expression expression )
-    {
-        ArgumentNullException.ThrowIfNull( expression, nameof( expression ) );
-
-        return expression switch
-        {
-            ConstantExpression ce => ce.Value as Type ?? ce.Type,
-            Expression => expression.Type
-        };
-    }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private static Type CastToType( Expression expression, bool nullable = false )
     {
         if ( expression is not ConstantExpression ce || ce.Value is not Type type )

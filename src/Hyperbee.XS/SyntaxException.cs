@@ -30,7 +30,7 @@ public class SyntaxException : Exception
             var sourceLine = BufferHelper.GetLine( Buffer, Offset, out var caret );
             var caretLine = new string( ' ', caret ) + "^";
 
-            return $"({Line} {Column})\n{sourceLine}\n{caretLine}";
+            return $"{base.Message}\n({Line} {Column})\n{sourceLine}\n{caretLine}";
         }
     }
 }

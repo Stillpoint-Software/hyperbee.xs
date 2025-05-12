@@ -19,8 +19,8 @@ public static partial class XsParsers
     {
         return parser.AndSkipIf(
             ( ctx, _ ) => ((XsContext) ctx).RequireTermination,
-            OneOrMany( Terms.Char( ';' ) ),
-            ZeroOrMany( Terms.Char( ';' ) ).RequireTermination( true )
+            OneOrMany( Terms.Char( ';' ) ).ElseError( XsParser.InvalidTerminationMessage ),
+            ZeroOrMany( Terms.Char( ';' ) ).RequireTermination( true ).ElseError( XsParser.InvalidTerminationMessage )
         ).Named( "Termination" );
     }
 }

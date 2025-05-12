@@ -8,6 +8,7 @@ namespace Hyperbee.XS;
 public partial class XsParser
 {
     public const string InvalidSyntaxMessage = "Invalid syntax.";
+    public const string InvalidTerminationMessage = "Invalid termination, missing ';'.";
     public const string InvalidTypeMessage = "Invalid type.";
     public const string InvalidExpressionMessage = "Invalid expression.";
     public const string InvalidStatementMessage = "Invalid statement.";
@@ -21,7 +22,7 @@ public partial class XsParser
     internal static Parser<char> CloseBracket = Terms.Char( ']' ).ElseError( InvalidSyntaxMessage );
     internal static Parser<char> Assignment = Terms.Char( '=' ).ElseError( InvalidSyntaxMessage );
     internal static Parser<char> Delimiter = Terms.Char( ',' ).ElseError( InvalidSyntaxMessage );
-    internal static Parser<char> Terminator = Terms.Char( ';' ).ElseError( InvalidSyntaxMessage );
+    internal static Parser<char> Terminator = Terms.Char( ';' ).ElseError( InvalidTerminationMessage );
     internal static Parser<char> Colon = Terms.Char( ':' ).ElseError( InvalidSyntaxMessage );
 }
 
