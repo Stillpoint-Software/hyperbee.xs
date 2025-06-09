@@ -29,11 +29,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FastExpressionCompiler" Version="5.1.1" />
+    <PackageReference Include="FastExpressionCompiler" Version="5.2.0" />
     <PackageReference Include="Spectre.Console" Version="0.50.0" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="9.0.4" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.4" />
+    <PackageReference Include="System.Reflection.Metadata" Version="9.0.5" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup>
