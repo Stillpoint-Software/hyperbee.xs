@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
@@ -26,9 +26,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.25177.1" />
-    <PackageReference Include="System.Reflection.Metadata" Version="9.0.4" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.4" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.4" />
+    <PackageReference Include="System.Reflection.Metadata" Version="9.0.5" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.5" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup>
