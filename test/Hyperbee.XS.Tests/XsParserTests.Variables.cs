@@ -7,7 +7,7 @@ public class XsParserVariableTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -22,7 +22,7 @@ public class XsParserVariableTests
         Assert.IsNotNull( function );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -38,7 +38,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 20, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -54,7 +54,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -70,7 +70,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 8, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -86,7 +86,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 32, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -106,7 +106,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 0, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -122,7 +122,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 10, result ); // x++ returns the value before increment
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -138,7 +138,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 11, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -154,7 +154,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -170,7 +170,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 10, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -186,7 +186,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 40, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -202,7 +202,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 10, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -218,7 +218,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 8, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -240,7 +240,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -262,7 +262,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -284,7 +284,7 @@ public class XsParserVariableTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -302,14 +302,15 @@ public class XsParserVariableTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithDefaultInvalid( CompilerType compiler )
     {
-        try
+        Assert.ThrowsExactly<SyntaxException>( () =>
+        {
+            try
         {
             Xs.Parse( "var x ~ 10;" );
         }
@@ -318,5 +319,6 @@ public class XsParserVariableTests
             Console.WriteLine( ex.Message );
             throw;
         }
+        } );
     }
 }

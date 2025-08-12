@@ -8,7 +8,7 @@ public class XsParserComplexTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]

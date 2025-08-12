@@ -7,7 +7,7 @@ public class XsParserConditionalTests
 {
     public static XsParser Xs { get; } = new();
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -31,7 +31,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( 1, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -57,7 +57,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -81,7 +81,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -108,7 +108,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -135,14 +135,15 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithMissingSemicolon( CompilerType compiler )
     {
-        try
+        Assert.ThrowsExactly<SyntaxException>( () =>
+        {
+            try
         {
             Xs.Parse(
                 """
@@ -158,16 +159,18 @@ public class XsParserConditionalTests
             Console.WriteLine( ex.Message );
             throw;
         }
+        } );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithUnmatchedBraces( CompilerType compiler )
     {
-        try
+        Assert.ThrowsExactly<SyntaxException>( () =>
+        {
+            try
         {
             Xs.Parse(
                 """
@@ -185,16 +188,18 @@ public class XsParserConditionalTests
             Console.WriteLine( ex.Message );
             throw;
         }
+        } );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidCondition( CompilerType compiler )
     {
-        try
+        Assert.ThrowsExactly<SyntaxException>( () =>
+        {
+            try
         {
             Xs.Parse(
                 """
@@ -211,16 +216,18 @@ public class XsParserConditionalTests
             Console.WriteLine( ex.Message );
             throw;
         }
+        } );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidElse( CompilerType compiler )
     {
-        try
+        Assert.ThrowsExactly<SyntaxException>( () =>
+        {
+            try
         {
             Xs.Parse(
                 """
@@ -237,6 +244,7 @@ public class XsParserConditionalTests
             Console.WriteLine( ex.Message );
             throw;
         }
+        } );
     }
 }
 

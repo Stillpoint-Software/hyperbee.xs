@@ -7,7 +7,7 @@ public class XsParserMethodTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -27,7 +27,7 @@ public class XsParserMethodTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -47,7 +47,7 @@ public class XsParserMethodTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -67,7 +67,7 @@ public class XsParserMethodTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -87,7 +87,7 @@ public class XsParserMethodTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -107,7 +107,7 @@ public class XsParserMethodTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -127,7 +127,7 @@ public class XsParserMethodTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -146,7 +146,7 @@ public class XsParserMethodTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]

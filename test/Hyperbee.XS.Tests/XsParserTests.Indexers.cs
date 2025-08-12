@@ -7,7 +7,7 @@ public class XsParserIndexTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -27,7 +27,7 @@ public class XsParserIndexTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -47,7 +47,7 @@ public class XsParserIndexTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -66,7 +66,7 @@ public class XsParserIndexTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -86,14 +86,15 @@ public class XsParserIndexTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithUnclosedBracket( CompilerType compiler )
     {
-        try
+        Assert.ThrowsExactly<SyntaxException>( () =>
+        {
+            try
         {
             Xs.Parse(
                 """
@@ -106,6 +107,7 @@ public class XsParserIndexTests
             Console.WriteLine( ex.Message );
             throw;
         }
+        } );
     }
 
 }
