@@ -2,8 +2,7 @@
 	<!--
 	Push the target package to nuget
     -->
-	<Target Name="PushPackage" AfterTargets="Pack" 
-	        Condition="'$(PushAfterPack)'=='true' AND '$(IsPackable)'=='true'">
+	<Target Name="PushPackage" AfterTargets="Pack" Condition="'$(PushAfterPack)'=='true' AND '$(IsPackable)'=='true'">
 		<Exec Command="dotnet nuget push $(SolutionDir)output/$(PackageId).$(PackageVersion).nupkg $(PackageSourceParam) $(PackageApiKeyParam)"></Exec>
 	</Target>
 
@@ -12,23 +11,20 @@
 	https://github.com/NuGet/NuGet.Client/blob/4.3.0.4202/src/NuGet.Core/NuGet.Build.Tasks.Pack.Library/Pack.targets
 	Must run before target "GenerateNuspec" ("Pack") for the version to be applied as expected
 	-->
-	<Target Name="SetPackageVersion" BeforeTargets="GenerateNuspec"
-	        Condition="'$(IsPackable)'=='true'">
+	<Target Name="SetPackageVersion" BeforeTargets="GenerateNuspec" Condition="'$(IsPackable)'=='true'">
 		<PropertyGroup>
 			<PackageVersion Condition="'$(VersionSuffix)'==''">$(VersionPrefix)</PackageVersion>
 			<PackageVersion Condition="'$(VersionSuffix)'!=''">$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
 		</PropertyGroup>
 	</Target>
 
-	<Target Name="SetPackageSource" BeforeTargets="GenerateNuspec"
-	        Condition="'$(PushAfterPack)'=='true'">
+	<Target Name="SetPackageSource" BeforeTargets="GenerateNuspec" Condition="'$(PushAfterPack)'=='true'">
 		<PropertyGroup>
 			<PackageSourceParam Condition="'$(PackageSource)'!=''">--source $(PackageSource)</PackageSourceParam>
 		</PropertyGroup>
 	</Target>
 
-	<Target Name="SetPackageApiKey" BeforeTargets="GenerateNuspec"
-	        Condition="'$(PushAfterPack)'=='true'">
+	<Target Name="SetPackageApiKey" BeforeTargets="GenerateNuspec" Condition="'$(PushAfterPack)'=='true'">
 		<PropertyGroup>
 			<PackageApiKeyParam Condition="'$(PackageApiKey)'!=''">--api-key $(PackageApiKey)</PackageApiKeyParam>
 		</PropertyGroup>
