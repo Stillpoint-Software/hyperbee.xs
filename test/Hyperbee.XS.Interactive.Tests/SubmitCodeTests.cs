@@ -97,7 +97,7 @@ public class SubmitCodeTests
 
         var displayResult = GetDisplayResult( events );
 
-        Assert.AreEqual( 1, displayResult.Length );
+        Assert.HasCount( 1, displayResult );
         Assert.AreEqual( "x:40", displayResult[0] );
         events.Clear();
 
@@ -112,7 +112,7 @@ public class SubmitCodeTests
 
         displayResult = GetDisplayResult( events );
 
-        Assert.AreEqual( 1, displayResult.Length );
+        Assert.HasCount( 1, displayResult );
         Assert.AreEqual( "x:42", displayResult[0] );
     }
 
@@ -132,7 +132,7 @@ public class SubmitCodeTests
 
         var displayResult = GetDisplayResult( events );
 
-        Assert.AreEqual( 2, displayResult.Length );
+        Assert.HasCount( 2, displayResult );
         Assert.AreEqual( "y:\"hello\"", displayResult[1] );
         Assert.AreEqual( "x:123", displayResult[0] );
         events.Clear();
@@ -147,7 +147,7 @@ public class SubmitCodeTests
 
         displayResult = GetDisplayResult( events );
 
-        Assert.AreEqual( 2, displayResult.Length );
+        Assert.HasCount( 2, displayResult );
         Assert.AreEqual( "y:\"hello\"", displayResult[1] );
         Assert.AreEqual( "x:\"world\"", displayResult[0] );
         events.Clear();
@@ -178,7 +178,7 @@ public class SubmitCodeTests
 
         var displayResult = GetDisplayResult( events );
 
-        Assert.AreEqual( 2, displayResult.Length );
+        Assert.HasCount( 2, displayResult );
         Assert.AreEqual( "simple:\"test\"", displayResult[0] );
         Assert.AreEqual( "zSimple:\"test\"", displayResult[1] );
         events.Clear();
