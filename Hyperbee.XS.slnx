@@ -1,0 +1,31 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="version.json" />
+    <Project Path="docs/docs.shproj" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/" />
+  <Folder Name="/Solution Items/.github/workflows/">
+    <File Path=".github/workflows/create_release.yml" />
+    <File Path=".github/workflows/create_test_report.yml" />
+    <File Path=".github/workflows/deploy-gh-pages.yml" />
+    <File Path=".github/workflows/format.yml" />
+    <File Path=".github/workflows/issue_branch.yml" />
+    <File Path=".github/workflows/pack_publish.yml" />
+    <File Path=".github/workflows/run_tests.yml" />
+    <File Path=".github/workflows/unlist_package.yml" />
+  </Folder>
+  <Folder Name="/Solution Tests/">
+    <Project Path="test/Hyperbee.XS.Benchmark/Hyperbee.XS.Benchmark.csproj" />
+    <Project Path="test/Hyperbee.XS.Extensions.Tests/Hyperbee.XS.Extensions.Tests.csproj" />
+    <Project Path="test/Hyperbee.XS.Interactive.Tests/Hyperbee.XS.Interactive.Tests.csproj" />
+    <Project Path="test/Hyperbee.XS.Tests/Hyperbee.XS.Tests.csproj" />
+  </Folder>
+  <Project Path="src/Hyperbee.XS.Cli/Hyperbee.Xs.Cli.csproj" />
+  <Project Path="src/Hyperbee.XS.Extensions/Hyperbee.Xs.Extensions.csproj" />
+  <Project Path="src/Hyperbee.XS.Interactive/Hyperbee.Xs.Interactive.csproj" />
+  <Project Path="src/Hyperbee.XS/Hyperbee.XS.csproj" />
+</Solution>
