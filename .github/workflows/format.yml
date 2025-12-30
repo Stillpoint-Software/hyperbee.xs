@@ -46,7 +46,6 @@ jobs:
     if: ${{ needs.discover.result == 'success' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@main
     with:
-      dotnet_version: "9.0.x"
       branch: ${{ needs.discover.outputs.branch_name }}
     secrets: inherit
       
