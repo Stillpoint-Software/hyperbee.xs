@@ -7,7 +7,7 @@ public class XsParserNewTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -28,7 +28,7 @@ public class XsParserNewTests
         Assert.AreEqual( 42, result.PropertyValue );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -55,7 +55,7 @@ public class XsParserNewTests
         }
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -71,10 +71,10 @@ public class XsParserNewTests
         var function = lambda.Compile( compiler );
         var result = function();
 
-        Assert.AreEqual( 5, result.Length );
+        Assert.HasCount( 5, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -90,10 +90,10 @@ public class XsParserNewTests
         var function = lambda.Compile( compiler );
         var result = function();
 
-        Assert.AreEqual( 10, result.Length );
+        Assert.HasCount( 10, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -111,10 +111,10 @@ public class XsParserNewTests
         var function = lambda.Compile( compiler );
         var result = function();
 
-        Assert.AreEqual( 2, result.Length );
+        Assert.HasCount( 2, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -132,10 +132,10 @@ public class XsParserNewTests
         var function = lambda.Compile( compiler );
         var result = function();
 
-        Assert.AreEqual( 2, result.Count );
+        Assert.HasCount( 2, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -157,17 +157,17 @@ public class XsParserNewTests
         var function = lambda.Compile( compiler );
         var result = function();
 
-        Assert.AreEqual( 3, result.Length );
-        Assert.AreEqual( 3, result[0].Length );
+        Assert.HasCount( 3, result );
+        Assert.HasCount( 3, result[0] );
         Assert.AreEqual( 10, result[0][0] );
-        Assert.AreEqual( 2, result[1].Length );
+        Assert.HasCount( 2, result[1] );
         Assert.AreEqual( 40, result[1][0] );
-        Assert.AreEqual( 1, result[2].Length );
+        Assert.HasCount( 1, result[2] );
         Assert.AreEqual( 60, result[2][0] );
 
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -186,7 +186,7 @@ public class XsParserNewTests
         Assert.IsInstanceOfType<List<int>>( result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -206,7 +206,7 @@ public class XsParserNewTests
         Assert.AreEqual( 0, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -226,14 +226,13 @@ public class XsParserNewTests
         Assert.IsNull( result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithDefaultInvalid( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
@@ -241,54 +240,40 @@ public class XsParserNewTests
                 var y = default(wrong};
                 x + y;
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidImport( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
             """
             using ;
             new TestClass(42);
             """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidImportMissingIdentifier( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
             """
             using Hyperbee.XS.;
             """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 }

@@ -7,7 +7,7 @@ public class XsParserLambdaTests
 {
     public static XsParser Xs { get; set; } = new( TestInitializer.XsConfig );
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -27,7 +27,7 @@ public class XsParserLambdaTests
         Assert.AreEqual( 1, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -47,7 +47,7 @@ public class XsParserLambdaTests
         Assert.AreEqual( 10, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -67,7 +67,7 @@ public class XsParserLambdaTests
         Assert.AreEqual( 13, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -88,7 +88,7 @@ public class XsParserLambdaTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -108,7 +108,7 @@ public class XsParserLambdaTests
         Assert.AreEqual( "42", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -130,7 +130,7 @@ public class XsParserLambdaTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -153,70 +153,55 @@ public class XsParserLambdaTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidLambdaSyntax( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
                 var myLambda = ( int x => x;
                 myLambda( 10 );
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidLambdaBody( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
                 var myLambda = ( int x ) => { return x + ; };
                 myLambda( 10 );
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidLambdaParameter( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
                 var myLambda = ( int x, ) => x;
                 myLambda( 10 );
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
 }
