@@ -7,7 +7,7 @@ public class XsParserConditionalTests
 {
     public static XsParser Xs { get; } = new();
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -31,7 +31,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( 1, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -57,7 +57,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -81,7 +81,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -108,7 +108,7 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -135,14 +135,13 @@ public class XsParserConditionalTests
         Assert.AreEqual( "hello", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithMissingSemicolon( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
@@ -152,22 +151,17 @@ public class XsParserConditionalTests
                     2;
                 x;
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithUnmatchedBraces( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
@@ -179,22 +173,17 @@ public class XsParserConditionalTests
                     "goodBye";
                 }
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidCondition( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
@@ -205,22 +194,17 @@ public class XsParserConditionalTests
                     "goodBye";
                 }
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidElse( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
@@ -231,12 +215,8 @@ public class XsParserConditionalTests
                 else
                     "goodBye"
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 }
 

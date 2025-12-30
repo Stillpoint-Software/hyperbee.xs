@@ -11,7 +11,7 @@ public class XsParserLiteralTests
 {
     public static XsParser Xs { get; } = new();
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -27,7 +27,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( "Some String", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -42,7 +42,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 'c', result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -57,7 +57,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 12345, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -72,7 +72,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 12345, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -87,7 +87,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 12345L, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -102,7 +102,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 123.45F, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -117,7 +117,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 123.45D, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -132,7 +132,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 123.45D, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -147,7 +147,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( "123.45", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -162,7 +162,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( "130.45", result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -177,7 +177,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 12345, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -192,7 +192,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 12345, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -204,10 +204,10 @@ public class XsParserLiteralTests
         var function = lambda.Compile( compiler );
         var result = function();
 
-        Assert.AreEqual( null, result );
+        Assert.IsNull( result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -222,7 +222,7 @@ public class XsParserLiteralTests
         Assert.AreEqual( 10, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     //[DataRow( CompilerType.Fast )]  // Issue: https://github.com/dadhi/FastExpressionCompiler/pull/456
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -237,70 +237,55 @@ public class XsParserLiteralTests
         Assert.IsTrue( result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithUnclosedString( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
                 var x = "Hello;
                 x;
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithUnclosedParenthesis( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
                 var x = (5 + 10;
                 x;
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
-    [ExpectedException( typeof( SyntaxException ) )]
     public void Compile_ShouldFail_WithInvalidCharacter( CompilerType compiler )
     {
-        try
+        var ex = Assert.Throws<SyntaxException>( () =>
         {
             Xs.Parse(
                 """
                 var x = 5 @ 10;
                 x;
                 """ );
-        }
-        catch ( SyntaxException ex )
-        {
-            Console.WriteLine( ex.Message );
-            throw;
-        }
+        } );
+        Console.WriteLine( ex.Message );
     }
 }
 

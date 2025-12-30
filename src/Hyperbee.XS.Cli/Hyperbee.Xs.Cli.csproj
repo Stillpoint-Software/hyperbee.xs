@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
     <OutputType>Exe</OutputType>
@@ -29,11 +27,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FastExpressionCompiler" Version="5.1.1" />
-    <PackageReference Include="Spectre.Console" Version="0.50.0" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="9.0.4" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.4" />
+    <PackageReference Include="FastExpressionCompiler" />
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,7 +41,7 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
     <ProjectReference Include="..\Hyperbee.XS.Extensions\Hyperbee.Xs.Extensions.csproj" />
     <ProjectReference Include="..\Hyperbee.XS\Hyperbee.XS.csproj" />
-    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
+    <PackageReference Update="Microsoft.SourceLink.GitHub">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

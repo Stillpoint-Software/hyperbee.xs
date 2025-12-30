@@ -96,7 +96,7 @@ public class DebugParseExtensionTests
         var result = compiled();
 
         // Assertions for each feature
-        Assert.AreEqual( 5, result.Count ); // total number of features
+        Assert.HasCount( 5, result ); // total number of features
 
         Assert.AreEqual( 42, result[0] ); // If-Else logic
         Assert.AreEqual( 42, result[1] ); // Switch-Case logic

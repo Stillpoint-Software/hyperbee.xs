@@ -7,7 +7,7 @@ public class XsParserSwitchTests
 {
     public static XsParser Xs { get; } = new();
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -39,7 +39,7 @@ public class XsParserSwitchTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -68,7 +68,7 @@ public class XsParserSwitchTests
         Assert.AreEqual( 42, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -103,7 +103,7 @@ public class XsParserSwitchTests
         Assert.AreEqual( 20, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -141,7 +141,7 @@ public class XsParserSwitchTests
         Assert.AreEqual( 50, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
@@ -174,7 +174,7 @@ public class XsParserSwitchTests
         Assert.AreEqual( 100, result );
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
     [DataRow( CompilerType.Interpret )]
