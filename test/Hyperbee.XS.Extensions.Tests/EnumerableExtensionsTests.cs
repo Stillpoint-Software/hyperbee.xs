@@ -24,7 +24,7 @@ public class EnumerableExtensionsTests
         var compiled = lambda.Compile();
         var result = compiled().ToArray();
 
-        Assert.AreEqual( 3, result.Length );
+        Assert.HasCount( 3, result );
         Assert.AreEqual( 1, result[0] );
         Assert.AreEqual( 2, result[1] );
         Assert.AreEqual( 3, result[2] );
@@ -48,7 +48,7 @@ public class EnumerableExtensionsTests
         var compiled = lambda.Compile();
         var result = compiled().ToArray();
 
-        Assert.AreEqual( 2, result.Length );
+        Assert.HasCount( 2, result );
         Assert.AreEqual( 1, result[0] );
         Assert.AreEqual( 2, result[1] );
     }
@@ -71,7 +71,7 @@ public class EnumerableExtensionsTests
         var compiled = lambda.Compile();
         var result = compiled().ToArray();
 
-        Assert.AreEqual( 3, result.Length );
+        Assert.HasCount( 3, result );
         Assert.AreEqual( 0, result[0] );
         Assert.AreEqual( 1, result[1] );
         Assert.AreEqual( 2, result[2] );
