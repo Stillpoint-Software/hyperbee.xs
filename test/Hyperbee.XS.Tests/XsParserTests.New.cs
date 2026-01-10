@@ -122,7 +122,6 @@ public class XsParserNewTests
     {
         var parser = new XsParser();
 
-        // 以前的代码在这里会失败，因为它无法解析 "int[][]" 中的第二个 "[]"
         var expression = parser.Parse(
             """
             new int[][] { 
