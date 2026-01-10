@@ -113,6 +113,32 @@ public class XsParserNewTests
 
         Assert.HasCount( 2, result );
     }
+    
+    [TestMethod]
+    [DataRow( CompilerType.Fast )]
+    [DataRow( CompilerType.System )]
+    [DataRow( CompilerType.Interpret )]
+    public void Compile_ShouldSucceed_WithExplicitJaggedArraySyntax( CompilerType compiler )
+    {
+        var parser = new XsParser();
+
+        // 以前的代码在这里会失败，因为它无法解析 "int[][]" 中的第二个 "[]"
+        var expression = parser.Parse(
+            """
+            new int[][] { 
+                new int[] {1, 2}, 
+                new int[] {3, 4, 5} 
+            };
+            """ );
+
+        var lambda = Lambda<Func<int[][]>>( expression );
+        var function = lambda.Compile( compiler );
+        var result = function();
+
+        Assert.HasCount( 2, result );
+        Assert.AreEqual( 1, result[0][0] );
+        Assert.AreEqual( 5, result[1][2] );
+    }
 
     [TestMethod]
     [DataRow( CompilerType.Fast )]
