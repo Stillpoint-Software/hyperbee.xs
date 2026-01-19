@@ -113,7 +113,7 @@ public class XsParserNewTests
 
         Assert.HasCount( 2, result );
     }
-    
+
     [TestMethod]
     [DataRow( CompilerType.Fast )]
     [DataRow( CompilerType.System )]
