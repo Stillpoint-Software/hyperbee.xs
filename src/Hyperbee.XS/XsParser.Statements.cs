@@ -365,112 +365,159 @@ public partial class XsParser
 
     private static KeywordParserPair<Expression> NewParser( Parser<Expression> expression )
     {
-        var objectConstructor =
-            Between(
-                OpenParen,
-                ArgsParser( expression ),
-                CloseParen
-            )
-            .And(
-                ZeroOrOne(
-                    Between(
-                        Terms.Char( '{' ),
-                        Separated(
-                            Terms.Char( ',' ),
-                            expression
-                        ),
-                        Terms.Char( '}' )
-                    )
-                )
-            )
-            .Then( static parts =>
-            {
-                var (bounds, initial) = parts;
+        var closeParenWithError =
+            Terms.Char( ')' ).ElseError( "Invalid new expression: expected closing parenthesis ')'." );
+        var closeBracketWithError =
+            Terms.Char( ']' ).ElseError( "Invalid new array expression: expected closing bracket ']'." );
+        var openBrace = Terms.Char( '{' );
+        var closeBraceWithError = Terms.Char( '}' ).ElseError( "Expected closing brace '}' for initializer." );
 
-                return initial == null
-                    ? (ConstructorType.Object, bounds, null)
-                    : (ConstructorType.ListInit, bounds, initial);
-            } );
+        var initializerParser =
+            ZeroOrOne(
+                openBrace.SkipAnd(
+                    Separated( Terms.Char( ',' ), expression )
+                ).AndSkip( closeBraceWithError )
+            );
+
+        var objectConstructor =
+            Terms.Char( '(' )
+                .SkipAnd(
+                    ArgsParser( expression )
+                )
+                .AndSkip(
+                    closeParenWithError
+                )
+                .And(
+                    initializerParser
+                )
+                .Then( static parts =>
+                {
+                    var (bounds, initial) = parts;
+                    return initial == null
+                        ? (ConstructorType.Object, bounds, null)
+                        : (ConstructorType.ListInit, bounds, initial);
+                } );
 
         var arrayConstructor =
-            Between(
-                OpenBracket,
-                ZeroOrOne( Separated(
-                    Terms.Char( ',' ),
-                    expression
-                ) ),
-                CloseBracket
-            )
-            .And(
-                ZeroOrOne(
-                    Between(
-                        Terms.Char( '{' ),
-                        Separated(
-                            Terms.Char( ',' ),
-                            expression.ElseInvalidExpression()
-                        ),
-                        Terms.Char( '}' )
-                    )
+            Terms.Char( '[' )
+                .SkipAnd(
+                    ZeroOrOne( Separated( Terms.Char( ',' ), expression ) )
                 )
-            )
-            .Then( static parts =>
-            {
-                var (bounds, initial) = parts;
-
-                return initial == null
-                    ? (ConstructorType.ArrayBounds, bounds, null)
-                    : (ConstructorType.ArrayInit, bounds, initial);
-            } );
-
-
-        return new( "new",
-            TypeRuntime()
-            .And(
-                OneOf(
-                    objectConstructor,
-                    arrayConstructor
+                .AndSkip(
+                    closeBracketWithError
                 )
-            )
-            .Then<Expression>( static parts =>
-            {
-                var (type, (constructorType, arguments, initial)) = parts;
-
-                switch ( constructorType )
+                .And(
+                    initializerParser
+                )
+                .Then( static parts =>
                 {
-                    case ConstructorType.ArrayBounds:
-                        if ( arguments.Count == 0 )
-                            throw new InvalidOperationException( "Array bounds initializer requires at least one argument." );
+                    var (bounds, initial) = parts;
+                    return initial == null
+                        ? (ConstructorType.ArrayBounds, bounds, null)
+                        : (ConstructorType.ArrayInit, bounds, initial);
+                } );
 
-                        return NewArrayBounds( type, arguments );
+        var rankSpecifier =
+            Terms.Char( '[' ).SkipAnd( Terms.Char( ']' ) );
 
-                    case ConstructorType.ArrayInit:
-                        var arrayType = initial[^1].Type;
+        var jaggedArrayTypeExt = rankSpecifier.When( ( ctx, _ ) =>
+        {
+            var start = ctx.Scanner.Cursor.Position;
 
-                        if ( type != arrayType && arrayType.IsArray && type != arrayType.GetElementType() )
-                            throw new InvalidOperationException( $"Array of type {type.Name} does not match type {arrayType.Name}." );
+            ctx.Scanner.SkipWhiteSpace();
 
-                        return NewArrayInit( arrayType, initial );
+            var hasNextBracket = ctx.Scanner.ReadChar( '[' );
 
-                    case ConstructorType.Object:
-                        var constructor = type.GetConstructor( arguments.Select( arg => arg.Type ).ToArray() );
+            ctx.Scanner.Cursor.ResetPosition( start );
 
-                        if ( constructor == null )
-                            throw new InvalidOperationException( $"No matching constructor found for type {type.Name}." );
+            return hasNextBracket;
+        } );
 
-                        return New( constructor, arguments );
+        return new KeywordParserPair<Expression>( "new",
+            TypeRuntime()
+                .And( ZeroOrMany( jaggedArrayTypeExt ) )
+                .Then( static parts =>
+                {
+                    var (type, ranks) = parts;
+                    foreach ( var _ in ranks )
+                    {
+                        type = type.MakeArrayType();
+                    }
 
-                    case ConstructorType.ListInit:
-                        var listCtor = type.GetConstructor( arguments.Select( arg => arg.Type ).ToArray() );
+                    return type;
+                } )
+                .And(
+                    OneOf(
+                            objectConstructor,
+                            arrayConstructor
+                        )
+                        .ElseError( "Invalid new expression: expected '(' for object or '[' for array." )
+                )
+                .Then<Expression>( static parts =>
+                {
+                    var (type, (constructorType, arguments, initial)) = parts;
 
-                        if ( listCtor == null )
-                            throw new InvalidOperationException( $"No matching constructor found for type {type.Name}." );
+                    switch ( constructorType )
+                    {
+                        case ConstructorType.ArrayBounds:
+                            if ( arguments == null || arguments.Count == 0 )
+                            {
+                                throw new InvalidOperationException(
+                                    "Array bounds initializer requires at least one argument." );
+                            }
 
-                        return ListInit( New( listCtor, arguments ), initial );
+                            return NewArrayBounds( type, arguments );
 
-                    default:
-                        throw new InvalidOperationException( $"Unsupported constructor type: {constructorType}." );
-                }
-            } )
+                        case ConstructorType.ArrayInit:
+
+                            if ( initial.Count == 0 )
+                            {
+                                var emptyElemType = type.IsArray ? type.GetElementType()! : type;
+                                return NewArrayInit( emptyElemType, initial );
+                            }
+
+                            var inferredType = initial[0].Type;
+                            var explicitType = type.IsArray ? type.GetElementType()! : type;
+
+                            if ( inferredType.IsArray && !explicitType.IsArray )
+                            {
+                                return NewArrayInit( inferredType, initial );
+                            }
+
+                            if ( explicitType.IsAssignableFrom( inferredType ) )
+                            {
+                                return NewArrayInit( explicitType, initial );
+                            }
+
+                            return NewArrayInit( inferredType, initial );
+
+                        case ConstructorType.Object:
+                            var constructor =
+                                type.GetConstructor( arguments?.Select( arg => arg.Type ).ToArray() ?? [] );
+
+                            if ( constructor == null )
+                            {
+                                throw new InvalidOperationException(
+                                    $"No matching constructor found for type {type.Name}." );
+                            }
+
+                            return New( constructor, arguments );
+
+                        case ConstructorType.ListInit:
+                            var listCtor = type.GetConstructor( arguments?.Select( arg => arg.Type ).ToArray() ?? [] );
+
+                            if ( listCtor == null )
+                            {
+                                throw new InvalidOperationException(
+                                    $"No matching constructor found for type {type.Name}." );
+                            }
+
+                            return ListInit( New( listCtor, arguments ), initial );
+
+                        default:
+                            throw new InvalidOperationException( $"Unsupported constructor type: {constructorType}." );
+                    }
+                } )
         );
     }
 
