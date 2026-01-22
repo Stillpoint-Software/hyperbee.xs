@@ -46,15 +46,15 @@
     <PackageVersion Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.24568.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.24568.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.PackageManagement" Version="1.0.0-beta.24568.1" />
-    <PackageVersion Include="Hyperbee.Expressions" Version="1.1.1" />
+    <PackageVersion Include="Hyperbee.Expressions" Version="1.2.0" />
   </ItemGroup>
   <!-- .NET 9 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.0" />
-    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="9.0.0" />
-    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.4" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="9.0.4" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0" />
