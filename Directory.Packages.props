@@ -15,8 +15,6 @@
     </PackageVersion>
     <!-- Core Libraries -->
     <PackageVersion Include="Parlot" Version="1.3.6" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <!-- NuGet Libraries -->
     <PackageVersion Include="NuGet.Configuration" Version="7.0.1" />
     <PackageVersion Include="NuGet.DependencyResolver.Core" Version="7.0.1" />
@@ -26,10 +24,6 @@
     <!-- CLI Libraries -->
     <PackageVersion Include="Spectre.Console" Version="0.50.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.50.0" />
-    <!-- System Libraries -->
-    <PackageVersion Include="System.Reflection.Metadata" Version="10.0.2" />
-    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="10.0.2" />
-    <PackageVersion Include="System.Text.Encodings.Web" Version="10.0.2" />
     <!-- Testing Libraries -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.0.2" />
@@ -37,10 +31,15 @@
   </ItemGroup>
   <!-- .NET 8 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="8.0.1" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="8.0.1" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.13.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.13.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.13.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.11.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Scripting.Common" Version="4.13.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces" Version="4.13.0" />
     <PackageVersion Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.24568.1" />
@@ -51,6 +50,11 @@
   </ItemGroup>
   <!-- .NET 9 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.0" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="9.0.0" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0" />
@@ -67,6 +71,11 @@
   </ItemGroup>
   <!-- .NET 10 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="10.0.2" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="10.0.2" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="10.0.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
