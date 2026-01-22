@@ -56,11 +56,11 @@
   </ItemGroup>
   <!-- .NET 9 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
-    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.4" />
-    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="9.0.4" />
-    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.6" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="9.0.6" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.6" />
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0" />
