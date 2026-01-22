@@ -8,6 +8,7 @@ permissions:
   contents: write
   pull-requests: write
   packages: write
+  statuses: write
 
 jobs:
   set-config:
@@ -25,3 +26,10 @@ jobs:
       build_configuration: ${{ needs.set-config.outputs.build_configuration }}
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+  result:
+    needs: [publish]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+       - run: echo "Pack & Publish result = ${{ needs.publish.result }}"
