@@ -46,7 +46,7 @@
     <PackageVersion Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.24568.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.24568.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.PackageManagement" Version="1.0.0-beta.24568.1" />
-    <PackageVersion Include="Hyperbee.Expressions" Version="1.2.0" />
+    <PackageVersion Include="Hyperbee.Expressions" Version="1.1.1" />
   </ItemGroup>
   <!-- .NET 9 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
