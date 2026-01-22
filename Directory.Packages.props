@@ -71,8 +71,6 @@
     <PackageVersion Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.25323.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.25323.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.PackageManagement" Version="1.0.0-beta.25323.1" />
-    <PackageVersion Include="System.Runtime.Loader" Version="4.3.0" />
-    <PackageVersion Include="Humanizer.Core" Version="2.14.1" />
     <PackageVersion Include="Hyperbee.Expressions" Version="1.2.0" />
   </ItemGroup>
   <!-- .NET 10 specific package versions -->
