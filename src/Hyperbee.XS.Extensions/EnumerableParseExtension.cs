@@ -31,11 +31,15 @@ public class EnumerableParseExtension : IParseExtension, IExpressionWriter, IXsW
                 Terms.Char( '}' )
             ).Named( "enumerable block" )
             .Then<Expression>( static ( ctx, parts ) =>
-                ExpressionExtensions.BlockEnumerable(
-                    [.. ctx.Scope().Variables.EnumerateValues( LinkedNode.Current )],
+            {
+                var vars = new System.Collections.ObjectModel.ReadOnlyCollection<ParameterExpression>(
+                    [.. ctx.Scope().Variables.EnumerateValues( LinkedNode.Current )]
+                );
+                var exprs = new System.Collections.ObjectModel.ReadOnlyCollection<Expression>(
                     [.. parts]
-                )
-            ),
+                );
+                return ExpressionExtensions.BlockEnumerable( vars, exprs );
+            } ),
             static ctx =>
             {
                 ctx.ExitScope();

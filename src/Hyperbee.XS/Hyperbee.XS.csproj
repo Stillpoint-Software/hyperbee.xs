@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
-    
+
     <Authors>Stillpoint Software, Inc.</Authors>
     <PackageId>Hyperbee.XS</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -48,10 +48,7 @@
     <PackageReference Include="NuGet.ProjectModel" />
     <PackageReference Include="NuGet.Protocol" />
     <PackageReference Include="Parlot" />
-    <PackageReference Update="Microsoft.SourceLink.GitHub">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
 </Project>

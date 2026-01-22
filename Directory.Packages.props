@@ -1,22 +1,22 @@
 <Project>
-  <!-- Enable Central Package Management -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-  <!-- Centralized Package Versions -->
   <ItemGroup>
-    <!-- Build and Development Tools -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="FastExpressionCompiler" Version="5.1.1" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50" />
+    <PackageVersion Include="Hyperbee.Collections" Version="2.7.3" />
+    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.102">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
     <!-- Core Libraries -->
-    <PackageVersion Include="Hyperbee.Collections" Version="2.4.0" />
-    <PackageVersion Include="Hyperbee.Expressions" Version="1.2.0" />
     <PackageVersion Include="Parlot" Version="1.3.6" />
-    <!-- Microsoft Libraries - Common for both .NET 8 and .NET 9 -->
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <!-- NuGet Libraries -->
     <PackageVersion Include="NuGet.Configuration" Version="7.0.1" />
     <PackageVersion Include="NuGet.DependencyResolver.Core" Version="7.0.1" />
@@ -27,34 +27,54 @@
     <PackageVersion Include="Spectre.Console" Version="0.50.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.50.0" />
     <!-- System Libraries -->
-    <PackageVersion Include="System.Reflection.Metadata" Version="10.0.1" />
-    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="10.0.1" />
-    <PackageVersion Include="System.Text.Encodings.Web" Version="10.0.1" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="10.0.2" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="10.0.2" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="10.0.2" />
     <!-- Testing Libraries -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.0.2" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.0.2" />
   </ItemGroup>
-  <!-- .NET 8 specific package versions - Using 4.13.0 minimum due to Hyperbee.Expressions dependency -->
+  <!-- .NET 8 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.13.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.13.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.13.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Scripting.Common" Version="4.13.0" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.25177.1" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.25177.1" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.25177.1" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive.PackageManagement" Version="1.0.0-beta.25177.1" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces" Version="4.13.0" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.24568.1" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.24568.1" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.24568.1" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.PackageManagement" Version="1.0.0-beta.24568.1" />
+    <PackageVersion Include="Hyperbee.Expressions" Version="1.2.0" />
   </ItemGroup>
   <!-- .NET 9 specific package versions -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Scripting.Common" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces" Version="4.14.0" />
     <PackageVersion Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.25323.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.25323.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.25323.1" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.PackageManagement" Version="1.0.0-beta.25323.1" />
+    <PackageVersion Include="Hyperbee.Expressions" Version="1.2.0" />
+  </ItemGroup>
+  <!-- .NET 10 specific package versions -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Scripting.Common" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive" Version="1.0.0-beta.26071.1" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharp" Version="1.0.0-beta.26071.1" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.26071.1" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.PackageManagement" Version="1.0.0-beta.26071.1" />
+    <PackageVersion Include="Hyperbee.Expressions" Version="1.3.2" />
   </ItemGroup>
 </Project>
