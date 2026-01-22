@@ -43,6 +43,6 @@ jobs:
     needs: discover
     uses: Stillpoint-Software/shared-workflows/.github/workflows/run_tests.yml@main
     with:
-      branch: ${{ needs.discover.outputs.branch_name }}
+      branch: ${{ github.event.release.target_commitish }}
       solution_name: ${{ vars.SOLUTION_NAME }}
     secrets: inherit
