@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
-    
+
     <Authors>Stillpoint Software, Inc.</Authors>
     <PackageId>Hyperbee.XS.Extensions</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -44,10 +44,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Parlot" />
     <ProjectReference Include="..\Hyperbee.XS\Hyperbee.XS.csproj" />
-    <PackageReference Update="Microsoft.SourceLink.GitHub">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
 </Project>

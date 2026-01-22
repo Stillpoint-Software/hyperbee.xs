@@ -31,11 +31,15 @@ public class AsyncParseExtension : IParseExtension, IExpressionWriter, IXsWriter
                 Terms.Char( '}' )
             ).Named( "async block" )
             .Then<Expression>( static ( ctx, parts ) =>
-                ExpressionExtensions.BlockAsync(
-                    [.. ctx.Scope().Variables.EnumerateValues( LinkedNode.Current )],
+            {
+                var vars = new System.Collections.ObjectModel.ReadOnlyCollection<ParameterExpression>(
+                    [.. ctx.Scope().Variables.EnumerateValues( LinkedNode.Current )]
+                );
+                var exprs = new System.Collections.ObjectModel.ReadOnlyCollection<Expression>(
                     [.. parts]
-                )
-            ),
+                );
+                return ExpressionExtensions.BlockAsync( vars, exprs );
+            } ),
             static ctx =>
             {
                 ctx.ExitScope();

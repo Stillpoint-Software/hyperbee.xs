@@ -24,6 +24,10 @@ public class BenchmarkConfig
                 .WithRuntime( CoreRuntime.Core90 )
                 .WithId( ".NET 9" ) );
 
+            AddJob( Job.ShortRun
+                .WithRuntime( CoreRuntime.Core10_0 )
+                .WithId( ".NET 10" ) );
+
             AddExporter( MarkdownExporter.GitHub );
             AddValidator( JitOptimizationsValidator.DontFailOnError );
             AddLogger( ConsoleLogger.Default );

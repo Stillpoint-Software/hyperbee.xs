@@ -17,10 +17,10 @@ internal static class Script
 {
 #if NET9_0_OR_GREATER
 
-    internal static string Compile( 
-        string script, 
-        string outputAssemblyName, 
-        string outputFile, 
+    internal static string Compile(
+        string script,
+        string outputAssemblyName,
+        string outputFile,
         string outputModuleName = null,
         string outputClassName = null,
         string outputMethodName = null,

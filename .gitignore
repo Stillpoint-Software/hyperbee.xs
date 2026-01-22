@@ -398,5 +398,9 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Claude AI Assistant files
+.claude/
+CLAUDE.md
+
 
 .nuget/

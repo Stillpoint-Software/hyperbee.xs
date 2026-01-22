@@ -1,14 +1,12 @@
 <Project>
-  <!-- Shared package refs - moved to Directory.Packages.props -->
+  <PropertyGroup>
+    <!-- Suppress NU1507 (multiple package sources with CPM) -->
+    <NoWarn>$(NoWarn);NU1507;MSTEST0001</NoWarn>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSTEST0001</WarningsNotAsErrors>
+  </PropertyGroup>
   <ItemGroup>
-    <!-- NBGV drives versions; PrivateAssets=all keeps it out of consumers -->
-    <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="all" />
-
-    <!-- SourceLink for GitHub -->
-    <PackageReference Include="Microsoft.SourceLink.GitHub">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Nerdbank.GitVersioning" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
   <!-- SourceLink / build hygiene -->
@@ -42,9 +40,10 @@
           PackagePath="\"
     Link="LICENSE" />
   </ItemGroup>
-  <!-- Global project properies -->
+  <!-- Global project properties - .NET 10 LTS First Strategy -->
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <!-- Primary target: .NET 10 (next LTS), with .NET 9 for current support, .NET 8 for compatibility -->
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 </Project>
