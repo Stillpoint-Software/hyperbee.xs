@@ -11,7 +11,7 @@ permissions:
   statuses: write
 
 jobs:
-  set-config:
+  set_config:
     uses: Stillpoint-Software/shared-workflows/.github/workflows/determine_build_configuration.yml@main
     with:
       trigger: release
@@ -20,17 +20,17 @@ jobs:
       prerelease: ${{ github.event.release.prerelease }} # true/false from the release
   
   tests:
-    needs: set-config
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/run_test.yml@main
+    needs: set_config
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/run_tests.yml@main
     with:
       branch: ${{ github.event.release.target_commitish }}
       solution_name: ${{ vars.SOLUTION_NAME }}
 
   publish:
-    needs: [set-config, tests]
+    needs: [set_config, tests]
     uses: Stillpoint-Software/shared-workflows/.github/workflows/pack_and_publish.yml@main
     with:
-      build_configuration: ${{ needs.set-config.outputs.build_configuration }}
+      build_configuration: ${{ needs.set_config.outputs.build_configuration }}
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
