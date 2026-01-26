@@ -22,7 +22,7 @@
     <PackageVersion Include="NuGet.ProjectModel" Version="7.0.1" />
     <PackageVersion Include="NuGet.Protocol" Version="7.0.1" />
     <!-- CLI Libraries -->
-    <PackageVersion Include="Spectre.Console" Version="0.50.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.54.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.50.0" />
     <!-- Testing Libraries -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
