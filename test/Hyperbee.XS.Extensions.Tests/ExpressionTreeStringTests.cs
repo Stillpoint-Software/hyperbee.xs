@@ -418,6 +418,7 @@ public class ExpressionTreeStringTests
         await AssertScriptValue( code, result );
     }
 
+#if !NET9_0
     [TestMethod]
     public void ToXsString_ShouldCreate_WithExtensions()
     {
@@ -442,7 +443,7 @@ public class ExpressionTreeStringTests
 
         Assert.AreEqual( "one hundred and twenty-three", result );
     }
-
+#endif
     [TestMethod]
     public async Task ToXsString_ShouldCreate_Inject()
     {

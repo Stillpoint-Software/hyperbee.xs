@@ -42,6 +42,7 @@
     <None Include="$(MSBuildThisFileDirectory)language\variables.md" />
     <None Include="$(MSBuildThisFileDirectory)language\yield.md" />
     <None Include="$(MSBuildThisFileDirectory)language\while.md" />
+    <None Include="$(MSBuildThisFileDirectory).todo.md" />
     <None Include="$(MSBuildThisFileDirectory)_config.yml" />
   </ItemGroup>
 </Project>

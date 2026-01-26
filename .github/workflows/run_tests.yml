@@ -2,7 +2,7 @@ name: Run Tests
 
 on:
   workflow_run:
-    workflows: [Create Prerelease, Create Release]
+    workflows: [Create Release]
     types: [requested]
     branches: [main, develop]        
   workflow_dispatch:

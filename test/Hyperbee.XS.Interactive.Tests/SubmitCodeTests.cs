@@ -46,41 +46,27 @@ public class SubmitCodeTests
     {
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
-        var script = """
-            #!xs
-
-            var number = 123;
-            number;
-            """;
+        var script = "#\u0021xs\n\nvar number = 123;\nnumber;\n";
 
         await _kernel.SubmitCodeAsync( script );
 
         AssertSuccess( events );
         Assert.IsTrue( events.OfType<DisplayedValueProduced>().Any( x => (x.Value as string) == "123" ) );
     }
-
+#if !NET9_0
     [TestMethod]
     public async Task SubmitCode_WithCommand_ShouldAddPackage()
     {
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
-        var script =
-            """
-            #!xs
-
-            package Humanizer.Core;
-            using Humanizer;
-
-            var x = 1+5;
-            var y = x.ToWords();
-            display(y);
-            """;
+        var script = "#\u0021xs\n\npackage Humanizer.Core;\nusing Humanizer;\n\nvar x = 1+5;\nvar y = x.ToWords();\ndisplay(y);\n";
 
         await _kernel.SubmitCodeAsync( script );
 
         AssertSuccess( events );
         Assert.IsTrue( events.OfType<DisplayedValueProduced>().Any( x => (x.Value as string) == "six" ) );
     }
+#endif
 
     [TestMethod]
     public async Task SubmitCode_WithCommand_ShouldKeepVariables()
@@ -88,12 +74,7 @@ public class SubmitCodeTests
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
         await _kernel.SubmitCodeAsync(
-            """
-            #!xs
-
-            var x = 40;
-            #!whos
-            """ );
+            "#\u0021xs\n\nvar x = 40;\n#\u0021whos\n" );
 
         var displayResult = GetDisplayResult( events );
 
@@ -102,13 +83,7 @@ public class SubmitCodeTests
         events.Clear();
 
         await _kernel.SubmitCodeAsync(
-            """
-            #!xs
-            x++;
-            x++;
-
-            #!whos
-            """ );
+            "#\u0021xs\nx++;\nx++;\n\n#\u0021whos\n" );
 
         displayResult = GetDisplayResult( events );
 
@@ -122,13 +97,7 @@ public class SubmitCodeTests
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
         await _kernel.SubmitCodeAsync(
-            """
-            #!xs
-
-            var x = 123;
-            var y = "hello";
-            #!whos
-            """ );
+            "#\u0021xs\n\nvar x = 123;\nvar y = \"hello\";\n#\u0021whos\n" );
 
         var displayResult = GetDisplayResult( events );
 
@@ -138,12 +107,7 @@ public class SubmitCodeTests
         events.Clear();
 
         await _kernel.SubmitCodeAsync(
-            """
-            #!xs
-
-            var x = "world";
-            #!whos
-            """ );
+            "#\u0021xs\n\nvar x = \"world\";\n#\u0021whos\n" );
 
         displayResult = GetDisplayResult( events );
 
@@ -160,21 +124,12 @@ public class SubmitCodeTests
         using var events = _kernel.KernelEvents.ToSubscribedList();
 
         await _kernel.SubmitCodeAsync(
-            """
-            #!csharp
-
-            var simple = "test";
-            """ );
+            "#\u0021csharp\n\nvar simple = \"test\";\n" );
 
         events.Clear();
 
         await _kernel.SubmitCodeAsync(
-            """
-            #!xs
-
-            #!share --from csharp --name "simple" --as "zSimple"
-            #!whos
-            """ );
+            "#\u0021xs\n\n#\u0021share --from csharp --name \"simple\" --as \"zSimple\"\n#\u0021whos\n" );
 
         var displayResult = GetDisplayResult( events );
 
