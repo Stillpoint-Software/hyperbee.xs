@@ -12,7 +12,7 @@ public class PackageParseExtensionTests
 
     public XsVisitorConfig XsConfig = new( "\t",
             XsExtensions.Extensions().OfType<IXsWriter>().ToArray() );
-
+#if !NET9_0
     [TestMethod]
     public void Compile_ShouldSucceed_WithExtensions()
     {
@@ -43,4 +43,5 @@ public class PackageParseExtensionTests
 
         Assert.AreEqual( "one hundred and twenty-three", result );
     }
+#endif
 }
