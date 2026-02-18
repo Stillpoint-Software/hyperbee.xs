@@ -311,6 +311,3 @@ for more details.
 
 # Help
  See [Todo](https://github.com/Stillpoint-Software/Hyperbee.XS/blob/main/docs/todo.md)
-
-[![Hyperbee.XS](https://github.com/Stillpoint-Software/Hyperbee.XS/blob/main/assets/hyperbee.svg?raw=true)](https://github.com/Stillpoint-Software/Hyperbee.XS)
-
