@@ -18,6 +18,10 @@
     <File Path=".github/workflows/run_tests.yml" />
     <File Path=".github/workflows/unlist_package.yml" />
   </Folder>
+  <Folder Name="/Solution Items/assets/">
+    <File Path="assets/hyperbee.svg" />
+    <File Path="assets/icon.png" />
+  </Folder>
   <Folder Name="/Solution Tests/">
     <Project Path="test/Hyperbee.XS.Benchmark/Hyperbee.XS.Benchmark.csproj" />
     <Project Path="test/Hyperbee.XS.Extensions.Tests/Hyperbee.XS.Extensions.Tests.csproj" />
