@@ -8,7 +8,7 @@ on:
           How to set the version:
           - explicit: set to a specific value (e.g., 1.3-alpha)
           - bump: bump major/minor/patch from current SimpleVersion and apply optional prerelease
-          - auto: policy-based (develop->next minor -alpha; hotfix/*->next patch -alpha; main/vX.Y->stable)
+          - auto: policy-based (main/vX.Y->stable; hotfix/*->next patch -alpha; feature branches->next minor -alpha)
         type: choice
         options: [auto, bump, explicit]
         default: auto

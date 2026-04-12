@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches: [main, develop]
+    branches: [main]
 
   workflow_run:
     workflows: [Create Prerelease, Create Release]
