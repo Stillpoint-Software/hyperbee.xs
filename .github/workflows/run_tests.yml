@@ -4,11 +4,11 @@ on:
   workflow_run:
     workflows: [Create Release]
     types: [requested]
-    branches: [main, develop]        
+    branches: [main]
   workflow_dispatch:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches: [main, develop]
+    branches: [main]
 
 permissions:
   contents: read
@@ -24,19 +24,22 @@ jobs:
       - id: set_branch
         shell: bash
         run: |
-          # 1. Pick the raw branch/ref for each trigger type
+          # Pick the ref to test for each trigger type.
+          # For pull_request, test the PR head SHA (the incoming changes),
+          # not the base branch. Using the SHA is deterministic even if
+          # the PR branch is later force-pushed.
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            RAW='${{ github.event.workflow_run.head_branch }}'   
+            RAW='${{ github.event.workflow_run.head_sha }}'
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            RAW='${{ github.event.pull_request.base.ref }}'       
-          else                                                    
-            RAW='${{ github.ref }}'                                
+            RAW='${{ github.event.pull_request.head.sha }}'
+          else
+            RAW='${{ github.ref }}'
           fi
 
-          # 2. Strip the refs/heads/ prefix if present
+          # Strip the refs/heads/ prefix if present (only relevant for the push/dispatch fallback)
           CLEAN="${RAW#refs/heads/}"
 
-          echo "Detected branch: $CLEAN"
+          echo "Detected ref: $CLEAN"
           echo "branch_name=$CLEAN" >> "$GITHUB_OUTPUT"
 
   test:

@@ -1,27 +1,23 @@
-defaultBranch: 'develop'
+defaultBranch: 'main'
 branchName: '${issue.number}:${issue.title,}'
 mode: auto
 gitSafeReplacementChar: '-'
 branches:
   - label : feature
     prefix: feature/
-    name: develop
-    prTarget: develop
+    name: main
+    prTarget: main
     skip: false
   - label : bug
     prefix: bugfix/
-    name: develop
-    prTarget: develop
+    name: main
+    prTarget: main
     skip: false
   - label : critical
     prefix: hotfix/
     name: main
     prTarget: main
     skip: false
-  - label : documentation
-    prefix: doc/
-    name: main
-    prTarget: main
   - label : '*'
     skip: true
 
