@@ -1,3 +1,6 @@
+---
+render_with_liquid: false
+---
 # Running Jekyll Docs Locally (Docker)
 
 Reusable recipe for previewing `just-the-docs` / GitHub Pages sites locally
