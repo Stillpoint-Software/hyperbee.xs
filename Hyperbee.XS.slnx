@@ -5,7 +5,7 @@
     <File Path="LICENSE" />
     <File Path="README.md" />
     <File Path="version.json" />
-    <Project Path="docs/docs.shproj" />
+    <Project Path="docs/site/docs.shproj" />
   </Folder>
   <Folder Name="/Solution Items/.github/" />
   <Folder Name="/Solution Items/.github/workflows/">
