@@ -120,13 +120,13 @@ performance improvements and enabling dynamic updates without application restar
 complete C# programs. XS is a lightweight parsing engine optimized for expression tree generation and execution.  
 
 #### **Why Use XS Instead of Roslyn for Runtime Execution?** 
-- Enhances Expressions – XS simplifies expression tree creation and management, enabling developers to focus on code, not AST syntax. 
-- Lower Overhead – XS generates and executes expression trees directly, avoiding Roslyn's full compilation pipeline and reducing startup costs.  
-- Optimized for Dynamic Execution – Ideal for rule engines, embedded scripting, and DSLs, where Roslyn's full compilation step is unnecessary.  
-- Expression Tree Native – XS treats code as data, enabling runtime introspection, transformation, and optimization before execution.  
-- Extensible by Design – XS allows custom language constructs, control flow features, and operators, making it an ideal fit for domain-specific scripting.  
+- Enhances Expressions - XS simplifies expression tree creation and management, enabling developers to focus on code, not AST syntax. 
+- Lower Overhead - XS generates and executes expression trees directly, avoiding Roslyn's full compilation pipeline and reducing startup costs.  
+- Optimized for Dynamic Execution - Ideal for rule engines, embedded scripting, and DSLs, where Roslyn's full compilation step is unnecessary.  
+- Expression Tree Native - XS treats code as data, enabling runtime introspection, transformation, and optimization before execution.  
+- Extensible by Design - XS allows custom language constructs, control flow features, and operators, making it an ideal fit for domain-specific scripting.  
 
-XS is **not a Roslyn replacement**—it serves a different purpose: **fast, lightweight, and embeddable runtime execution 
+XS is **not a Roslyn replacement**--it serves a different purpose: **fast, lightweight, and embeddable runtime execution 
 without full compiler overhead**. If you need to compile and analyze full C# programs, Roslyn is the right tool. If 
 you need a small, efficient, and customizable scripting language for runtime execution, or you want to easily generate expression 
 trees, XS is a solid choice.
@@ -169,7 +169,7 @@ Example Extensions:
 
 #### **Debugging**:
 
-XS supports `debug();` statements and line level debugging, allowing users to create debug callbacks and set breakpoints. 
+XS supports `debug();` statements and line level debugging, allowing users to create debug callbacks and set breakpoints. 
 This feature automates a process that is laborious when using manual expression trees.
 
 ```

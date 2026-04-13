@@ -25,6 +25,6 @@ nav_order: 19
 ## **Type Promotion Rules**
 
 1. Arithmetic operations promote types:  
-   `int` → `float` → `double` → `decimal`.
+   `int` -> `float` -> `double` -> `decimal`.
 2. Null-coalescing (`??`) resolves to the type of the non-null operand.
 3. Conditional expressions (`if-else`) return the common compatible type.

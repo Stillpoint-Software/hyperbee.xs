@@ -404,3 +404,11 @@ CLAUDE.md
 
 
 .nuget/
+# Jekyll / GitHub Pages local build
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+vendor/
+.bundle/
+docs/site/Gemfile.lock
