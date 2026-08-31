@@ -24,13 +24,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Interactive" />
-    <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
-    <PackageReference Include="System.Text.Encodings.Web" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
     <PackageReference Include="Microsoft.DotNet.Interactive.PackageManagement" />
+    <!-- Pin patched transitive of PackageManagement (GHSA CVE-2026-50648 / -47302 / -26171). -->
+    <PackageReference Include="System.Security.Cryptography.Xml" />
   </ItemGroup>
 
   <ItemGroup>
