@@ -29,7 +29,6 @@
     <PackageReference Include="FastExpressionCompiler" />
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="Spectre.Console.Cli" />
-    <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
   </ItemGroup>
 
