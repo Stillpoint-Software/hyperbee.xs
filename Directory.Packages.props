@@ -7,7 +7,7 @@
     <PackageVersion Include="FastExpressionCompiler" Version="5.1.1" />
     <PackageVersion Include="Hyperbee.Collections" Version="2.7.3" />
     <PackageVersion Include="Hyperbee.Expressions" Version="1.5.1" />
-    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50">
+    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.10.94">
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.102">
