@@ -47,5 +47,7 @@ jobs:
     uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@main
     with:
       branch: ${{ needs.discover.outputs.branch_name }}
+      # The shared workflow defaults to a 10.0.x SDK, which cannot restore net11.0.
+      dotnet_version: '11.0.x'
     secrets: inherit
       

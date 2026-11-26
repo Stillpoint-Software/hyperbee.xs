@@ -25,12 +25,18 @@ jobs:
     with:
       branch: ${{ github.event.release.target_commitish }}
       solution_name: ${{ vars.SOLUTION_NAME }}
+      # The shared workflow still defaults to ["net8.0", "net9.0", "net10.0"].
+      # This repo retired net8.0 and net9.0, so without the opt-in the matrix
+      # would ask for targets the projects no longer build.
+      frameworks: '["net11.0", "net10.0"]'
 
   publish:
     needs: [set_config, tests]
     uses: Stillpoint-Software/shared-workflows/.github/workflows/pack_and_publish.yml@main
     with:
       build_configuration: ${{ needs.set_config.outputs.build_configuration }}
+      # The shared workflow defaults to a 10.0.x SDK, which cannot build net11.0.
+      dotnet_version: '11.0.x'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
