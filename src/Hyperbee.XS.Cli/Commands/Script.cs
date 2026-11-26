@@ -1,12 +1,10 @@
 ﻿
 using System.Linq.Expressions;
 using System.Reflection;
-#if NET9_0_OR_GREATER
 using System.Reflection.Emit;  // For PersistedAssemblyBuilder
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 
-#endif
 using Hyperbee.XS;
 using Hyperbee.XS.Core.Writer;
 using Spectre.Console;
@@ -15,7 +13,6 @@ namespace Hyperbee.Xs.Cli.Commands;
 
 internal static class Script
 {
-#if NET9_0_OR_GREATER
 
     internal static string Compile(
         string script,
@@ -115,7 +112,6 @@ internal static class Script
         }
     }
 
-#endif
 
     internal static string Execute( string script, XsConfig config = null )
     {

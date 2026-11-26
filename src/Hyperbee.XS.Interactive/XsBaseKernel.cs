@@ -3,9 +3,7 @@ using Hyperbee.Xs.Interactive.Extensions;
 using Hyperbee.XS.Core;
 using Microsoft.DotNet.Interactive;
 
-#if NET9_0_OR_GREATER
 using Microsoft.DotNet.Interactive.PackageManagement;
-#endif
 
 namespace Hyperbee.XS.Interactive;
 
@@ -47,7 +45,6 @@ public class XsBaseKernel : Kernel
             ]
         };
 
-#if NET9_0_OR_GREATER
         this.UseNugetDirective( async ( kernel, references ) =>
         {
             foreach ( var reference in references )
@@ -55,7 +52,6 @@ public class XsBaseKernel : Kernel
                 await PackageParseExtension.Resolve( reference.PackageName, reference.PackageVersion, TypeResolver );
             }
         } );
-#endif
 
         this.UseExtensions();
 

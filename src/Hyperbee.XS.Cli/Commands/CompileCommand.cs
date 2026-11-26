@@ -1,5 +1,4 @@
-﻿#if NET9_0_OR_GREATER
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Hyperbee.XS;
 using Hyperbee.XS.Core;
@@ -64,4 +63,3 @@ internal class CompileCommand : Command<CompileCommand.Settings>
     }
 }
 
-#endif

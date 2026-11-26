@@ -1,6 +1,6 @@
 ﻿//#define NUGET_TESTS
 
-#if NET9_0_OR_GREATER && NUGET_TESTS
+#if NUGET_TESTS
 
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.CSharp;

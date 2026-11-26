@@ -53,7 +53,6 @@ public class SubmitCodeTests
         AssertSuccess( events );
         Assert.IsTrue( events.OfType<DisplayedValueProduced>().Any( x => (x.Value as string) == "123" ) );
     }
-#if !NET9_0
     [TestMethod]
     public async Task SubmitCode_WithCommand_ShouldAddPackage()
     {
@@ -66,7 +65,6 @@ public class SubmitCodeTests
         AssertSuccess( events );
         Assert.IsTrue( events.OfType<DisplayedValueProduced>().Any( x => (x.Value as string) == "six" ) );
     }
-#endif
 
     [TestMethod]
     public async Task SubmitCode_WithCommand_ShouldKeepVariables()

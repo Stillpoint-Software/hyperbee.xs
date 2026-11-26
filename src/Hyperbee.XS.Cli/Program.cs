@@ -14,9 +14,7 @@ partial class Program
 
             config.AddCommand<ReplCommand>( "repl" );
 
-#if NET9_0_OR_GREATER
             config.AddCommand<CompileCommand>( "compile" );
-#endif
             config.AddBranch<RunSettings>( "run", run =>
             {
                 run.AddCommand<RunFileCommand>( "file" );

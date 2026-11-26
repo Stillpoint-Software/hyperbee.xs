@@ -53,18 +53,11 @@ internal static class RunSettingsHelper
         if ( string.IsNullOrWhiteSpace( value ) )
             return;
 
-#if NET9_0_OR_GREATER
         var span = value.AsSpan();
         foreach ( var segment in span.Split( ';' ) )
         {
             LoadAssembly( span[segment].ToString(), referenceManager );
         }
-#else
-        foreach ( var part in value.Split( ';' ) )
-        {
-            LoadAssembly( part, referenceManager );
-        }
-#endif
 
         return;
 
