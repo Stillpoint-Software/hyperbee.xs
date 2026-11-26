@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Plural, with one value: Directory.Build.props sets <TargetFrameworks>,
+         which overrides the singular form, so this has to match in kind.
+         Benchmarks run on one modern runtime; netstandard2.1 is not a runtime. -->
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>

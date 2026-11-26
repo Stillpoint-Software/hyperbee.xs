@@ -1,4 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Pinned, not inherited: Directory.Build.props adds netstandard2.1 for the
+      shipped libraries, and there is no test host for netstandard2.1.
+    -->
+    <TargetFrameworks>net11.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
 
   <PropertyGroup>
     <Nullable>disable</Nullable>
@@ -27,6 +35,45 @@
 
   <ItemGroup>
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
+  </ItemGroup>
+
+  <!--
+    Opt-in: run this suite against the netstandard2.1 build of the libraries
+    instead of the matching net10.0/net11.0 build. netstandard2.1 is not a
+    runtime and cannot host a test, so the tests still execute on net10.0 or
+    net11.0; only the library under test changes. This is what exercises the
+    #if NETSTANDARD branches, the hand-written shims in src/Shared and the
+    netstandard load-context fallback in ReferenceManager.
+
+      dotnet test <project> -f net10.0 -p:UseNetstandardAsset=true
+  -->
+  <PropertyGroup Condition="'$(UseNetstandardAsset)' == 'true'">
+    <!--
+      Lets the few tests that exercise API absent from the netstandard2.1 asset
+      compile out, rather than failing the swapped-asset run.
+    -->
+    <DefineConstants>$(DefineConstants);NETSTANDARD_ASSET</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseNetstandardAsset)' == 'true'">
+    <!--
+      SetTargetFramework applies only to the direct reference edge, so both
+      libraries are pinned here. Without the Hyperbee.XS edge, the transitive
+      reference would still resolve from this project's own framework and put a
+      net10.0 Hyperbee.XS in the output beside the netstandard2.1
+      Hyperbee.Xs.Extensions, under the same assembly identity.
+    -->
+    <ProjectReference Update="..\..\src\Hyperbee.XS.Extensions\Hyperbee.Xs.Extensions.csproj"
+                      SetTargetFramework="TargetFramework=netstandard2.1" />
+    <ProjectReference Update="..\..\src\Hyperbee.XS\Hyperbee.XS.csproj"
+                      SetTargetFramework="TargetFramework=netstandard2.1" />
+
+    <!--
+      PackageParseExtension and ReferenceManager.LoadPackageAsync are not on the
+      netstandard2.1 asset, because the NuGet client stack ships no netstandard
+      asset. See src/Hyperbee.XS/Core/ReferenceManager.cs.
+    -->
+    <Compile Remove="PackageParseExtensionsTests.cs" />
   </ItemGroup>
 
 </Project>

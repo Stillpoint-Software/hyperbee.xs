@@ -15,7 +15,12 @@ public static class XsExtensions
             new AsyncParseExtension(),
             new AwaitParseExtension(),
             new DebugParseExtension(),
+#if !NETSTANDARD
+            // PackageParseExtension resolves NuGet packages through
+            // ReferenceManager.LoadPackageAsync, which the netstandard2.1 asset does
+            // not carry. See src/Hyperbee.XS/Core/ReferenceManager.cs.
             new PackageParseExtension(),
+#endif
             new EnumerableParseExtension(),
             new YieldBreakParseExtension(),
             new YieldReturnParseExtension(),

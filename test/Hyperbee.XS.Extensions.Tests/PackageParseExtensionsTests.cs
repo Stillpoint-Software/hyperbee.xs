@@ -12,7 +12,7 @@ public class PackageParseExtensionTests
 
     public XsVisitorConfig XsConfig = new( "\t",
             XsExtensions.Extensions().OfType<IXsWriter>().ToArray() );
-#if !NET9_0
+#if !NETSTANDARD_ASSET
     [TestMethod]
     public void Compile_ShouldSucceed_WithExtensions()
     {

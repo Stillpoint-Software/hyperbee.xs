@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Hyperbee.Collections;
+using Hyperbee.XS.Shared;
 
 namespace Hyperbee.XS.Core;
 
@@ -60,7 +61,7 @@ public class TypeResolver : ITypeResolver, ITypeRewriter
 
     public TypeResolver( ReferenceManager referenceManager )
     {
-        ArgumentNullException.ThrowIfNull( referenceManager, nameof( referenceManager ) );
+        ThrowIf.Null( referenceManager );
 
         ReferenceManager = referenceManager;
     }
@@ -502,7 +503,7 @@ public class TypeResolver : ITypeResolver, ITypeRewriter
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private static Type TypeOf( Expression expression )
     {
-        ArgumentNullException.ThrowIfNull( expression, nameof( expression ) );
+        ThrowIf.Null( expression );
 
         return expression switch
         {

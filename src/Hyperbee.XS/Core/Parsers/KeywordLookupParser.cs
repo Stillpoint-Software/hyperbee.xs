@@ -1,5 +1,6 @@
 ﻿using Parlot;
 using Parlot.Fluent;
+using Hyperbee.XS.Shared;
 
 namespace Hyperbee.XS.Core.Parsers;
 
@@ -21,7 +22,7 @@ public sealed class KeywordLookupParser<T> : Parser<T>
             throw new ArgumentException( "Keyword cannot be null or whitespace.", nameof( keyword ) );
         }
 
-        ArgumentNullException.ThrowIfNull( parser );
+        ThrowIf.Null( parser );
 
         _parsers[keyword] = parser;
 
@@ -30,7 +31,7 @@ public sealed class KeywordLookupParser<T> : Parser<T>
 
     public KeywordLookupParser<T> Add( params KeywordParserPair<T>[] parsers )
     {
-        ArgumentNullException.ThrowIfNull( parsers );
+        ThrowIf.Null( parsers );
 
         foreach ( var (keyword, parser) in parsers )
         {

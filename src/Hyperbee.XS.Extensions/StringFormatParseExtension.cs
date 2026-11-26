@@ -90,22 +90,34 @@ internal class BacktickLiteral : Parser<TextSpan>
 
     public class UnsafeScannerHelper
     {
+        // Parlot supports quoting strings with other characters. This reached
+        // Scanner.ReadQuotedString( char, out ReadOnlySpan<char> ) through
+        // [UnsafeAccessor], a .NET 8 runtime feature with no netstandard2.1
+        // equivalent: an attribute shim would compile to an extern method with no
+        // body and fail at run time. That overload is public in Parlot 1.3.6, so the
+        // indirection is not needed on any target and a direct call replaces it.
         public static bool ReadQuotedString( Scanner scanner, char quoteChar )
         {
-            return ReadQuotedString( scanner, quoteChar, out _ );
-
-            // Parlot has support for quoting strings with other characters
-            [UnsafeAccessor( UnsafeAccessorKind.Method, Name = nameof( Scanner.ReadQuotedString ) )]
-            // ReSharper disable once LocalFunctionHidesMethod
-            static extern bool ReadQuotedString( Scanner scanner, char quoteChar, out ReadOnlySpan<char> result );
+            return scanner.ReadQuotedString( quoteChar, out _ );
         }
     }
 }
 
 internal static partial class StringFormatHelper
 {
+    // [GeneratedRegex] is a .NET 7 source generator and emits nothing for
+    // netstandard2.1, so that target falls back to one compiled Regex built once.
+    // The pattern is identical, so matching behavior is the same; only the one-time
+    // construction cost differs.
+#if NETSTANDARD
+    private static readonly Regex CompiledNamedPlaceholderRegex =
+        new( @"\{(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\}", RegexOptions.Compiled | RegexOptions.CultureInvariant );
+
+    private static Regex NamedPlaceholderRegex() => CompiledNamedPlaceholderRegex;
+#else
     [GeneratedRegex( @"\{(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\}" )]
     private static partial Regex NamedPlaceholderRegex();
+#endif
 
     public static (Expression template, ParameterExpression[] usedParameters) PrepareFormat( string format, IEnumerable<ParameterExpression> parameters )
     {

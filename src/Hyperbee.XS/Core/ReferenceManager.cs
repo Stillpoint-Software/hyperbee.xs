@@ -1,8 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
+#if !NETSTANDARD
 using System.Runtime.Loader;
 using System.Text.RegularExpressions;
+#endif
 using Hyperbee.Collections;
+#if !NETSTANDARD
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Packaging;
@@ -10,6 +13,7 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+#endif
 
 namespace Hyperbee.XS.Core;
 
@@ -17,7 +21,9 @@ public partial class ReferenceManager
 {
     public const string DefaultNuGetSource = "https://api.nuget.org/v3/index.json";
 
+#if !NETSTANDARD
     private readonly string _globalPackagesFolder;
+#endif
     private readonly XsAssemblyLoadContext _assemblyLoadContext = new();
     private readonly List<string> _nugetSources = [DefaultNuGetSource];
 
@@ -36,8 +42,10 @@ public partial class ReferenceManager
 
     public ReferenceManager()
     {
+#if !NETSTANDARD
         var settings = Settings.LoadDefaultSettings( null );
         _globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder( settings );
+#endif
     }
 
     public IEnumerable<Assembly> PackageAssemblies => _assemblyLoadContext.Assemblies;
@@ -101,6 +109,16 @@ public partial class ReferenceManager
 
         return _assemblyLoadContext.LoadFromAssemblyPath( assemblyPath );
     }
+
+    // Everything from here to the end of the NuGet region is compiled out of the
+    // netstandard2.1 asset. NuGet.Configuration, NuGet.Protocol and NuGet.Packaging
+    // ship lib/net472 and lib/net8.0 only, with no netstandard asset at any version,
+    // so a netstandard2.1 build cannot reference them at all. The netstandard2.1
+    // ReferenceManager therefore keeps assembly registration and path loading, which
+    // is what Hyperbee.Templating's XS provider uses, and drops NuGet package
+    // acquisition. Downlevel consumers that need `package` directives can reference
+    // the net10.0 or net11.0 asset instead.
+#if !NETSTANDARD
 
     public async Task<IEnumerable<Assembly>> LoadPackageAsync( string packageId, string version = default, string source = null, ILogger logger = default, CancellationToken cancellation = default )
     {
@@ -333,6 +351,10 @@ public partial class ReferenceManager
     [GeneratedRegex( @"\.NET (\d+)" )]
     private static partial Regex NetVersionRegex();
 
+#endif // !NETSTANDARD
+
+#if !NETSTANDARD
+
     private class XsAssemblyLoadContext : AssemblyLoadContext
     {
         public XsAssemblyLoadContext() : base( "XS-Context", isCollectible: true ) { }
@@ -342,4 +364,39 @@ public partial class ReferenceManager
             return Default.Assemblies.FirstOrDefault( x => x.GetName().FullName == assemblyName.FullName );
         }
     }
+
+#else
+
+    /// <summary>
+    /// Stands in for <c>AssemblyLoadContext</c>, which netstandard2.1 does not carry.
+    /// </summary>
+    /// <remarks>
+    /// The netstandard2.1 contract exposes no usable <c>System.Runtime.Loader</c>: the
+    /// named, collectible constructor, the <c>Assemblies</c> property and the
+    /// <c>Load</c> override all arrived with .NET Core 3.0 and are not part of the
+    /// standard. This shim keeps the two members ReferenceManager actually calls,
+    /// backed by <see cref="Assembly.LoadFrom(string)"/> into the default context.
+    /// Scripts loaded through the netstandard2.1 asset are therefore not isolated and
+    /// not collectible. That is acceptable here because the netstandard2.1 asset also
+    /// has no NuGet package acquisition, so the only assemblies it loads are ones the
+    /// host handed it by path.
+    /// </remarks>
+    private class XsAssemblyLoadContext
+    {
+        private readonly List<Assembly> _assemblies = [];
+
+        public IEnumerable<Assembly> Assemblies => _assemblies;
+
+        public Assembly LoadFromAssemblyPath( string assemblyPath )
+        {
+            var assembly = Assembly.LoadFrom( assemblyPath );
+
+            if ( !_assemblies.Contains( assembly ) )
+                _assemblies.Add( assembly );
+
+            return assembly;
+        }
+    }
+
+#endif
 }

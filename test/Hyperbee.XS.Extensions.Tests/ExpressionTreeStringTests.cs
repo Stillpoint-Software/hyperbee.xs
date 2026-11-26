@@ -418,7 +418,7 @@ public class ExpressionTreeStringTests
         await AssertScriptValue( code, result );
     }
 
-#if !NET9_0
+#if !NETSTANDARD_ASSET
     [TestMethod]
     public void ToXsString_ShouldCreate_WithExtensions()
     {

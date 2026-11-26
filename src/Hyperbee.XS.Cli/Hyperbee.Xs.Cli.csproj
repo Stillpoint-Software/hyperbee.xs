@@ -1,6 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!--
+      Pinned, not inherited. This is a dotnet tool, so it needs a runtime, and
+      System.Reflection.MetadataLoadContext plus the NuGet stack it reaches through
+      Hyperbee.XS ship no netstandard2.1 assets. Tooling has no downlevel consumers
+      to serve, so there is nothing to gain from the compatibility floor here.
+    -->
+    <TargetFrameworks>net11.0;net10.0</TargetFrameworks>
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
     <OutputType>Exe</OutputType>

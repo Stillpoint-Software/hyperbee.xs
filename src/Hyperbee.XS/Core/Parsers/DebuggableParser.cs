@@ -46,7 +46,13 @@ public static class XsParsersHelper
 
     static XsParsersHelper()
     {
+        // The (name, BindingFlags, Type[]) overload is .NET 8; netstandard2.1 has only
+        // the five-argument form, so pass a null binder and no parameter modifiers.
+#if NETSTANDARD
+        AddMethod = typeof( Dictionary<string, object> ).GetMethod( "Add", BindingFlags.Instance | BindingFlags.Public, null, [typeof( string ), typeof( object )], null );
+#else
         AddMethod = typeof( Dictionary<string, object> ).GetMethod( "Add", BindingFlags.Instance | BindingFlags.Public, [typeof( string ), typeof( object )] );
+#endif
         Constructor = typeof( Dictionary<string, object> ).GetConstructor( Type.EmptyTypes )!;
     }
 

@@ -41,10 +41,24 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
     <PackageReference Include="Hyperbee.Collections" />
     <PackageReference Include="Hyperbee.Expressions" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Parlot" />
     <ProjectReference Include="..\Hyperbee.XS\Hyperbee.XS.csproj" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
+  </ItemGroup>
+
+  <!-- Shared internal helpers, compiled into each project so they stay off the public surface. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\Shared\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+  <!--
+    PackageParseExtension drives ReferenceManager.LoadPackageAsync, which is not on the
+    netstandard2.1 asset of Hyperbee.XS because the NuGet client stack has no
+    netstandard asset. The `package` directive is therefore absent from the
+    netstandard2.1 build; `source` and every other extension are present.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <Compile Remove="PackageParseExtension.cs" />
   </ItemGroup>
 
 </Project>

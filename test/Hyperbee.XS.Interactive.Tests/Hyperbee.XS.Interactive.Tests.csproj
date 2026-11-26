@@ -1,4 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Pinned, not inherited: Directory.Build.props adds netstandard2.1 for the
+      shipped libraries, and there is no test host for netstandard2.1.
+    -->
+    <TargetFrameworks>net11.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
 
   <PropertyGroup>
     <Nullable>disable</Nullable>

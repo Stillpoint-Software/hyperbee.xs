@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Hyperbee.XS.Shared;
 
 namespace Hyperbee.Xs.Extensions.Core;
 
@@ -13,7 +14,7 @@ internal static class AsyncCurrentThreadHelper
 {
     public static void RunSync( Func<Task> func )
     {
-        ArgumentNullException.ThrowIfNull( func );
+        ThrowIf.Null( func );
 
         var currentContext = SynchronizationContext.Current;
         var syncContext = new SingleThreadSynchronizationContext();
@@ -31,7 +32,7 @@ internal static class AsyncCurrentThreadHelper
 
     public static T RunSync<T>( Func<Task<T>> func )
     {
-        ArgumentNullException.ThrowIfNull( func );
+        ThrowIf.Null( func );
 
         var currentContext = SynchronizationContext.Current;
         var syncContext = new SingleThreadSynchronizationContext();
@@ -76,7 +77,7 @@ internal static class AsyncCurrentThreadHelper
             // this method receives posted continuations from the task.
             // we add them to our queue for execution by the run loop. 
 
-            ArgumentNullException.ThrowIfNull( callback );
+            ThrowIf.Null( callback );
 
             _items.Add( (callback, state) );
         }

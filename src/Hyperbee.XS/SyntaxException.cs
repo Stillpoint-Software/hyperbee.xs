@@ -27,7 +27,9 @@ public class SyntaxException : Exception
     {
         get
         {
-            var sourceLine = BufferHelper.GetLine( Buffer, Offset, out var caret );
+            // ToString(): netstandard2.1 has no interpolated-string handler, so the
+            // compiler lowers interpolation to string.Format and a span cannot be boxed.
+            var sourceLine = BufferHelper.GetLine( Buffer, Offset, out var caret ).ToString();
             var caretLine = new string( ' ', caret ) + "^";
 
             return $"{base.Message}\n({Line} {Column})\n{sourceLine}\n{caretLine}";
