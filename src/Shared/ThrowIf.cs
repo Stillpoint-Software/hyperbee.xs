@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 // Enabled per file, not per project: this source is compiled into projects on
 // both sides of the <Nullable> setting, so the annotations below have to be

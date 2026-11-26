@@ -1,4 +1,4 @@
-#if NETSTANDARD
+﻿#if NETSTANDARD
 
 // Everything netstandard2.1 needs from the compiler that newer targets have in box.
 // Hand-written rather than taken from the Polyfill package: Polyfill compiles all of
