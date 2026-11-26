@@ -4,9 +4,17 @@
     <NoWarn>$(NoWarn);NU1507;MSTEST0001</NoWarn>
     <WarningsNotAsErrors>$(WarningsNotAsErrors);MSTEST0001</WarningsNotAsErrors>
   </PropertyGroup>
+  <!--
+    PrivateAssets has to sit on the PackageReference. NuGet reads only Version off a
+    PackageVersion item, so the PrivateAssets metadata in Directory.Packages.props
+    never applied, and both of these build-time-only packages were emitted into every
+    dependency group of every package this repo ships. They are now suppressed, which
+    also keeps them off the netstandard2.1 group that downlevel consumers resolve.
+  -->
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" />
+    <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 
   <!-- SourceLink / build hygiene -->
