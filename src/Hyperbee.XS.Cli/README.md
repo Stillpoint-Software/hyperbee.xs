@@ -29,7 +29,7 @@ or:
 xs run file ./script.xs
 ```
 
-### Compile (.NET 9 or later)
+### Compile
 ```
 xs compile -s "1 + 1" -o "output.dll"
 ```
@@ -104,3 +104,8 @@ Special thanks to:
 
 We welcome contributions! Please see our [Contributing Guide](https://github.com/Stillpoint-Software/.github/blob/main/.github/CONTRIBUTING.md) 
 for more details.
+
+## Target frameworks
+
+`net11.0`, `net10.0`. This package has no `netstandard2.1` asset, so it is runtime-only on
+`net10.0` and above.

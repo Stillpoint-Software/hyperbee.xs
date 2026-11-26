@@ -192,7 +192,9 @@ var result = compiled();
 
 ## **Getting Started with XS**
 
-To get started with XS, you need to set up a .NET project. Ensure you have .NET 8 or .NET 9 installed.
+To get started with XS, you need to set up a .NET project. The packages target `net11.0`,
+`net10.0` and `netstandard2.1`, so any project on .NET 8 or later can consume them. Building
+this repository requires the .NET 11 SDK.
 
 Add the necessary packages:
 

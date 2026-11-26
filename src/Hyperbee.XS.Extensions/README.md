@@ -24,3 +24,8 @@ XS.Extensions is a collection of useful extensions for the XS language, includin
 
 We welcome contributions! Please see our [Contributing Guide](https://github.com/Stillpoint-Software/.github/blob/main/.github/CONTRIBUTING.md) 
 for more details.
+
+## Target frameworks
+
+`net11.0`, `net10.0`, `netstandard2.1`. `net8.0` and `net9.0` both reached end of support
+on 2026-11-10; a project on either resolves the `netstandard2.1` asset.
