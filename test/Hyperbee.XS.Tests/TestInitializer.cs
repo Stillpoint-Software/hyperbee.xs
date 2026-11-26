@@ -10,8 +10,10 @@ public static class TestInitializer
 {
     public static XsConfig XsConfig { get; set; }
 
+    // Qualified: FastExpressionCompiler 6.0.0 added its own TestContext, which
+    // collides with the MSTest type brought in by the implicit global using.
     [AssemblyInitialize]
-    public static void Initialize( TestContext _ )
+    public static void Initialize( Microsoft.VisualStudio.TestTools.UnitTesting.TestContext _ )
     {
         var typeResolver = TypeResolver.Create( Assembly.GetExecutingAssembly() );
 
