@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using Hyperbee.XS.Shared;
+using Hyperbee.Xs.Extensions.Internal;
 
 namespace Hyperbee.Xs.Extensions.Core;
 

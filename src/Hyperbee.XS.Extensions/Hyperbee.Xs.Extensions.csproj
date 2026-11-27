@@ -42,14 +42,16 @@
     <PackageReference Include="Hyperbee.Collections" />
     <PackageReference Include="Hyperbee.Expressions" />
     <PackageReference Include="Parlot" />
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
     <ProjectReference Include="..\Hyperbee.XS\Hyperbee.XS.csproj" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
-  <!-- Shared internal helpers, compiled into each project so they stay off the public surface. -->
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\Shared\*.cs" LinkBase="Shared" />
-  </ItemGroup>
+  <!--
+    Internal helpers live in this project's Internal folder and compile like any
+    other source. The compiler-required types for netstandard2.1 come from
+    PolySharp; see Directory.Build.props.
+  -->
 
   <!--
     PackageParseExtension drives ReferenceManager.LoadPackageAsync, which is not on the

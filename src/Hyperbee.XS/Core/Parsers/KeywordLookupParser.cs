@@ -1,6 +1,6 @@
-﻿using Parlot;
+﻿using Hyperbee.XS.Internal;
+using Parlot;
 using Parlot.Fluent;
-using Hyperbee.XS.Shared;
 
 namespace Hyperbee.XS.Core.Parsers;
 

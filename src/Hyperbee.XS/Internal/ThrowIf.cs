@@ -1,11 +1,11 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 // Enabled per file, not per project: this source is compiled into projects on
 // both sides of the <Nullable> setting, so the annotations below have to be
 // valid in either context.
 #nullable enable
 
-namespace Hyperbee.XS.Shared;
+namespace Hyperbee.XS.Internal;
 
 /// <summary>
 /// Argument guards that keep the framework's own behavior on modern targets and

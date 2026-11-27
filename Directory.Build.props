@@ -78,4 +78,19 @@
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <!--
+    PolySharp generates the two compiler-required types netstandard2.1 lacks,
+    IsExternalInit and CallerArgumentExpressionAttribute, as internal types in each
+    assembly that references it. On net10.0 and net11.0, where the framework has
+    them, it emits [TypeForwardedTo] instead. That forwarder is what keeps init
+    accessors binding when code compiled against the netstandard2.1 asset runs on a
+    net10.0+ asset; without it the call throws MissingMethodException.
+
+    Only these two types are generated. Everything else PolySharp can polyfill is
+    left off so no unused internal types land in the assemblies.
+  -->
+  <PropertyGroup>
+    <PolySharpIncludeGeneratedTypes>System.Runtime.CompilerServices.IsExternalInit;System.Runtime.CompilerServices.CallerArgumentExpressionAttribute</PolySharpIncludeGeneratedTypes>
+  </PropertyGroup>
 </Project>

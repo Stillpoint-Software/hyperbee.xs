@@ -5,6 +5,7 @@ using System.Runtime.Loader;
 using System.Text.RegularExpressions;
 #endif
 using Hyperbee.Collections;
+using Hyperbee.XS.Internal;
 #if !NETSTANDARD
 using NuGet.Common;
 using NuGet.Configuration;

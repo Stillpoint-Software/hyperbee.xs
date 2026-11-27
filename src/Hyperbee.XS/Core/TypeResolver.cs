@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Hyperbee.Collections;
-using Hyperbee.XS.Shared;
+using Hyperbee.XS.Internal;
 
 namespace Hyperbee.XS.Core;
 

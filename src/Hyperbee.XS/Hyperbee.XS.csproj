@@ -42,12 +42,18 @@
     <PackageReference Include="Hyperbee.Collections" />
     <PackageReference Include="Hyperbee.Expressions" />
     <PackageReference Include="Parlot" />
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
-  <!-- Shared internal helpers, compiled into each project so they stay off the public surface. -->
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\Shared\*.cs" LinkBase="Shared" />
+  <!--
+    Internal helpers live in this project's Internal folder and compile like any
+    other source. NetstandardShims.cs is the exception: it is removed from every
+    target but netstandard2.1, the way dotnet/runtime conditions its polyfills.
+    The compiler-required types come from PolySharp; see Directory.Build.props.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
+    <Compile Remove="Internal\NetstandardShims.cs" />
   </ItemGroup>
 
   <!--
