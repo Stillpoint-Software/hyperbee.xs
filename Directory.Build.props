@@ -25,12 +25,17 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
-  <!-- Package metadata applied only to packable projects -->
-  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+  <!--
+    Package metadata. This group is deliberately unconditional: a csproj sets
+    IsPackable in its own body, which MSBuild evaluates after this file, so a
+    Condition on IsPackable here is always false and the metadata never applied.
+    The properties do nothing in a project that does not pack, and a csproj that
+    sets one of them still wins.
+  -->
+  <PropertyGroup>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageIcon>assets/icon.png</PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/Hyperbee.XS/releases/latest</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.XS</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
