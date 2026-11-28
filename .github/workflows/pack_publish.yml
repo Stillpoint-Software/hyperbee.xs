@@ -1,4 +1,4 @@
-﻿name: Pack and Publish
+name: Pack and Publish
 
 on:
   release:
@@ -11,34 +11,57 @@ permissions:
   statuses: write
 
 jobs:
-  set_config:
+  set-config:
     uses: Stillpoint-Software/shared-workflows/.github/workflows/determine_build_configuration.yml@main
     with:
       trigger: release
       target_branch: ${{ github.event.release.target_commitish }}
-      override_build_configuration: ''                 
+      override_build_configuration: ''
       prerelease: ${{ github.event.release.prerelease }} # true/false from the release
-  
+
   tests:
-    needs: set_config
+    needs: set-config
     uses: Stillpoint-Software/shared-workflows/.github/workflows/run_tests.yml@main
     with:
       branch: ${{ github.event.release.target_commitish }}
       solution_name: ${{ vars.SOLUTION_NAME }}
-      # The shared workflow still defaults to ["net8.0", "net9.0", "net10.0"].
-      # This repo retired net8.0 and net9.0, so without the opt-in the matrix
-      # would ask for targets the projects no longer build.
+      # Keep in step with <TargetFrameworks> in Directory.Build.props.
+      # netstandard2.1 is built but not tested: it has no test host.
       frameworks: '["net11.0", "net10.0"]'
 
   publish:
-    needs: [set_config, tests]
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/pack_and_publish.yml@main
-    with:
-      build_configuration: ${{ needs.set_config.outputs.build_configuration }}
-      # The shared workflow defaults to a 10.0.x SDK, which cannot build net11.0.
-      dotnet_version: '11.0.x'
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    needs: [set-config, tests]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # Trusted Publishing swaps a GitHub OIDC token for a short-lived NuGet key, and
+      # the token has to be minted in THIS repository's job, because that is the
+      # identity nuget.org matches against its trust policy. Running the publish as a
+      # reusable workflow would stamp the shared repo's identity on the token instead,
+      # which is why the steps arrive as a composite action rather than `uses:` on the
+      # job. Permissions can only be reduced down a call chain, so this has to be
+      # granted here.
+      id-token: write
+
+    steps:
+      # fetch-depth: 0 because nbgv needs history to compute the version.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: Stillpoint-Software/shared-workflows/.github/actions/pack-and-publish@main
+        with:
+          solution_name: ${{ vars.SOLUTION_NAME }}
+          build_configuration: ${{ needs.set-config.outputs.build_configuration }}
+          # The 11.0 SDK is required to pack the net11.0 target framework.
+          dotnet_version: |
+            11.0.x
+            10.0.x
+          # When NUGET_USER is unset the action falls back to the API key, so this is
+          # inert until a Trusted Publishing policy exists on nuget.org.
+          nuget_user: ${{ secrets.NUGET_USER }}
+          nuget_api_key: ${{ secrets.NUGET_API_KEY }}
 
   result:
     needs: [publish, tests]

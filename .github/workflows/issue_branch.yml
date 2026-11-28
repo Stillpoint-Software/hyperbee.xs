@@ -2,11 +2,11 @@ name: Create Issue Branch
 
 on:
   issues:
-    types: [opened, assigned]        # “immediate” / “auto” modes
+    types: [opened, assigned]
   issue_comment:
-    types: [created]                 # ChatOps mode
+    types: [created]
   pull_request:
-    types: [opened, closed]          # PR-related features
+    types: [opened, closed]
 
 permissions:
   contents: read

@@ -20,11 +20,11 @@ on:
 permissions:
   contents: read
 
-run-name: "Unlist · ${{ inputs.package_id }} · ${{ inputs.package_nuget }}"
+run-name: "Unlist Â· ${{ inputs.package_id }} Â· ${{ inputs.package_version }}"
 
 jobs:
   unlist:
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/unlist-package.yml@main
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/unlist_package.yml@main
     secrets: inherit
     with:
       package_id:      ${{ inputs.package_id }}

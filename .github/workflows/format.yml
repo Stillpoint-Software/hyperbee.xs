@@ -8,13 +8,13 @@ on:
     branches: [main]
 
   workflow_run:
-    workflows: [Create Prerelease, Create Release]
+    workflows: [Create Release]
     types: [requested]
- 
+
 permissions:
   contents: write
   pull-requests: write
-  actions: read                
+  actions: read
 
 jobs:
    discover:
@@ -28,11 +28,11 @@ jobs:
         run: |
           # 1. Pick the raw branch/ref for each trigger type
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            RAW='${{ github.event.workflow_run.head_branch }}'   
+            RAW='${{ github.event.workflow_run.head_branch }}'
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            RAW='${{ github.event.pull_request.base.ref }}'       
-          else                                                    
-            RAW='${{ github.ref }}'                                
+            RAW='${{ github.event.pull_request.base.ref }}'
+          else
+            RAW='${{ github.ref }}'
           fi
 
           # 2. Strip the refs/heads/ prefix if present
@@ -40,7 +40,7 @@ jobs:
 
           echo "Detected branch: $CLEAN"
           echo "branch_name=$CLEAN" >> "$GITHUB_OUTPUT"
-          
+
    format:
     needs: discover
     if: ${{ needs.discover.result == 'success' }}
@@ -50,4 +50,3 @@ jobs:
       # The shared workflow defaults to a 10.0.x SDK, which cannot restore net11.0.
       dotnet_version: '11.0.x'
     secrets: inherit
-      

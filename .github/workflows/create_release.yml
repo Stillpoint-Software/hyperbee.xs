@@ -31,7 +31,7 @@ permissions:
   pull-requests: write
   packages: write
 
-run-name: "Create Release � ${{ inputs.mode }} � ${{ github.ref_name }}"
+run-name: "Create Release · ${{ inputs.mode }} · ${{ github.ref_name }}"
 
 jobs:
   validate-inputs:
@@ -44,12 +44,12 @@ jobs:
           VERSION='${{ inputs.version }}'
           INCR='${{ inputs.increment }}'
           if [[ "$MODE" == "explicit" && -z "$VERSION" ]]; then
-            echo "? mode=explicit requires 'version' (e.g., 1.3-alpha)."; exit 1
+            echo "❌ mode=explicit requires 'version' (e.g., 1.3-alpha)."; exit 1
           fi
           if [[ "$MODE" == "bump" && -z "$INCR" ]]; then
-            echo "? mode=bump requires 'increment' (major|minor|patch)."; exit 1
+            echo "❌ mode=bump requires 'increment' (major|minor|patch)."; exit 1
           fi
-          echo "? inputs look good."
+          echo "✅ inputs look good."
 
   set-version:
     needs: validate-inputs

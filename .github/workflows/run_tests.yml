@@ -48,8 +48,7 @@ jobs:
     with:
       branch: ${{ needs.discover.outputs.branch_name }}
       solution_name: ${{ vars.SOLUTION_NAME }}
-      # The shared workflow still defaults to ["net8.0", "net9.0", "net10.0"].
-      # This repo retired net8.0 and net9.0, so without the opt-in the matrix
-      # would ask for targets the projects no longer build.
+      # Keep in step with <TargetFrameworks> in Directory.Build.props.
+      # netstandard2.1 is built but not tested: it has no test host.
       frameworks: '["net11.0", "net10.0"]'
     secrets: inherit
